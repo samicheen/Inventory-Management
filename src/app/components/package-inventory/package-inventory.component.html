@@ -1,0 +1,16 @@
+<table>
+    <thead>
+        <td>Barcode</td>
+        <td>Item Name</td>
+        <td>Size</td>
+        <td>Quantity</td>
+        <td>Date</td>
+    </thead>
+    <tr *ngFor="let package of inventory">
+        <td>{{package.barcode}}</td>
+        <td>{{package.item_name}}</td>
+        <td>{{package.size}}</td>
+        <td>{{package.quantity}}</td>
+        <td>{{package.timestamp}}</td>
+    </tr>
+</table>
