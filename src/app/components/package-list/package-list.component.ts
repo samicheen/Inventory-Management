@@ -3,12 +3,18 @@ import { InventoryService } from 'src/app/services/inventory.service';
 import { Inventory, InventoryResponse } from 'src/app/models/inventory.model';
 
 @Component({
-  selector: 'app-package-inventory',
-  templateUrl: './package-inventory.component.html',
-  styleUrls: ['./package-inventory.component.scss']
+  selector: 'app-package-list',
+  templateUrl: './package-list.component.html',
+  styleUrls: ['./package-list.component.scss']
 })
-export class PackageInventoryComponent implements OnInit {
+export class PackageListComponent implements OnInit {
   inventory : Inventory[];
+
+  items: string[] = [
+    'The first choice!',
+    'And another choice for you.',
+    'but wait! A third!'
+  ];
 
   constructor(
     private inventoryService: InventoryService
