@@ -12,7 +12,11 @@ import { HeaderComponent } from './components/header/header.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { ModalModule } from 'ngx-bootstrap/modal';
 import { AlertModule } from 'ngx-bootstrap';
+import { AddPackageComponent } from './components/add-package/add-package.component';
+import { ModalComponent } from './components/modal/modal.component';
+import { AddPackageModalComponent } from './components/add-package-modal/add-package-modal.component';
 
 const ENVIRONMENT = "environment";
 
@@ -21,7 +25,10 @@ const ENVIRONMENT = "environment";
     AppComponent,
     PackageListComponent,
     DashboardComponent,
-    HeaderComponent
+    HeaderComponent,
+    AddPackageComponent,
+    ModalComponent,
+    AddPackageModalComponent
   ],
   imports: [
     BrowserModule,
@@ -30,8 +37,8 @@ const ENVIRONMENT = "environment";
     BrowserAnimationsModule,
     BsDropdownModule.forRoot(),
     AlertModule.forRoot(),
-    CollapseModule.forRoot()
-
+    CollapseModule.forRoot(),
+    ModalModule.forRoot()
   ],
   providers: [
     HttpClient,
@@ -44,6 +51,7 @@ const ENVIRONMENT = "environment";
       useClass: PathLocationStrategy
     }
   ],
+  entryComponents: [AddPackageModalComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

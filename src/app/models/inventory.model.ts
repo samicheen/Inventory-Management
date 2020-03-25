@@ -9,4 +9,9 @@ export interface Inventory {
     size: string;
     quantity: string;
     timestamp: string;
+    invoice_number: string;
+    vendor: string;
+    grade: string;
+    rate: string;
+    amount: string
 }

@@ -1,26 +1,33 @@
 <div class="container-fluid">
+  <button type="button"
+          class="btn btn-primary add-inventory-btn"
+          (click)=addPackage()>
+    Add Inventory
+  </button>
   <table class="table">
       <thead>
           <th scope="col">Date</th>
           <th scope="col">Invoice No.</th>
           <th scope="col">Vendor</th>
           <th scope="col">Item Name</th>
+          <th scope="col">Grade</th>
           <th scope="col">Size</th>
           <th scope="col">Quantity</th>
-          <th scope="col">Grade</th>
+          <th scope="col">Rate</th>
           <th scope="col">Amount</th>
           <th scope="col">Actions</th> 
       </thead>
       <tbody>
         <tr *ngFor="let package of inventory">
             <td>{{package.timestamp}}</td>
-            <td>Test Invoice</td>
-            <td>Test Vendor</td>
+            <td>{{package.invoice}}</td>
+            <td>{{package.vendor}}</td>
             <td>{{package.item_name}}</td>
+            <td>{{package.grade}}</td>
             <td>{{package.size}}</td>
             <td>{{package.quantity}}</td>
-            <td>Test Grade</td>
-            <td>Rs. 1000</td>
+            <td>{{package.rate}}</td>
+            <td>Rs. {{package.amount}}</td>
             <td class="actions">
               <div class="btn-group" dropdown>
                 <button id="button-split" type="button" dropdownToggle class="btn"

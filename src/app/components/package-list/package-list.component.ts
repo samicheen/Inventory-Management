@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory.service';
 import { Inventory, InventoryResponse } from 'src/app/models/inventory.model';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { AddPackageModalComponent } from '../add-package-modal/add-package-modal.component';
 
 @Component({
   selector: 'app-package-list',
@@ -9,19 +11,18 @@ import { Inventory, InventoryResponse } from 'src/app/models/inventory.model';
 })
 export class PackageListComponent implements OnInit {
   inventory : Inventory[];
-
-  items: string[] = [
-    'The first choice!',
-    'And another choice for you.',
-    'but wait! A third!'
-  ];
-
+  
   constructor(
-    private inventoryService: InventoryService
+    private inventoryService: InventoryService,
+    private modalService: BsModalService
   ) { }
 
   ngOnInit(): void {
     this.getInventory();
+  }
+
+  addPackage() {
+    this.modalService.show(AddPackageModalComponent);
   }
 
   getInventory(){
