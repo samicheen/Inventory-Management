@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { InventoryResponse } from '../models/inventory.model';
+import { InventoryResponse } from '../models/item.model';
 import { Observable } from 'rxjs';
 const ENVIRONMENT = "environment";
 
@@ -17,7 +17,7 @@ export class InventoryService {
   }
 
   /**
-   * Get list of inventory
+   * Get inventory
    */
   getInventory(): Observable<InventoryResponse> {
     return this.http.get<InventoryResponse>(`${this.baseUrl}/api/inventory/getInventory.php`);

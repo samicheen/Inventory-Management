@@ -1,9 +1,9 @@
 export interface InventoryResponse {
     alerts: any[];
-    inventory: Inventory[];
+    items: Item[];
 }
 
-export interface Inventory {
+export interface Item {
     barcode: string;
     item_name: string;
     size: string;

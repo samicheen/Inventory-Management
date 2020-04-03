@@ -1,0 +1,98 @@
+<ng-container>
+    <form [formGroup]="addItem">
+        <div class="form-group">
+            <label for="invoiceNo">Invoice No.</label>
+            <input type="text"
+                   class="form-control"
+                   id="invoiceNo"
+                   formControlName="invoiceNo">
+        </div>
+        <div class="form-group">
+            <label for="vendor">Vendor</label>
+            <input type="text"
+                   class="form-control"
+                   id="vendor"
+                   formControlName="vendor">
+            <div *ngIf="item.vendor.touched && item.vendor.invalid" class="alert alert-danger">
+                <div *ngIf="item.vendor.errors.required">Vendor is required.</div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="itemName">Item Name</label>
+                <input type="text"
+                       class="form-control"
+                       id="itemName"
+                       formControlName="itemName">
+                <div *ngIf="item.itemName.touched && item.itemName.invalid" class="alert alert-danger">
+                    <div *ngIf="item.itemName.errors.required">Item name is required.</div>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="grade">Grade</label>
+                <input type="text"
+                       class="form-control"
+                       id="grade"
+                       formControlName="grade">
+                <div *ngIf="item.grade.touched && item.grade.invalid" class="alert alert-danger">
+                    <div *ngIf="item.grade.errors.required">Grade is required.</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="size">Size</label>
+                <input type="text"
+                       class="form-control"
+                       id="size"
+                       formControlName="size">
+                <div *ngIf="item.size.touched && item.size.invalid" class="alert alert-danger">
+                    <div *ngIf="item.size.errors.required">Size is required.</div>
+                </div>
+                <div *ngIf="item.size.touched && item.size.invalid" class="alert alert-danger">
+                    <div *ngIf="item.size.errors.pattern">Size should be in correct format</div>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="quantity">Quantity</label>
+                <input type="text"
+                       class="form-control"
+                       id="quantity"
+                       formControlName="quantity">
+                <div *ngIf="item.quantity.touched && item.quantity.invalid" class="alert alert-danger">
+                    <div *ngIf="item.quantity.errors.required">Quantity is required.</div>
+                </div>
+                <div *ngIf="item.quantity.touched && item.quantity.invalid" class="alert alert-danger">
+                    <div *ngIf="item.quantity.errors.pattern">Quantity should be in correct format</div>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="rate">Rate</label>
+                <input type="text"
+                       class="form-control"
+                       id="rate"
+                       formControlName="rate">
+                <div *ngIf="item.rate.touched && item.rate.invalid" class="alert alert-danger">
+                    <div *ngIf="item.rate.errors.required">Rate is required.</div>
+                </div>
+                <div *ngIf="item.rate.touched && item.rate.invalid" class="alert alert-danger">
+                    <div *ngIf="item.rate.errors.pattern">Rate should be in correct format</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6 add-item__apply-next">
+                <button class="btn btn-secondary add-item__button"
+                        (click)="applyToNext()">Apply to Next</button>
+            </div>
+            <div class="form-group col-md-6 add-item__next-item">
+                <button class="btn btn-primary add-item__button"
+                        (click)="nextItem()">Next Item</button>
+            </div>
+        </div>
+        <div class="form-group add-item__done-and-print">
+            <button class="btn btn-light add-item__button"
+                    (click)="doneAndPrintLabels()">Done and Print Labels</button> 
+        </div>
+    </form>
+</ng-container>
