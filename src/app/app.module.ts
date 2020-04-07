@@ -4,6 +4,7 @@ import { PathLocationStrategy, LocationStrategy } from '@angular/common';
 import { environment } from '../environments/environment';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -16,8 +17,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { AlertModule } from 'ngx-bootstrap';
 import { AddItemComponent } from './components/add-item/add-item.component';
-import { ModalComponent } from './components/modal/modal.component';
-import { AddItemModalComponent } from './components/add-item-modal/add-item-modal.component';
+import { ModalComponent } from './components/modal/modal.component'
 
 const ENVIRONMENT = "environment";
 
@@ -28,8 +28,7 @@ const ENVIRONMENT = "environment";
     DashboardComponent,
     HeaderComponent,
     AddItemComponent,
-    ModalComponent,
-    AddItemModalComponent
+    ModalComponent
   ],
   imports: [
     BrowserModule,
@@ -37,6 +36,7 @@ const ENVIRONMENT = "environment";
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
+    NgSelectModule,
     ReactiveFormsModule,
     BsDropdownModule.forRoot(),
     AlertModule.forRoot(),
@@ -54,7 +54,7 @@ const ENVIRONMENT = "environment";
       useClass: PathLocationStrategy
     }
   ],
-  entryComponents: [AddItemModalComponent],
+  entryComponents: [AddItemComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

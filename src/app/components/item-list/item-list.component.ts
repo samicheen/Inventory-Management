@@ -1,8 +1,10 @@
 import { Component, OnInit, TemplateRef, Output, EventEmitter } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory.service';
-import { Item, InventoryResponse } from 'src/app/models/item.model';
+import { Item, QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/item.model';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
-import { AddItemModalComponent } from '../add-item-modal/add-item-modal.component';
+import { AddItemComponent } from '../add-item/add-item.component';
+import { InventoryResponse } from 'src/app/models/inventory-response.model';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-item-list',
@@ -11,6 +13,9 @@ import { AddItemModalComponent } from '../add-item-modal/add-item-modal.componen
 })
 export class ItemListComponent implements OnInit {
   items : Item[];
+  modalRef: BsModalRef;
+  quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
+  private readonly refreshItems = new BehaviorSubject(undefined);
   
   constructor(
     private inventoryService: InventoryService,
@@ -19,10 +24,26 @@ export class ItemListComponent implements OnInit {
 
   ngOnInit(): void {
     this.getInventory();
+    this.refreshItems.subscribe(() => {
+      this.getInventory();
+    });
   }
 
   addItem() {
-    this.modalService.show(AddItemModalComponent);
+    this.modalRef = this.modalService.show(AddItemComponent);
+    this.modalRef.content.saveAndPrintItems.subscribe(item => this.saveAndPrintItems(item));
+  }
+
+  saveAndPrintItems(item: Item) {
+    this.inventoryService.addItem(item).subscribe(addItemResponse => {
+      this.refreshItems.next(undefined);
+    });
+  }
+
+  removeItem(itemNumber: string) {
+    this.inventoryService.removeItem(itemNumber).subscribe(() => {
+      this.refreshItems.next(undefined);
+    });
   }
 
   getInventory(){

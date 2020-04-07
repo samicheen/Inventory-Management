@@ -20,12 +20,12 @@
       <tbody>
         <tr *ngFor="let item of items">
             <td>{{item.timestamp}}</td>
-            <td>{{item.invoice}}</td>
+            <td>{{item.invoice_number}}</td>
             <td>{{item.vendor}}</td>
             <td>{{item.item_name}}</td>
             <td>{{item.grade}}</td>
             <td>{{item.size}}</td>
-            <td>{{item.quantity}}</td>
+            <td>{{item.quantity.value}} {{quantityUnitToLabelMapping[item.quantity.unit]}}</td>
             <td>{{item.rate}}</td>
             <td>Rs. {{item.amount}}</td>
             <td class="actions">
@@ -36,10 +36,10 @@
                 </button>
                 <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
                     role="menu" aria-labelledby="button-split">
-                  <li role="menuitem"><a class="dropdown-item" href="#">Action 1</a></li>
-                  <li role="menuitem"><a class="dropdown-item" href="#">Action 2</a>
-                  </li>
-                  <li role="menuitem"><a class="dropdown-item" href="#">Action 3</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="removeItem(item.item_number)">Remove Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item">Edit Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
+                  <li role="menuitem"><a class="dropdown-item">Show Sub Items</a></li>
                 </ul>
               </div>
             </td>
