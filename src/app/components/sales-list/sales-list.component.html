@@ -1,0 +1,26 @@
+<div class="container-fluid">
+    <table class="table">
+        <thead>
+            <th scope="col">Date</th>
+            <th scope="col">Item Name</th>
+            <th scope="col">Grade</th>
+            <th scope="col">Size</th>
+            <th scope="col">Party Name</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Rate</th>
+            <th scope="col">Amount</th> 
+        </thead>
+        <tbody>
+          <tr *ngFor="let sale of sales">
+              <td>{{sale.timestamp | date: 'dd/MM/yyyy HH:mm a'}}</td>
+              <td>{{sale.item_name}}</td>
+              <td>{{sale.grade}}</td>
+              <td>{{sale.size}}</td>
+              <td>{{sale.party_name}}</td>
+              <td>{{sale.quantity.value}} {{quantityUnitToLabelMapping[sale.quantity.unit]}}</td>
+              <td>{{sale.selling_price}}</td>
+              <td>Rs. {{sale.amount}}</td>
+          </tr>
+        </tbody>
+    </table>
+  </div>

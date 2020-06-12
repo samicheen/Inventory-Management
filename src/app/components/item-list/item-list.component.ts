@@ -1,10 +1,11 @@
-import { Component, OnInit, TemplateRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory.service';
 import { Item, QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/item.model';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { AddItemComponent } from '../add-item/add-item.component';
 import { InventoryResponse } from 'src/app/models/inventory-response.model';
 import { BehaviorSubject } from 'rxjs';
+import { SubItemListComponent } from '../sub-item-list/sub-item-list.component';
 
 @Component({
   selector: 'app-item-list',
@@ -13,7 +14,6 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class ItemListComponent implements OnInit {
   items : Item[];
-  modalRef: BsModalRef;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
   
@@ -30,8 +30,8 @@ export class ItemListComponent implements OnInit {
   }
 
   addItem() {
-    this.modalRef = this.modalService.show(AddItemComponent);
-    this.modalRef.content.saveAndPrintItems.subscribe(item => this.saveAndPrintItems(item));
+    let addItemModalRef = this.modalService.show(AddItemComponent);
+    addItemModalRef.content.saveAndPrintItems.subscribe(item => this.saveAndPrintItems(item));
   }
 
   saveAndPrintItems(item: Item) {
@@ -50,6 +50,20 @@ export class ItemListComponent implements OnInit {
     this.inventoryService.getInventory()
     .subscribe((response: InventoryResponse) => {
       this.items = response.items;
+    });
+  }
+
+  showSubItems(item: Item) {
+    const initialState = {
+      item: item
+    };
+    let showSubItemsModalRef = this.modalService.show(SubItemListComponent, { initialState, backdrop: 'static', keyboard: false });
+    showSubItemsModalRef.content.getUpdatedItem.subscribe(updated_item => this.updateItem(updated_item));
+  }
+
+  updateItem(item: Item) {
+    this.inventoryService.updateItem(item).subscribe(() => {
+      this.refreshItems.next(undefined);
     });
   }
 

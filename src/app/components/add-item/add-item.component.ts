@@ -47,18 +47,18 @@ export class AddItemComponent implements OnInit {
     this.saveItem = new Subject();
     this.saveAndPrintItems = new Subject();
     this.addItemForm  =  this.formBuilder.group({
-      invoice_number: 'test123',
-      vendor: ['test123', Validators.required],
-      item_name: ['test123', Validators.required],
-      grade: ['test123', Validators.required],
-      size: ['0.5', [Validators.required,
+      invoice_number: '',
+      vendor: ['', Validators.required],
+      item_name: ['', Validators.required],
+      grade: ['', Validators.required],
+      size: ['', [Validators.required,
                  Validators.pattern(/^\d+\.\d{1}$/)]],
       quantity: this.formBuilder.group({
-        value: ['10', [Validators.required,
+        value: ['', [Validators.required,
                     Validators.pattern(/^[0-9]*$/)]],
         unit: QuantityUnit.KG
       }),
-      rate: ['20.00', [Validators.required,
+      rate: ['', [Validators.required,
                  Validators.pattern(/^\d+\.\d{2}$/)]]
     });
   }

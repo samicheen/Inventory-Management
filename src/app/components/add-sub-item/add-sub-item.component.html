@@ -1,0 +1,59 @@
+<app-modal [modalRef]="modalRef" 
+            title="Add Sub Item">
+    <form [formGroup]="addSubItemForm">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text"
+                    class="form-control"
+                    id="name"
+                    formControlName="name">
+            <div *ngIf="name.touched && name.errors?.required" class="alert alert-danger">
+                <div>Name is required.</div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="size">Size</label>
+                <input type="text"
+                        class="form-control"
+                        id="size"
+                        formControlName="size"
+                        placeholder="0.6">
+                <div *ngIf="size.touched && size.errors?.required" class="alert alert-danger">
+                    <div>Size is required.</div>
+                </div>
+                <div *ngIf="size.touched && size.errors?.pattern" class="alert alert-danger">
+                    <div>Size should be in correct format</div>
+                </div>
+            </div>
+            <div class="form-group col-md-6" formGroupName="quantity">
+                <label for="value">Quantity</label>
+                <div class="input-group">
+                    <input type="text"
+                        class="form-control"
+                        id="value"
+                        formControlName="value"
+                        placeholder="100">
+                    <div class="input-group-append">
+                        <select class="custom-select" formControlName="unit">
+                            <option *ngFor="let unit of unitValues"
+                                    [value]="unit">
+                                {{ quantityUnitToLabelMapping[unit] }}
+                            </option>
+                            </select>
+                    </div>
+                </div>
+                <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
+                    <div>Quantity is required.</div>
+                </div>
+                <div *ngIf="value.touched && value.errors?.pattern" class="alert alert-danger">
+                    <div>Quantity should be in correct format</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group add-item__done-and-print">
+            <button class="btn btn-primary btn-block"
+                    (click)="doneAndPrintLabels()">Done and Print Labels</button> 
+        </div>
+    </form>
+</app-modal>

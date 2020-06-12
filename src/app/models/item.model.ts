@@ -1,9 +1,10 @@
 export interface Item {
+    item_number: string;
     barcode: string;
     item_name: string;
     size: string;
     quantity: {
-        value: string;
+        value: number;
         unit: QuantityUnit;
     };
     timestamp: string;

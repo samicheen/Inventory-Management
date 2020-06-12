@@ -1,0 +1,57 @@
+<app-modal [modalRef]="modalRef" 
+            title="Sell Item">
+    <form [formGroup]="sellItemForm">
+        <div class="form-group">
+            <label for="party_name">Party Name</label>
+            <input type="text"
+                   class="form-control"
+                   id="party_name"
+                   formControlName="party_name">
+            <div *ngIf="party_name.touched && party_name.errors?.required" class="alert alert-danger">
+                <div>Party name is required.</div>
+            </div>
+        </div>
+        <div class="form-group" formGroupName="quantity">
+            <label for="value">Quantity</label>
+            <div class="input-group">
+                <input type="text"
+                    class="form-control"
+                    id="value"
+                    formControlName="value"
+                    placeholder="100">
+                <div class="input-group-append">
+                    <select class="custom-select" formControlName="unit">
+                        <option *ngFor="let unit of unitValues"
+                                [value]="unit">
+                            {{ quantityUnitToLabelMapping[unit] }}
+                        </option>
+                        </select>
+                </div>
+            </div>
+            <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
+                <div>Quantity is required.</div>
+            </div>
+            <div *ngIf="value.touched && value.errors?.pattern" class="alert alert-danger">
+                <div>Quantity should be in correct format</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="selling_price">Selling Price</label>
+            <input type="text"
+                   class="form-control"
+                   id="selling_price"
+                   formControlName="selling_price"
+                   placeholder="50.00">
+            <div *ngIf="selling_price.touched && selling_price.errors?.required" class="alert alert-danger">
+                <div>Selling Price is required.</div>
+            </div>
+            <div *ngIf="selling_price.touched && selling_price.errors?.pattern" class="alert alert-danger">
+                <div>Selling Price should be in correct format</div>
+            </div>
+        </div>
+        <div class="form-group sell-item__done-and-print">
+            <button class="btn btn-primary btn-block"
+                    (click)="sellItem()">Sell Item</button> 
+        </div>
+    </form>
+</app-modal>

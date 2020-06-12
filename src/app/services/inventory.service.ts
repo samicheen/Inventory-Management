@@ -34,6 +34,14 @@ export class InventoryService {
   }
 
   /**
+   * Update item in the inventory
+   * @param item Item to update
+   */
+  updateItem(item: Item) {
+    return this.http.post(`${this.baseUrl}/api/inventory/updateItem.php`, item);
+  }
+
+  /**
    * Remove item from inventory
    * @param itemNumber Item to remove
    */

@@ -2,11 +2,13 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ItemListComponent } from './components/item-list/item-list.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { SalesListComponent } from './components/sales-list/sales-list.component';
 
 
 const routes: Routes = [
   { path: 'inventory', component: ItemListComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'sales', component: SalesListComponent },
   { path: '',
     redirectTo: '/inventory',
     pathMatch: 'full'

@@ -17,7 +17,11 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { AlertModule } from 'ngx-bootstrap';
 import { AddItemComponent } from './components/add-item/add-item.component';
-import { ModalComponent } from './components/modal/modal.component'
+import { ModalComponent } from './components/modal/modal.component';
+import { SubItemListComponent } from './components/sub-item-list/sub-item-list.component';
+import { AddSubItemComponent } from './components/add-sub-item/add-sub-item.component';
+import { SellItemComponent } from './components/sell-item/sell-item.component';
+import { SalesListComponent } from './components/sales-list/sales-list.component'
 
 const ENVIRONMENT = "environment";
 
@@ -28,7 +32,11 @@ const ENVIRONMENT = "environment";
     DashboardComponent,
     HeaderComponent,
     AddItemComponent,
-    ModalComponent
+    ModalComponent,
+    SubItemListComponent,
+    AddSubItemComponent,
+    SellItemComponent,
+    SalesListComponent
   ],
   imports: [
     BrowserModule,
@@ -54,7 +62,10 @@ const ENVIRONMENT = "environment";
       useClass: PathLocationStrategy
     }
   ],
-  entryComponents: [AddItemComponent],
+  entryComponents: [AddItemComponent,
+                    SubItemListComponent,
+                    AddSubItemComponent,
+                    SellItemComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,0 +1,44 @@
+<app-modal [modalRef]="modalRef" 
+            title="Sub Items">
+  <div class="sub_item_table">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Name</th>
+          <th scope="col">Size</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Actions</th>
+        </tr> 
+      </thead>
+      <tbody>
+        <tr *ngFor="let subItem of subItems">
+            <td>{{subItem.timestamp | date: 'short'}}</td>
+            <td>{{subItem.name}}</td>
+            <td>{{subItem.size}}</td>
+            <td>{{subItem.quantity.value}} {{quantityUnitToLabelMapping[subItem.quantity.unit]}}</td>
+            <td class="actions">
+              <div class="btn-group" dropdown>
+                <button id="button-split" type="button" dropdownToggle class="btn"
+                        aria-controls="dropdown-split">
+                        <i class="fa fa-ellipsis-v"></i>
+                </button>
+                <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                    role="menu" aria-labelledby="button-split">
+                  <li role="menuitem"><a class="dropdown-item" (click)="removeSubItem(subItem.id)">Remove Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item">Edit Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="sellSubItem(subItem)">Sell Sub Item</a></li>
+                </ul>
+              </div>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <button type="button"
+          class="btn btn-primary btn-block add-item-btn"
+          (click)=addSubItem()>
+          Add Sub Item
+  </button>
+</app-modal>

@@ -19,7 +19,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of items">
-            <td>{{item.timestamp}}</td>
+            <td>{{item.timestamp | date: 'dd/MM/yyyy HH:mm a'}}</td>
             <td>{{item.invoice_number}}</td>
             <td>{{item.vendor}}</td>
             <td>{{item.item_name}}</td>
@@ -39,7 +39,7 @@
                   <li role="menuitem"><a class="dropdown-item" (click)="removeItem(item.item_number)">Remove Item</a></li>
                   <li role="menuitem"><a class="dropdown-item">Edit Item</a></li>
                   <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
-                  <li role="menuitem"><a class="dropdown-item">Show Sub Items</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="showSubItems(item)">Show Sub Items</a></li>
                 </ul>
               </div>
             </td>
@@ -47,5 +47,3 @@
       </tbody>
   </table>
 </div>
-
-

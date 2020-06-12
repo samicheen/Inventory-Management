@@ -46,7 +46,8 @@
                 <input type="text"
                        class="form-control"
                        id="size"
-                       formControlName="size">
+                       formControlName="size"
+                       placeholder="0.6">
                 <div *ngIf="size.touched && size.errors?.required" class="alert alert-danger">
                     <div>Size is required.</div>
                 </div>
@@ -60,7 +61,8 @@
                     <input type="text"
                        class="form-control"
                        id="value"
-                       formControlName="value">
+                       formControlName="value"
+                       placeholder="100">
                     <div class="input-group-append">
                         <select class="custom-select" formControlName="unit">
                             <option *ngFor="let unit of unitValues"
@@ -82,7 +84,8 @@
                 <input type="text"
                        class="form-control"
                        id="rate"
-                       formControlName="rate">
+                       formControlName="rate"
+                       placeholder="50.00">
                 <div *ngIf="rate.touched && rate.errors?.required" class="alert alert-danger">
                     <div>Rate is required.</div>
                 </div>
