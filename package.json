@@ -24,7 +24,7 @@
     "@types/gapi.auth2": "^0.0.52",
     "@types/gapi.client.gmail": "^1.0.2",
     "@types/gapi.client.sheets": "^4.0.9",
-    "bootstrap": "4.1.1",
+    "bootstrap": "4.3.1",
     "font-awesome": "^4.7.0",
     "googleapi": "^1.0.2",
     "ngx-bootstrap": "^5.5.0",
