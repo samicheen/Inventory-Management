@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
-import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/item.model';
+import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { Subject } from 'rxjs';
 import { SubItem } from 'src/app/models/sub-item.model';
 

@@ -1,4 +1,4 @@
-import { QuantityUnit } from './item.model';
+import { Quantity } from './quantity.model';
 
 export interface SubItem {
     id: string;
@@ -6,9 +6,6 @@ export interface SubItem {
     name: string;
     size: string;
     grade: string;
-    quantity: {
-        value: number;
-        unit: QuantityUnit;
-    };
+    quantity: Quantity;
     timestamp: string;
 }

@@ -1,53 +1,41 @@
 <app-modal [modalRef]="modalRef" 
-            title="Item Entry">
-    <form [formGroup]="addItemForm">
+            title="Purchase Entry">
+    <form [formGroup]="addPurchaseForm">
         <div class="form-group">
             <label for="invoiceNo">Invoice No.</label>
             <input type="text"
                    class="form-control"
                    id="invoiceNo"
-                   formControlName="invoice_number">
+                   formControlName="invoice_id">
         </div>
-        <div class="form-group">
+        <div class="form-group" formGroupName="vendor">
             <label for="vendor">Vendor</label>
             <input type="text"
                    class="form-control"
                    id="vendor"
-                   formControlName="vendor">
+                   formControlName="name">
             <div *ngIf="vendor.touched && vendor.errors?.required" class="alert alert-danger">
                 <div>Vendor is required.</div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="itemName">Item Name</label>
+            <div class="form-group col-md-4" formGroupName="item">
+                <label for="name">Item Name</label>
                 <input type="text"
-                       class="form-control"
-                       id="itemName"
-                       formControlName="item_name">
+                    class="form-control"
+                    id="itemName"
+                    formControlName="name">
                 <div *ngIf="itemName.touched && itemName.errors?.required" class="alert alert-danger">
                     <div>Item name is required.</div>
                 </div>
             </div>
-            <div class="form-group col-md-6">
-                <label for="grade">Grade</label>
-                <input type="text"
-                       class="form-control"
-                       id="grade"
-                       formControlName="grade">
-                <div *ngIf="grade.touched && grade.errors?.required" class="alert alert-danger">
-                    <div>Grade is required.</div>
-                </div>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-3">
+            <div class="form-group col-md-4" formGroupName="item">
                 <label for="size">Size</label>
                 <input type="text"
-                       class="form-control"
-                       id="size"
-                       formControlName="size"
-                       placeholder="0.6">
+                    class="form-control"
+                    id="size"
+                    formControlName="size"
+                    placeholder="0.6">
                 <div *ngIf="size.touched && size.errors?.required" class="alert alert-danger">
                     <div>Size is required.</div>
                 </div>
@@ -55,7 +43,19 @@
                     <div>Size should be in correct format</div>
                 </div>
             </div>
-            <div class="form-group col-md-5" formGroupName="quantity">
+            <div class="form-group col-md-4" formGroupName="item">
+                <label for="grade">Grade</label>
+                <input type="text"
+                    class="form-control"
+                    id="grade"
+                    formControlName="grade">
+                <div *ngIf="grade.touched && grade.errors?.required" class="alert alert-danger">
+                    <div>Grade is required.</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6" formGroupName="quantity">
                 <label for="value">Quantity</label>
                 <div class="input-group">
                     <input type="text"
@@ -79,7 +79,7 @@
                     <div>Quantity should be in correct format</div>
                 </div>
             </div>
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-6">
                 <label for="rate">Rate</label>
                 <input type="text"
                        class="form-control"
@@ -95,17 +95,17 @@
             </div>
         </div>
         <div class="row">
-            <div class="form-group col-md-6 add-item__apply-next">
-                <button class="btn btn-secondary add-item__button"
+            <div class="form-group col-md-6 add-purchase__apply-next">
+                <button class="btn btn-secondary add-purchase__button"
                         (click)="applyToNext()">Apply to Next</button>
             </div>
-            <div class="form-group col-md-6 add-item__next-item">
-                <button class="btn btn-primary add-item__button"
+            <div class="form-group col-md-6 add-purchase__next-item">
+                <button class="btn btn-primary add-purchase__button"
                         (click)="nextItem()">Next Item</button>
             </div>
         </div>
-        <div class="form-group add-item__done-and-print">
-            <button class="btn btn-light add-item__button"
+        <div class="form-group add-purchase__done-and-print">
+            <button class="btn btn-light add-purchase__button"
                     (click)="doneAndPrintLabels()">Done and Print Labels</button> 
         </div>
     </form>

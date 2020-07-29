@@ -1,14 +1,14 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { PathLocationStrategy, LocationStrategy } from '@angular/common';
+import { PathLocationStrategy, LocationStrategy, APP_BASE_HREF } from '@angular/common';
 import { environment } from '../environments/environment';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ItemListComponent } from './components/item-list/item-list.component';
+import { InventoryListComponent } from './components/inventory-list/inventory-list.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { HeaderComponent } from './components/header/header.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -16,27 +16,36 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { AlertModule } from 'ngx-bootstrap';
-import { AddItemComponent } from './components/add-item/add-item.component';
+import { AddPurchaseComponent } from './components/add-purchase/add-purchase.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { SubItemListComponent } from './components/sub-item-list/sub-item-list.component';
 import { AddSubItemComponent } from './components/add-sub-item/add-sub-item.component';
 import { SellItemComponent } from './components/sell-item/sell-item.component';
-import { SalesListComponent } from './components/sales-list/sales-list.component'
+import { SalesListComponent } from './components/sales-list/sales-list.component';
+import { EmailComponent } from './components/email/email.component';
+import { GapiSession } from './sessions/gapi.session';
+import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
 
 const ENVIRONMENT = "environment";
+
+export function initGapi(gapiSession: GapiSession) {
+  return () => gapiSession.initClient();
+}
 
 @NgModule({
   declarations: [
     AppComponent,
-    ItemListComponent,
+    InventoryListComponent,
+    PurchaseListComponent,
     DashboardComponent,
     HeaderComponent,
-    AddItemComponent,
+    AddPurchaseComponent,
     ModalComponent,
     SubItemListComponent,
     AddSubItemComponent,
     SellItemComponent,
-    SalesListComponent
+    SalesListComponent,
+    EmailComponent
   ],
   imports: [
     BrowserModule,
@@ -52,7 +61,9 @@ const ENVIRONMENT = "environment";
     ModalModule.forRoot()
   ],
   providers: [
+    { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
     HttpClient,
+    GapiSession,
     {
       provide: ENVIRONMENT,
       useValue: environment
@@ -60,9 +71,10 @@ const ENVIRONMENT = "environment";
     {
       provide: LocationStrategy,
       useClass: PathLocationStrategy
-    }
+    },
+    {provide: APP_BASE_HREF, useValue: '/inventory-management'}
   ],
-  entryComponents: [AddItemComponent,
+  entryComponents: [AddPurchaseComponent,
                     SubItemListComponent,
                     AddSubItemComponent,
                     SellItemComponent],

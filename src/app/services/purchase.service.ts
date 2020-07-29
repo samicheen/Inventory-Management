@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Inventory } from '../models/inventory.model';
 import { Response } from '../models/response.model';
 import { Observable } from 'rxjs';
+import { AddItemResponse } from '../models/add-item-response.model';
+import { Purchase } from '../models/purchase.model';
 import { map } from 'rxjs/operators';
 
 const ENVIRONMENT = "environment";
@@ -10,9 +12,8 @@ const ENVIRONMENT = "environment";
 @Injectable({
   providedIn: 'root'
 })
-export class InventoryService {
+export class PurchaseService {
   baseUrl: string;
-  items: Response<Inventory>;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
@@ -21,27 +22,26 @@ export class InventoryService {
   }
 
   /**
-   * Get inventory
+   * Get purchases
    */
-  getInventory(item_id): Observable<Response<Inventory>> {
-    const item_id_str = item_id ? `?item_id=${item_id}` : '';
-    return this.http.get(`${this.baseUrl}/api/inventory/getInventory.php${item_id_str}`)
+  getPurchases(): Observable<Response<Purchase>> {
+    return this.http.get<Response<Purchase>>(`${this.baseUrl}/api/purchase/getPurchases.php`)
     .pipe(map((res: any) => {
       return {
-        items: res.inventory,
+        items: res.purchases,
         total_amount: res.total_amount,
         alerts: res.alerts
       };
-    }));
+    }));;
   }
 
   /**
-   * Add item to the inventory
-   * @param item Item to add
+   * Add purchase
+   * @param purchase Purchase to add
    */
-  // addItem(item: Item): Observable<AddItemResponse> {
-  //   return this.http.post<AddItemResponse>(`${this.baseUrl}/api/inventory/addItem.php`, item);
-  // }
+  addPurchase(purchase: Purchase): Observable<AddItemResponse> {
+    return this.http.post<AddItemResponse>(`${this.baseUrl}/api/purchase/addPurchase.php`, purchase);
+  }
 
   /**
    * Update item in the inventory

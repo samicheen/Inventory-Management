@@ -1,13 +1,16 @@
 <div class="container-fluid">
-  <button type="button"
-          class="btn btn-primary add-item-btn"
-          (click)=addItem()>
-    Add Item
-  </button>
+  <div class="flex-container">
+    <div class="total">Total purchase amount: Rs. {{total_amount}}</div>
+    <button type="button"
+            class="btn btn-primary add-purchase-btn"
+            (click)=addPurchase()>
+      Add Purchase
+    </button>
+  </div>
   <table class="table">
       <thead>
           <th scope="col">Date</th>
-          <th scope="col">Invoice No.</th>
+          <th scope="col">Invoice Id</th>
           <th scope="col">Vendor</th>
           <th scope="col">Item Name</th>
           <th scope="col">Grade</th>
@@ -18,16 +21,16 @@
           <th scope="col">Actions</th> 
       </thead>
       <tbody>
-        <tr *ngFor="let item of items">
-            <td>{{item.timestamp | date: 'dd/MM/yyyy HH:mm a'}}</td>
-            <td>{{item.invoice_number}}</td>
-            <td>{{item.vendor}}</td>
-            <td>{{item.item_name}}</td>
-            <td>{{item.grade}}</td>
-            <td>{{item.size}}</td>
-            <td>{{item.quantity.value}} {{quantityUnitToLabelMapping[item.quantity.unit]}}</td>
-            <td>{{item.rate}}</td>
-            <td>Rs. {{item.amount}}</td>
+        <tr *ngFor="let purchase of purchases">
+            <td>{{purchase.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
+            <td>{{purchase.invoice_id}}</td>
+            <td>{{purchase.vendor.name}}</td>
+            <td>{{purchase.item.name}}</td>
+            <td>{{purchase.item.grade}}</td>
+            <td>{{purchase.item.size}}</td>
+            <td>{{purchase.quantity.value}} {{quantityUnitToLabelMapping[purchase.quantity.unit]}}</td>
+            <td>{{purchase.rate}}</td> 
+            <td>Rs. {{purchase.amount}}</td>
             <td class="actions">
               <div class="btn-group" dropdown>
                 <button id="button-split" type="button" dropdownToggle class="btn"
@@ -36,10 +39,8 @@
                 </button>
                 <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
                     role="menu" aria-labelledby="button-split">
-                  <li role="menuitem"><a class="dropdown-item" (click)="removeItem(item.item_number)">Remove Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="removeItem(purchase.purchase_id)">Remove Item</a></li>
                   <li role="menuitem"><a class="dropdown-item">Edit Item</a></li>
-                  <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="showSubItems(item)">Show Sub Items</a></li>
                 </ul>
               </div>
             </td>

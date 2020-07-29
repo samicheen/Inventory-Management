@@ -1,0 +1,38 @@
+<div class="container-fluid">
+  <div class="total">Total inventory amount: Rs. {{total_amount}}</div> 
+  <table class="table">
+      <thead>
+          <th scope="col">Date</th>
+          <th scope="col">Item Name</th>
+          <th scope="col">Grade</th>
+          <th scope="col">Size</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Actions</th> 
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv_item of inventory">
+            <td>{{inv_item.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
+            <td *ngIf="!item_id"><a [routerLink]="['/inventory', inv_item.item.item_id]">{{inv_item.item.name}}</a></td>
+            <td *ngIf="item_id">{{inv_item.item.name}}</td>
+            <td>{{inv_item.item.grade}}</td>
+            <td>{{inv_item.item.size}}</td>
+            <td>{{inv_item.quantity.value}} {{quantityUnitToLabelMapping[inv_item.quantity.unit]}}</td>
+            <td>Rs. {{inv_item.amount}}</td>
+            <td class="actions">
+              <div class="btn-group" dropdown>
+                <button id="button-split" type="button" dropdownToggle class="btn"
+                        aria-controls="dropdown-split">
+                        <i class="fa fa-ellipsis-v"></i>
+                </button>
+                <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                    role="menu" aria-labelledby="button-split">
+                  <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
+                  <li *ngIf="!item_id" role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item.item)">Move to Manufacturing</a></li>
+                </ul>
+              </div>
+            </td>
+        </tr>
+      </tbody>
+  </table>
+</div>

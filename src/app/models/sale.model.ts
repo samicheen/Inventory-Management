@@ -1,4 +1,4 @@
-import { QuantityUnit } from './item.model';
+import { Quantity } from './quantity.model';
 
 export interface Sale {
     id: string;
@@ -6,10 +6,7 @@ export interface Sale {
     grade: string;
     size: string;
     party_name: string;
-    quantity: {
-        value: number;
-        unit: QuantityUnit;
-    };
+    quantity: Quantity;
     selling_price: string;
     amount: string;
     timestamp: string;

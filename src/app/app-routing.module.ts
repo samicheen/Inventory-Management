@@ -1,14 +1,19 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ItemListComponent } from './components/item-list/item-list.component';
+import { InventoryListComponent } from './components/inventory-list/inventory-list.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { SalesListComponent } from './components/sales-list/sales-list.component';
+import { EmailComponent } from './components/email/email.component';
+import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
 
 
 const routes: Routes = [
-  { path: 'inventory', component: ItemListComponent },
+  { path: 'purchase', component: PurchaseListComponent },
+  { path: 'inventory', component: InventoryListComponent },
+  { path: 'inventory/:item_id', component: InventoryListComponent }, 
   { path: 'dashboard', component: DashboardComponent },
   { path: 'sales', component: SalesListComponent },
+  { path: 'email', component: EmailComponent },
   { path: '',
     redirectTo: '/inventory',
     pathMatch: 'full'

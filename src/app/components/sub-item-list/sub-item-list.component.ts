@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
-import { Item, QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/item.model';
+import { Inventory } from 'src/app/models/inventory.model';
+import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { SubItem } from 'src/app/models/sub-item.model';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SubItemService } from 'src/app/services/sub-item.service';
@@ -15,11 +16,11 @@ import { SellItem } from 'src/app/models/sell-item.model';
   styleUrls: ['./sub-item-list.component.scss']
 })
 export class SubItemListComponent implements OnInit {
-  @Input() item: Item;
+  @Input() inventory: Inventory;
   subItems: SubItem[];
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
-  getUpdatedItem: Subject<Item>;
+  getUpdatedItem: Subject<Inventory>;
 
   constructor(
     private subItemService: SubItemService,
@@ -29,9 +30,9 @@ export class SubItemListComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUpdatedItem = new Subject();
-    this.getSubItems(this.item.item_number);
+    this.getSubItems(this.inventory.item.item_id);
     this.refreshItems.subscribe(() => {
-      this.getSubItems(this.item.item_number);
+      this.getSubItems(this.inventory.item.item_id);
     });
   }
 
@@ -48,11 +49,11 @@ export class SubItemListComponent implements OnInit {
   }
 
   saveAndPrintSubItems(sub_item: SubItem) {
-    sub_item.item_id = this.item.item_number;
-    sub_item.grade = this.item.grade;
+    sub_item.item_id = this.inventory.item.item_id;
+    sub_item.grade = this.inventory.item.grade;
     this.subItemService.addSubItem(sub_item).subscribe(addSubItemResponse => {
       this.refreshItems.next(undefined);
-      let updated_item = { ...this.item };
+      let updated_item = { ...this.inventory };
       updated_item.quantity.value = updated_item.quantity.value - sub_item.quantity.value;
       this.getUpdatedItem.next(updated_item);
     });

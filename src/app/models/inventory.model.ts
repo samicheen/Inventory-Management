@@ -1,10 +1,10 @@
+import { Item } from './item.model';
 import { Quantity } from './quantity.model';
 
-export interface SellItem {
-    item_id: string;
-    party_name: string;
+export interface Inventory {
+    inventory_id: string;
+    item: Item;
     quantity: Quantity;
-    selling_price: string;
     amount: string;
     timestamp: string;
 }

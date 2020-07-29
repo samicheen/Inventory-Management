@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Sale } from 'src/app/models/sale.model';
-import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/item.model';
+import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { SalesService } from 'src/app/services/sales.service';
 import { SalesResponse } from 'src/app/models/sales-response.model';
 
