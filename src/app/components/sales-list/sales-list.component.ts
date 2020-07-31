@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Sale } from 'src/app/models/sale.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { SalesService } from 'src/app/services/sales.service';
-import { SalesResponse } from 'src/app/models/sales-response.model';
+import { Response } from '../../models/response.model';
 
 @Component({
   selector: 'app-sales-list',
@@ -11,6 +11,7 @@ import { SalesResponse } from 'src/app/models/sales-response.model';
 })
 export class SalesListComponent implements OnInit {
   sales : Sale[];
+  total_amount: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping
 
   constructor(private salesService: SalesService) { }
@@ -21,8 +22,9 @@ export class SalesListComponent implements OnInit {
 
   getSales(){
     this.salesService.getSales()
-    .subscribe((response: SalesResponse) => {
-      this.sales = response.sales;
+    .subscribe((response: Response<Sale>) => {
+      this.sales = response.items;
+      this.total_amount = response.total_amount;
     });
   }
 

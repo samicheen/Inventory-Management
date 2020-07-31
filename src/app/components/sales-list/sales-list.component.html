@@ -1,4 +1,5 @@
 <div class="container-fluid">
+    <div class="total">Total sales amount: Rs. {{total_amount}}</div> 
     <table class="table">
         <thead>
             <th scope="col">Date</th>
@@ -12,11 +13,11 @@
         </thead>
         <tbody>
           <tr *ngFor="let sale of sales">
-              <td>{{sale.timestamp | date: 'dd/MM/yyyy HH:mm a'}}</td>
-              <td>{{sale.item_name}}</td>
-              <td>{{sale.grade}}</td>
-              <td>{{sale.size}}</td>
-              <td>{{sale.party_name}}</td>
+              <td>{{sale.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
+              <td>{{sale.item.name}}</td>
+              <td>{{sale.item.grade}}</td>
+              <td>{{sale.item.size}}</td>
+              <td>{{sale.customer.name}}</td>
               <td>{{sale.quantity.value}} {{quantityUnitToLabelMapping[sale.quantity.unit]}}</td>
               <td>{{sale.selling_price}}</td>
               <td>Rs. {{sale.amount}}</td>

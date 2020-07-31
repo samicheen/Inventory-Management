@@ -4,6 +4,8 @@ import { Inventory } from '../models/inventory.model';
 import { Response } from '../models/response.model';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { SubItemInventory } from '../models/sub-item-inventory.model';
+import { AddItemResponse } from '../models/add-item-response.model';
 
 const ENVIRONMENT = "environment";
 
@@ -36,26 +38,10 @@ export class InventoryService {
   }
 
   /**
-   * Add item to the inventory
+   * Add sub item inventory
    * @param item Item to add
    */
-  // addItem(item: Item): Observable<AddItemResponse> {
-  //   return this.http.post<AddItemResponse>(`${this.baseUrl}/api/inventory/addItem.php`, item);
-  // }
-
-  /**
-   * Update item in the inventory
-   * @param item Item to update
-   */
-  // updateItem(item: Item) {
-  //   return this.http.post(`${this.baseUrl}/api/inventory/updateItem.php`, item);
-  // }
-
-  /**
-   * Remove item from inventory
-   * @param itemNumber Item to remove
-   */
-  removeItem(itemNumber) {
-    return this.http.delete(`${this.baseUrl}/api/inventory/removeItem.php?itemNumber=${itemNumber}`);
-  }
+   addSubItemInventory(item: SubItemInventory): Observable<AddItemResponse> {
+     return this.http.post<AddItemResponse>(`${this.baseUrl}/api/inventory/addSubItemInventory.php`, item);
+   }
 }

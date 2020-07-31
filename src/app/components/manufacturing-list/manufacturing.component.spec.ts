@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SubItemListComponent } from './sub-item-list.component';
+import { ManufacturingListComponent } from './manufacturing-list.component';
 
-describe('SubItemListComponent', () => {
-  let component: SubItemListComponent;
-  let fixture: ComponentFixture<SubItemListComponent>;
+describe('ManufacturingListComponent', () => {
+  let component: ManufacturingListComponent;
+  let fixture: ComponentFixture<ManufacturingListComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SubItemListComponent ]
+      declarations: [ ManufacturingListComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SubItemListComponent);
+    fixture = TestBed.createComponent(ManufacturingListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

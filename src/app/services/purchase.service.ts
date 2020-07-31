@@ -1,6 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Inventory } from '../models/inventory.model';
 import { Response } from '../models/response.model';
 import { Observable } from 'rxjs';
 import { AddItemResponse } from '../models/add-item-response.model';
@@ -32,7 +31,7 @@ export class PurchaseService {
         total_amount: res.total_amount,
         alerts: res.alerts
       };
-    }));;
+    }));
   }
 
   /**

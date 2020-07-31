@@ -1,12 +1,12 @@
 <app-modal [modalRef]="modalRef" 
             title="Sell Item">
     <form [formGroup]="sellItemForm">
-        <div class="form-group">
+        <div class="form-group" formGroupName="customer">
             <label for="party_name">Party Name</label>
             <input type="text"
                    class="form-control"
                    id="party_name"
-                   formControlName="party_name">
+                   formControlName="name">
             <div *ngIf="party_name.touched && party_name.errors?.required" class="alert alert-danger">
                 <div>Party name is required.</div>
             </div>

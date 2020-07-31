@@ -18,13 +18,14 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { AlertModule } from 'ngx-bootstrap';
 import { AddPurchaseComponent } from './components/add-purchase/add-purchase.component';
 import { ModalComponent } from './components/modal/modal.component';
-import { SubItemListComponent } from './components/sub-item-list/sub-item-list.component';
 import { AddSubItemComponent } from './components/add-sub-item/add-sub-item.component';
 import { SellItemComponent } from './components/sell-item/sell-item.component';
 import { SalesListComponent } from './components/sales-list/sales-list.component';
 import { EmailComponent } from './components/email/email.component';
 import { GapiSession } from './sessions/gapi.session';
 import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
+import { AddManufacturingComponent } from './components/add-manufacturing/add-manufacturing.component';
+import { ManufacturingListComponent } from './components/manufacturing-list/manufacturing-list.component';
 
 const ENVIRONMENT = "environment";
 
@@ -41,8 +42,9 @@ export function initGapi(gapiSession: GapiSession) {
     HeaderComponent,
     AddPurchaseComponent,
     ModalComponent,
-    SubItemListComponent,
     AddSubItemComponent,
+    AddManufacturingComponent,
+    ManufacturingListComponent,
     SellItemComponent,
     SalesListComponent,
     EmailComponent
@@ -75,9 +77,9 @@ export function initGapi(gapiSession: GapiSession) {
     {provide: APP_BASE_HREF, useValue: '/inventory-management'}
   ],
   entryComponents: [AddPurchaseComponent,
-                    SubItemListComponent,
                     AddSubItemComponent,
-                    SellItemComponent],
+                    SellItemComponent,
+                    AddManufacturingComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

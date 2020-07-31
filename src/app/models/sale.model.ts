@@ -1,11 +1,11 @@
 import { Quantity } from './quantity.model';
+import { Item } from './item.model';
+import { Customer } from './customer.model';
 
 export interface Sale {
-    id: string;
-    item_name: string;
-    grade: string;
-    size: string;
-    party_name: string;
+    sale_id: string;
+    item: Item;
+    customer: Customer;
     quantity: Quantity;
     selling_price: string;
     amount: string;

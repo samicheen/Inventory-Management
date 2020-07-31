@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService } from 'ngx-bootstrap/modal';
 import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
-import { Response } from 'src/app/models/response.model';
+import { Response } from '../../models/response.model';
 import { BehaviorSubject } from 'rxjs';
-import { SubItemListComponent } from '../sub-item-list/sub-item-list.component';
 import { Purchase } from 'src/app/models/purchase.model';
 import { PurchaseService } from 'src/app/services/purchase.service';
-import { Inventory } from 'src/app/models/inventory.model';
+import { Inventory } from '../../models/inventory.model';
 
 @Component({
   selector: 'app-purchase-list',
@@ -55,14 +54,6 @@ export class PurchaseListComponent implements OnInit {
       this.purchases = response.items;
       this.total_amount = response.total_amount;
     });
-  }
-
-  showSubItems(inventory: Inventory) {
-    const initialState = {
-      inventory: inventory
-    };
-    let showSubItemsModalRef = this.modalService.show(SubItemListComponent, { initialState, backdrop: 'static', keyboard: false });
-    //showSubItemsModalRef.content.getUpdatedItem.subscribe(updated_item => this.updateItem(updated_item));
   }
 
   // updateItem(inventory: Inventory) {

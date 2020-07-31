@@ -2,12 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory.service';
 import { Inventory } from 'src/app/models/inventory.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from 'src/app/models/response.model';
 import { BehaviorSubject } from 'rxjs';
-import { SubItemListComponent } from '../sub-item-list/sub-item-list.component';
 import { ActivatedRoute } from '@angular/router';
 import { Item } from 'src/app/models/item.model';
+import { SellItemComponent } from '../sell-item/sell-item.component';
+import { SalesService } from 'src/app/services/sales.service';
+import { AddManufacturingComponent } from '../add-manufacturing/add-manufacturing.component';
+import { ManufactureService } from 'src/app/services/manufacture.service';
 
 @Component({
   selector: 'app-inventory-list',
@@ -23,6 +26,8 @@ export class InventoryListComponent implements OnInit {
   
   constructor(
     private inventoryService: InventoryService,
+    private salesService: SalesService,
+    private manufactureService: ManufactureService,
     private modalService: BsModalService,
     private route: ActivatedRoute
   ) { }
@@ -35,12 +40,6 @@ export class InventoryListComponent implements OnInit {
     });
   }
 
-  removeItem(itemNumber: string) {
-    this.inventoryService.removeItem(itemNumber).subscribe(() => {
-      this.refreshItems.next(undefined);
-    });
-  }
-
   getInventory(){
     this.inventoryService.getInventory(this.item_id)
     .subscribe((response: Response<Inventory>) => {
@@ -49,16 +48,27 @@ export class InventoryListComponent implements OnInit {
     });
   }
 
-  showSubItems(inventory: Inventory) {
-    const initialState = {
-      inventory: inventory
-    };
-    let showSubItemsModalRef = this.modalService.show(SubItemListComponent, { initialState, backdrop: 'static', keyboard: false });
-    //showSubItemsModalRef.content.getUpdatedItem.subscribe(updated_item => this.updateItem(updated_item));
-  }
-
   moveToManufacturing(item: Item) {
-
+    const initialState = {
+      item: item
+    };
+    let addManufacturingModalRef = this.modalService.show(AddManufacturingComponent, { initialState, backdrop: 'static', keyboard: false });
+    addManufacturingModalRef.content.addToManufacturing.subscribe(manufacture => {
+      this.manufactureService.addToManufacturing(manufacture).subscribe(() => {
+        this.refreshItems.next(undefined);
+      });
+    });
   }
 
+  sellItem(item: Item) {
+    const initialState = {
+      item: item
+    };
+    let sellItemModalRef = this.modalService.show(SellItemComponent, { initialState, backdrop: 'static', keyboard: false });
+    sellItemModalRef.content.sell.subscribe(sale => {
+      this.salesService.sellItem(sale).subscribe(() => {
+        this.refreshItems.next(undefined);
+      });
+    });
+  }
 }

@@ -1,0 +1,33 @@
+<div class="container-fluid">
+  <table class="table">
+      <thead>
+          <th scope="col">Date</th>
+          <th scope="col">Item Name</th>
+          <th scope="col">Grade</th>
+          <th scope="col">Size</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Actions</th> 
+      </thead>
+      <tbody>
+        <tr *ngFor="let manufacture of manufactures">
+            <td>{{manufacture.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
+            <td>{{manufacture.item.name}}</td>
+            <td>{{manufacture.item.grade}}</td>
+            <td>{{manufacture.item.size}}</td>
+            <td>{{manufacture.quantity.value}} {{quantityUnitToLabelMapping[manufacture.quantity.unit]}}</td>
+            <td class="actions">
+              <div class="btn-group" dropdown>
+                <button id="button-split" type="button" dropdownToggle class="btn"
+                        aria-controls="dropdown-split">
+                        <i class="fa fa-ellipsis-v"></i>
+                </button>
+                <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                    role="menu" aria-labelledby="button-split">
+                  <li role="menuitem"><a class="dropdown-item" (click)="addSubItem(manufacture.item)">Add Sub Item</a></li>
+                </ul>
+              </div>
+            </td>
+        </tr>
+      </tbody>
+  </table>
+</div>

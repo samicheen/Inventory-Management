@@ -29,6 +29,7 @@
                     role="menu" aria-labelledby="button-split">
                   <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
                   <li *ngIf="!item_id" role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item.item)">Move to Manufacturing</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="sellItem(inv_item.item)">Sell Item</a></li>
                 </ul>
               </div>
             </td>

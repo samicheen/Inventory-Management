@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
-import { SubItem } from 'src/app/models/sub-item.model';
 import { Subject } from 'rxjs';
+import { Item } from 'src/app/models/item.model';
+import { SubItemInventory } from 'src/app/models/sub-item-inventory.model';
 
 @Component({
   selector: 'app-add-sub-item',
@@ -11,12 +12,12 @@ import { Subject } from 'rxjs';
   styleUrls: ['./add-sub-item.component.scss']
 })
 export class AddSubItemComponent implements OnInit {
+  @Input() item: Item;
 
   addSubItemForm: FormGroup;
-  subItems: SubItem[];
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
-  saveAndPrintSubItems: Subject<SubItem>;
+  saveAndPrintSubItems: Subject<SubItemInventory>;
 
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef) { }
@@ -33,6 +34,14 @@ export class AddSubItemComponent implements OnInit {
     return this.addSubItemForm.get('quantity.value') as FormControl;
   }
 
+  get quantity(): FormControl {
+    return this.addSubItemForm.get('quantity') as FormControl;
+  }
+
+  get rate(): FormControl {
+    return this.addSubItemForm.get('rate') as FormControl;
+  }
+
   ngOnInit(): void {
     this.saveAndPrintSubItems = new Subject();
     this.addSubItemForm  =  this.formBuilder.group({
@@ -43,17 +52,26 @@ export class AddSubItemComponent implements OnInit {
         value: ['', [Validators.required,
                     Validators.pattern(/^[0-9]*$/)]],
         unit: QuantityUnit.KG
-      })
+      }),
+      rate: ['', [Validators.required,
+        Validators.pattern(/^\d+\.\d{2}$/)]]
     });
   }
 
   doneAndPrintLabels() {
     if(this.addSubItemForm.valid) {
-       const sub_item = {
-         ...this.addSubItemForm.value,
-         timestamp: new Date().toISOString()
-       }
-       this.saveAndPrintSubItems.next(sub_item);
+       const item = {
+         item: {
+           item_id: this.item.item_id,
+           name: this.name.value,
+           grade: this.item.grade,
+           size: this.size.value
+         },
+         quantity: this.quantity.value,
+         rate: this.rate.value,
+         amount: (this.value.value * this.rate.value).toFixed(2)
+       } as SubItemInventory;
+       this.saveAndPrintSubItems.next(item);
        this.modalRef.hide();
     } else {
       this.addSubItemForm.markAllAsTouched();

@@ -1,17 +1,17 @@
 <app-modal [modalRef]="modalRef" 
             title="Add Sub Item">
     <form [formGroup]="addSubItemForm">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text"
-                    class="form-control"
-                    id="name"
-                    formControlName="name">
-            <div *ngIf="name.touched && name.errors?.required" class="alert alert-danger">
-                <div>Name is required.</div>
-            </div>
-        </div>
         <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="name">Name</label>
+                <input type="text"
+                        class="form-control"
+                        id="name"
+                        formControlName="name">
+                <div *ngIf="name.touched && name.errors?.required" class="alert alert-danger">
+                    <div>Name is required.</div>
+                </div>
+            </div>
             <div class="form-group col-md-6">
                 <label for="size">Size</label>
                 <input type="text"
@@ -26,6 +26,8 @@
                     <div>Size should be in correct format</div>
                 </div>
             </div>
+        </div>
+        <div class="form-row">
             <div class="form-group col-md-6" formGroupName="quantity">
                 <label for="value">Quantity</label>
                 <div class="input-group">
@@ -48,6 +50,20 @@
                 </div>
                 <div *ngIf="value.touched && value.errors?.pattern" class="alert alert-danger">
                     <div>Quantity should be in correct format</div>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="rate">Rate</label>
+                <input type="text"
+                       class="form-control"
+                       id="rate"
+                       formControlName="rate"
+                       placeholder="50.00">
+                <div *ngIf="rate.touched && rate.errors?.required" class="alert alert-danger">
+                    <div>Rate is required.</div>
+                </div>
+                <div *ngIf="rate.touched && rate.errors?.pattern" class="alert alert-danger">
+                    <div>Rate should be in correct format</div>
                 </div>
             </div>
         </div>
