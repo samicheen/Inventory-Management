@@ -11,6 +11,7 @@ import { SellItemComponent } from '../sell-item/sell-item.component';
 import { SalesService } from 'src/app/services/sales.service';
 import { AddManufacturingComponent } from '../add-manufacturing/add-manufacturing.component';
 import { ManufactureService } from 'src/app/services/manufacture.service';
+import { AddSubItemComponent } from '../add-sub-item/add-sub-item.component';
 
 @Component({
   selector: 'app-inventory-list',
@@ -45,6 +46,15 @@ export class InventoryListComponent implements OnInit {
     .subscribe((response: Response<Inventory>) => {
       this.inventory = response.items;
       this.total_amount = response.total_amount;
+    });
+  }
+
+  addItem() {
+    let addSubItemModalRef = this.modalService.show(AddSubItemComponent, { backdrop: 'static', keyboard: false });
+    addSubItemModalRef.content.saveAndPrintSubItems.subscribe(item => {
+      this.inventoryService.addSubItemInventory(item).subscribe(() => {
+        this.refreshItems.next(undefined);
+      });
     });
   }
 

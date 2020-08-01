@@ -12,7 +12,7 @@ import { SubItemInventory } from 'src/app/models/sub-item-inventory.model';
   styleUrls: ['./add-sub-item.component.scss']
 })
 export class AddSubItemComponent implements OnInit {
-  @Input() item: Item;
+  @Input() parentItem?: Item;
 
   addSubItemForm: FormGroup;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
@@ -22,12 +22,20 @@ export class AddSubItemComponent implements OnInit {
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef) { }
 
+  get item(): FormControl {
+    return this.addSubItemForm.get('item') as FormControl;
+  }
+
   get name(): FormControl {
-    return this.addSubItemForm.get('name') as FormControl;
+    return this.addSubItemForm.get('item.name') as FormControl;
   }
 
   get size(): FormControl {
-    return this.addSubItemForm.get('size') as FormControl;
+    return this.addSubItemForm.get('item.size') as FormControl;
+  }
+
+  get grade(): FormControl {
+    return this.addSubItemForm.get('item.grade') as FormControl;
   }
 
   get value(): FormControl {
@@ -45,9 +53,12 @@ export class AddSubItemComponent implements OnInit {
   ngOnInit(): void {
     this.saveAndPrintSubItems = new Subject();
     this.addSubItemForm  =  this.formBuilder.group({
-      name: ['', Validators.required],
-      size: ['', [Validators.required,
-                 Validators.pattern(/^\d+\.\d{1}$/)]],
+      item: this.formBuilder.group({
+        name: ['', Validators.required],
+        size: ['', [Validators.required,
+                  Validators.pattern(/^\d+\.\d{1}$/)]],
+        grade: ['', Validators.required]
+      }),
       quantity: this.formBuilder.group({
         value: ['', [Validators.required,
                     Validators.pattern(/^[0-9]*$/)]],
@@ -62,10 +73,8 @@ export class AddSubItemComponent implements OnInit {
     if(this.addSubItemForm.valid) {
        const item = {
          item: {
-           item_id: this.item.item_id,
-           name: this.name.value,
-           grade: this.item.grade,
-           size: this.size.value
+           item_id: this.parentItem ? this.parentItem.item_id : '',
+           ...this.item.value
          },
          quantity: this.quantity.value,
          rate: this.rate.value,

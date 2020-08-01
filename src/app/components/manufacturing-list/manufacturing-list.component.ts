@@ -41,7 +41,7 @@ export class ManufacturingListComponent implements OnInit {
 
   addSubItem(item: Item) {
     const initialState = {
-      item: item
+      parentItem: item
     };
     let addSubItemModalRef = this.modalService.show(AddSubItemComponent, { initialState, backdrop: 'static', keyboard: false });
     addSubItemModalRef.content.saveAndPrintSubItems.subscribe(item => {
