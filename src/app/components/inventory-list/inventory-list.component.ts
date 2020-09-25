@@ -21,7 +21,7 @@ import { AddSubItemComponent } from '../add-sub-item/add-sub-item.component';
 export class InventoryListComponent implements OnInit {
   inventory : Inventory[];
   total_amount: string;
-  item_id: string;
+  parent_item_id: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
   
@@ -34,7 +34,7 @@ export class InventoryListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.item_id = this.route.snapshot.params.item_id;
+    this.parent_item_id = this.route.snapshot.params.item_id;
     this.getInventory();
     this.refreshItems.subscribe(() => {
       this.getInventory();
@@ -42,7 +42,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   getInventory(){
-    this.inventoryService.getInventory(this.item_id)
+    this.inventoryService.getInventory(this.parent_item_id)
     .subscribe((response: Response<Inventory>) => {
       this.inventory = response.items;
       this.total_amount = response.total_amount;

@@ -25,8 +25,8 @@ export class InventoryService {
   /**
    * Get inventory
    */
-  getInventory(item_id): Observable<Response<Inventory>> {
-    const item_id_str = item_id ? `?item_id=${item_id}` : '';
+  getInventory(parent_item_id): Observable<Response<Inventory>> {
+    const item_id_str = parent_item_id ? `?parent_item_id=${parent_item_id}` : '';
     return this.http.get(`${this.baseUrl}/api/inventory/getInventory.php${item_id_str}`)
     .pipe(map((res: any) => {
       return {

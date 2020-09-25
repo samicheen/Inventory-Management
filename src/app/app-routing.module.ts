@@ -6,9 +6,11 @@ import { SalesListComponent } from './components/sales-list/sales-list.component
 import { EmailComponent } from './components/email/email.component';
 import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
 import { ManufacturingListComponent } from './components/manufacturing-list/manufacturing-list.component';
+import { ItemListComponent } from './components/item-list/item-list.component';
 
 
 const routes: Routes = [
+  { path: 'item', component: ItemListComponent }, 
   { path: 'purchase', component: PurchaseListComponent },
   { path: 'inventory', component: InventoryListComponent },
   { path: 'inventory/:item_id', component: InventoryListComponent }, 

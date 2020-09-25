@@ -15,7 +15,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
-import { AlertModule } from 'ngx-bootstrap';
+import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
+import { AlertModule } from 'ngx-bootstrap/alert';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { AddPurchaseComponent } from './components/add-purchase/add-purchase.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { AddSubItemComponent } from './components/add-sub-item/add-sub-item.component';
@@ -26,6 +28,8 @@ import { GapiSession } from './sessions/gapi.session';
 import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
 import { AddManufacturingComponent } from './components/add-manufacturing/add-manufacturing.component';
 import { ManufacturingListComponent } from './components/manufacturing-list/manufacturing-list.component';
+import { AddItemComponent } from './components/add-item/add-item.component';
+import { ItemListComponent } from './components/item-list/item-list.component';
 
 const ENVIRONMENT = "environment";
 
@@ -47,7 +51,9 @@ export function initGapi(gapiSession: GapiSession) {
     ManufacturingListComponent,
     SellItemComponent,
     SalesListComponent,
-    EmailComponent
+    EmailComponent,
+    AddItemComponent,
+    ItemListComponent
   ],
   imports: [
     BrowserModule,
@@ -60,7 +66,9 @@ export function initGapi(gapiSession: GapiSession) {
     BsDropdownModule.forRoot(),
     AlertModule.forRoot(),
     CollapseModule.forRoot(),
-    ModalModule.forRoot()
+    ModalModule.forRoot(),
+    BsDatepickerModule.forRoot(),
+    TypeaheadModule.forRoot()
   ],
   providers: [
     { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
@@ -79,7 +87,8 @@ export function initGapi(gapiSession: GapiSession) {
   entryComponents: [AddPurchaseComponent,
                     AddSubItemComponent,
                     SellItemComponent,
-                    AddManufacturingComponent],
+                    AddManufacturingComponent,
+                    AddItemComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

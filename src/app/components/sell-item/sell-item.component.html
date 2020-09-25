@@ -11,6 +11,26 @@
                 <div>Party name is required.</div>
             </div>
         </div>
+        <div class="form-group">
+            <label for="item">Item</label>
+            <input type="text"
+                class="form-control"
+                id="item"
+                name="sale-item"
+                [attr.disabled]="item ? true : null"
+                [typeahead]="items"
+                [typeaheadItemTemplate]="customItemTemplate"
+                typeaheadOptionField="name"
+                (typeaheadOnSelect)="onSelect($event)"
+                [typeaheadScrollable]="true"
+                formControlName="selected_item">
+                <ng-template #customItemTemplate let-item="item">
+                   {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
+                </ng-template>
+            <div *ngIf="selectedItem.touched && selectedItem.errors?.required" class="alert alert-danger">
+                <div>Item is required.</div>
+            </div>
+        </div>
         <div class="form-group" formGroupName="quantity">
             <label for="value">Quantity</label>
             <div class="input-group">

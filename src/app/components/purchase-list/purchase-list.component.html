@@ -22,7 +22,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let purchase of purchases">
-            <td>{{purchase.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
+            <td>{{purchase.timestamp | date: 'dd/MM/yyyy'}}</td>
             <td>{{purchase.invoice_id}}</td>
             <td>{{purchase.vendor.name}}</td>
             <td>{{purchase.item.name}}</td>

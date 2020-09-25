@@ -1,5 +1,12 @@
 <div class="container-fluid">
-    <div class="total">Total sales amount: Rs. {{total_amount}}</div> 
+    <div class="flex-container">
+        <div class="total">Total sales amount: Rs. {{total_amount}}</div>
+        <button type="button"
+                class="btn btn-primary add-sales-btn"
+                (click)=addSales()>
+          Add Sales
+        </button>
+      </div> 
     <table class="table">
         <thead>
             <th scope="col">Date</th>

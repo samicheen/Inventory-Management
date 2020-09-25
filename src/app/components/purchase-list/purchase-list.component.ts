@@ -5,8 +5,8 @@ import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
 import { Response } from '../../models/response.model';
 import { BehaviorSubject } from 'rxjs';
 import { Purchase } from 'src/app/models/purchase.model';
-import { PurchaseService } from 'src/app/services/purchase.service';
-import { Inventory } from '../../models/inventory.model';
+import { PurchaseService } from '../../services/purchase.service';
+import { Item } from 'src/app/models/item.model';
 
 @Component({
   selector: 'app-purchase-list',
@@ -14,7 +14,8 @@ import { Inventory } from '../../models/inventory.model';
   styleUrls: ['./purchase-list.component.scss']
 })
 export class PurchaseListComponent implements OnInit {
-  purchases : Purchase[];
+  items: Item[];
+  purchases: Purchase[];
   total_amount: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);

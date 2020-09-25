@@ -1,0 +1,43 @@
+<app-modal [modalRef]="modalRef" 
+            title="Add Item">
+    <form [formGroup]="addItemForm">
+        <div class="form-group" formGroupName="item">
+            <label for="name">Name</label>
+            <input type="text"
+                    class="form-control"
+                    id="name"
+                    formControlName="name">
+            <div *ngIf="name.touched && name.errors?.required" class="alert alert-danger">
+                <div>Name is required.</div>
+            </div>
+        </div>
+        <div class="form-group" formGroupName="item">
+            <label for="size">Size</label>
+            <input type="text"
+                    class="form-control"
+                    id="size"
+                    formControlName="size"
+                    placeholder="0.6">
+            <div *ngIf="size.touched && size.errors?.required" class="alert alert-danger">
+                <div>Size is required.</div>
+            </div>
+            <div *ngIf="size.touched && size.errors?.pattern" class="alert alert-danger">
+                <div>Size should be in correct format</div>
+            </div>
+        </div>
+        <div class="form-group" formGroupName="item">
+            <label for="grade">Grade</label>
+            <input type="text"
+                class="form-control"
+                id="grade"
+                formControlName="grade">
+            <div *ngIf="grade.touched && grade.errors?.required" class="alert alert-danger">
+                <div>Grade is required.</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary btn-block"
+                    (click)="addItem()">Add item</button> 
+        </div>
+    </form>
+</app-modal>

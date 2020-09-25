@@ -1,4 +1,15 @@
 .total {
-    padding: 1rem 0 1rem 0;
     font-weight: 500;
+}
+
+.add-sales-btn {
+    float: right;
+    margin: 1rem 0 1rem 0;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
 }
