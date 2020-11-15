@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Manufacture } from '../models/manufacture.model';
-import { Response } from '../models/response.model';
+import { Manufacture } from '../../models/manufacture.model';
+import { Response } from '../../models/response.model';
 import { map } from 'rxjs/operators';
-import { AddItemResponse } from '../models/add-item-response.model';
+import { AddItemResponse } from '../../models/add-item-response.model';
 
 const ENVIRONMENT = "environment";
 

@@ -1,6 +1,9 @@
 <div class="container-fluid">
   <div class="flex-container">
-    <div class="total">Total inventory amount: Rs. {{total_amount}}</div>
+    <div>
+    <div class="total">Total opening amount: Rs. {{total?.opening_amount | number:'1.2-2'}}</div>
+    <div class="total">Total closing amount: Rs. {{total?.closing_amount | number:'1.2-2'}}</div>
+  </div>
     <button type="button"
             class="btn btn-primary add-item-btn"
             (click)=addItem()>
@@ -13,8 +16,10 @@
           <th scope="col">Item Name</th>
           <th scope="col">Grade</th>
           <th scope="col">Size</th>
-          <th scope="col">Quantity</th>
-          <th scope="col">Amount</th>
+          <th scope="col">Opening Stock</th>
+          <th scope="col">Opening Amount</th>
+          <th scope="col">Closing Stock</th>
+          <th scope="col">Closing Amount</th>
           <th scope="col">Actions</th> 
       </thead>
       <tbody>
@@ -24,8 +29,10 @@
             <td *ngIf="parent_item_id">{{inv_item.item.name}}</td>
             <td>{{inv_item.item.grade}}</td>
             <td>{{inv_item.item.size}}</td>
-            <td>{{inv_item.quantity.value}} {{quantityUnitToLabelMapping[inv_item.quantity.unit]}}</td>
-            <td>Rs. {{inv_item.amount}}</td>
+            <td>{{inv_item.opening_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.opening_stock.unit]}}</td>
+            <td>Rs. {{inv_item.opening_amount | number:'1.2-2'}}</td>
+            <td>{{inv_item.closing_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.closing_stock.unit]}}</td>
+            <td>Rs. {{inv_item.closing_amount | number:'1.2-2'}}</td>
             <td class="actions">
               <div class="btn-group" dropdown>
                 <button id="button-split" type="button" dropdownToggle class="btn"

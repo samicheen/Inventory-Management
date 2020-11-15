@@ -5,7 +5,7 @@ import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
 import { Response } from '../../models/response.model';
 import { BehaviorSubject } from 'rxjs';
 import { Purchase } from 'src/app/models/purchase.model';
-import { PurchaseService } from '../../services/purchase.service';
+import { PurchaseService } from '../../services/purchase/purchase.service';
 import { Item } from 'src/app/models/item.model';
 
 @Component({

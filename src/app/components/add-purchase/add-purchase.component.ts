@@ -1,13 +1,13 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from  '@angular/forms';
-import { Inventory } from 'src/app/models/inventory.model';
+import { FormBuilder, FormGroup, Validators, FormControl, ControlContainer } from  '@angular/forms';
+import { InventoryItem } from 'src/app/models/inventory-item.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { Subject } from 'rxjs';
 import { Purchase } from 'src/app/models/purchase.model';
 import { Item } from 'src/app/models/item.model';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
-import { ItemService } from 'src/app/services/item.service';
+import { ItemService } from 'src/app/services/item/item.service';
 
 @Component({
   selector: 'app-add-purchase',
@@ -20,7 +20,7 @@ export class AddPurchaseComponent implements OnInit {
   selectedItemId: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
-  savePurchase: Subject<Inventory>;
+  savePurchase: Subject<InventoryItem>;
   saveAndPrintPurchases: Subject<Purchase>;
   selectedVal: any;
   constructor(private formBuilder: FormBuilder,
@@ -56,12 +56,10 @@ export class AddPurchaseComponent implements OnInit {
       }),
       selected_item: ['', Validators. required],
       quantity: this.formBuilder.group({
-        value: ['', [Validators.required,
-                    Validators.pattern(/^[0-9]*$/)]],
+        value: ['', Validators.required],
         unit: QuantityUnit.KG
       }),
-      rate: ['', [Validators.required,
-                 Validators.pattern(/^\d+\.\d{2}$/)]],
+      rate: ['', Validators.required],
       timestamp: [new Date()]
     });
   }
@@ -69,6 +67,9 @@ export class AddPurchaseComponent implements OnInit {
   onSelect(event: TypeaheadMatch): void {
     const item = event.item;
     this.selectedItemId = item.item_id;
+    this.addPurchaseForm.patchValue({
+      selected_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size
+    })
   }
 
   nextItem() {

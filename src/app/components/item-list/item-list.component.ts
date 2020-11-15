@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Item } from '../../models/item.model';
-import { ItemService } from 'src/app/services/item.service';
+import { ItemService } from 'src/app/services/item/item.service';
 import { BehaviorSubject } from 'rxjs';
 import { BsModalService } from 'ngx-bootstrap';
-import { AddSubItemComponent } from '../add-sub-item/add-sub-item.component';
 import { Response } from '../../models/response.model'
 import { AddItemComponent } from '../add-item/add-item.component';
 

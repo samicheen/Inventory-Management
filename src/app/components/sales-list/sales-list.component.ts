@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Sale } from 'src/app/models/sale.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
-import { SalesService } from 'src/app/services/sales.service';
+import { SalesService } from 'src/app/services/sales/sales.service';
 import { Response } from '../../models/response.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { SellItemComponent } from '../sell-item/sell-item.component';

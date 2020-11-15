@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { InventoryService } from 'src/app/services/inventory.service';
+import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from 'src/app/models/response.model';
 import { BehaviorSubject } from 'rxjs';
 import { Item } from 'src/app/models/item.model';
-import { ManufactureService } from 'src/app/services/manufacture.service';
+import { ManufactureService } from 'src/app/services/manufacture/manufacture.service';
 import { Manufacture } from 'src/app/models/manufacture.model';
-import { AddSubItemComponent } from '../add-sub-item/add-sub-item.component';
+import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-item.component';
 
 @Component({
   selector: 'app-manufacturing-list',
@@ -43,9 +43,9 @@ export class ManufacturingListComponent implements OnInit {
     const initialState = {
       parentItem: item
     };
-    let addSubItemModalRef = this.modalService.show(AddSubItemComponent, { initialState, backdrop: 'static', keyboard: false });
-    addSubItemModalRef.content.saveAndPrintSubItems.subscribe(item => {
-      this.inventoryService.addSubItemInventory(item).subscribe(() => {
+    let addSubItemModalRef = this.modalService.show(AddInventoryItemComponent, { initialState, backdrop: 'static', keyboard: false });
+    addSubItemModalRef.content.saveAndPrintInventoryItems.subscribe(item => {
+      this.inventoryService.addInventoryItem(item).subscribe(() => {
         this.refreshItems.next(undefined);
       });
     });

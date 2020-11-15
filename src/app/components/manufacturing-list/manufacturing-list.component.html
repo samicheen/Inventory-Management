@@ -5,6 +5,7 @@
           <th scope="col">Item Name</th>
           <th scope="col">Grade</th>
           <th scope="col">Size</th>
+          <th scope="col">Booked Quantity</th>
           <th scope="col">Quantity</th>
           <th scope="col">Actions</th> 
       </thead>
@@ -14,6 +15,7 @@
             <td>{{manufacture.item.name}}</td>
             <td>{{manufacture.item.grade}}</td>
             <td>{{manufacture.item.size}}</td>
+            <td>{{manufacture.booked_quantity.value}} {{quantityUnitToLabelMapping[manufacture.booked_quantity.unit]}}</td>
             <td>{{manufacture.quantity.value}} {{quantityUnitToLabelMapping[manufacture.quantity.unit]}}</td>
             <td class="actions">
               <div class="btn-group" dropdown>

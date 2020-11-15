@@ -1,6 +1,6 @@
 <div class="container-fluid">
   <div class="flex-container">
-    <div class="total">Total purchase amount: Rs. {{total_amount}}</div>
+    <div class="total">Total purchase amount: Rs. {{total_amount | number:'1.2-2'}}</div>
     <button type="button"
             class="btn btn-primary add-purchase-btn"
             (click)=addPurchase()>
@@ -28,9 +28,9 @@
             <td>{{purchase.item.name}}</td>
             <td>{{purchase.item.grade}}</td>
             <td>{{purchase.item.size}}</td>
-            <td>{{purchase.quantity.value}} {{quantityUnitToLabelMapping[purchase.quantity.unit]}}</td>
-            <td>{{purchase.rate}}</td> 
-            <td>Rs. {{purchase.amount}}</td>
+            <td>{{purchase.quantity.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[purchase.quantity.unit]}}</td>
+            <td>{{purchase.rate | number:'1.2-2'}}</td> 
+            <td>Rs. {{purchase.amount | number:'1.2-2'}}</td>
             <td class="actions">
               <div class="btn-group" dropdown>
                 <button id="button-split" type="button" dropdownToggle class="btn"

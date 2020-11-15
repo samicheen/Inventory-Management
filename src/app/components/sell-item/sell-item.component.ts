@@ -4,7 +4,7 @@ import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms'
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { Subject } from 'rxjs';
 import { Item } from 'src/app/models/item.model';
-import { ItemService } from 'src/app/services/item.service';
+import { ItemService } from 'src/app/services/item/item.service';
 
 @Component({
   selector: 'app-sell-item',
@@ -51,12 +51,11 @@ export class SellItemComponent implements OnInit {
       }),
       selected_item: [this.item? this.item.name + ' Grade: ' + this.item.grade + ' Size: ' + this.item.size : '', Validators. required],
       quantity: this.formBuilder.group({
-        value: ['', [Validators.required,
-                    Validators.pattern(/^[0-9]*$/)]],
+        value: ['', Validators.required],
         unit: QuantityUnit.KG
       }),
-      selling_price:  ['', [Validators.required,
-        Validators.pattern(/^\d+\.\d{2}$/)]]
+      selling_price:  ['', Validators.required],
+      timestamp: [new Date()]
     });
   }
 

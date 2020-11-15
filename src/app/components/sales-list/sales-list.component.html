@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <div class="flex-container">
-        <div class="total">Total sales amount: Rs. {{total_amount}}</div>
+        <div class="total">Total sales amount: Rs. {{total_amount | number:'1.2-2'}}</div>
         <button type="button"
                 class="btn btn-primary add-sales-btn"
                 (click)=addSales()>
@@ -25,9 +25,9 @@
               <td>{{sale.item.grade}}</td>
               <td>{{sale.item.size}}</td>
               <td>{{sale.customer.name}}</td>
-              <td>{{sale.quantity.value}} {{quantityUnitToLabelMapping[sale.quantity.unit]}}</td>
-              <td>{{sale.selling_price}}</td>
-              <td>Rs. {{sale.amount}}</td>
+              <td>{{sale.quantity.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[sale.quantity.unit]}}</td>
+              <td>{{sale.selling_price | number:'1.2-2'}}</td>
+              <td>Rs. {{sale.amount | number:'1.2-2'}}</td>
           </tr>
         </tbody>
     </table>

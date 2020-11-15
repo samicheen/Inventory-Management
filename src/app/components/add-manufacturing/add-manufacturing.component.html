@@ -1,14 +1,21 @@
 <app-modal [modalRef]="modalRef" 
             title="Add Manufacturing">
     <form [formGroup]="addManufacturingForm">
+        <div class="form-group">
+            <label for="timestamp">Date</label>
+            <input type="text"
+                class="form-control"
+                bsDatepicker
+                formControlName="timestamp"
+                [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY', containerClass: 'theme-dark-blue' }" />
+        </div>
         <div class="form-group" formGroupName="quantity">
             <label for="value">Quantity</label>
             <div class="input-group">
-                <input type="text"
+                <input appDecimalNumber type="text"
                     class="form-control"
                     id="value"
-                    formControlName="value"
-                    placeholder="100">
+                    formControlName="value">
                 <div class="input-group-append">
                     <select class="custom-select" formControlName="unit">
                         <option *ngFor="let unit of unitValues"
@@ -20,9 +27,6 @@
             </div>
             <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
                 <div>Quantity is required.</div>
-            </div>
-            <div *ngIf="value.touched && value.errors?.pattern" class="alert alert-danger">
-                <div>Quantity should be in correct format</div>
             </div>
         </div>
         <div class="form-group">

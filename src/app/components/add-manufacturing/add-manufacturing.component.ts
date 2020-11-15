@@ -29,10 +29,10 @@ export class AddManufacturingComponent implements OnInit {
     this.addToManufacturing = new Subject();
     this.addManufacturingForm  =  this.formBuilder.group({
       quantity: this.formBuilder.group({
-        value: ['', [Validators.required,
-                    Validators.pattern(/^[0-9]*$/)]],
+        value: ['', Validators.required],
         unit: QuantityUnit.KG
-      })
+      }),
+      timestamp: [new Date()]
     });
   }
 

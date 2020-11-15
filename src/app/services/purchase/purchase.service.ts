@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Response } from '../models/response.model';
+import { Response } from '../../models/response.model';
 import { Observable } from 'rxjs';
-import { AddItemResponse } from '../models/add-item-response.model';
-import { Purchase } from '../models/purchase.model';
+import { AddItemResponse } from '../../models/add-item-response.model';
+import { Purchase } from '../../models/purchase.model';
 import { map } from 'rxjs/operators';
 
 const ENVIRONMENT = "environment";

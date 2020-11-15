@@ -7,6 +7,7 @@ import { EmailComponent } from './components/email/email.component';
 import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
 import { ManufacturingListComponent } from './components/manufacturing-list/manufacturing-list.component';
 import { ItemListComponent } from './components/item-list/item-list.component';
+import { SummaryComponent } from './components/summary/summary.component';
 
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent },
   { path: 'manufacture', component: ManufacturingListComponent },
   { path: 'sales', component: SalesListComponent },
+  { path: 'summary', component: SummaryComponent },
   { path: 'email', component: EmailComponent },
   { path: '',
     redirectTo: '/purchase',

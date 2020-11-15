@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { InventoryService } from 'src/app/services/inventory.service';
-import { Inventory } from 'src/app/models/inventory.model';
+import { InventoryService } from 'src/app/services/inventory/inventory.service';
+import { InventoryItem } from 'src/app/models/inventory-item.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from 'src/app/models/response.model';
@@ -8,10 +8,10 @@ import { BehaviorSubject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Item } from 'src/app/models/item.model';
 import { SellItemComponent } from '../sell-item/sell-item.component';
-import { SalesService } from 'src/app/services/sales.service';
+import { SalesService } from 'src/app/services/sales/sales.service';
 import { AddManufacturingComponent } from '../add-manufacturing/add-manufacturing.component';
-import { ManufactureService } from 'src/app/services/manufacture.service';
-import { AddSubItemComponent } from '../add-sub-item/add-sub-item.component';
+import { ManufactureService } from 'src/app/services/manufacture/manufacture.service';
+import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-item.component';
 
 @Component({
   selector: 'app-inventory-list',
@@ -19,8 +19,8 @@ import { AddSubItemComponent } from '../add-sub-item/add-sub-item.component';
   styleUrls: ['./inventory-list.component.scss']
 })
 export class InventoryListComponent implements OnInit {
-  inventory : Inventory[];
-  total_amount: string;
+  inventory : InventoryItem[];
+  total: any;
   parent_item_id: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
@@ -43,16 +43,18 @@ export class InventoryListComponent implements OnInit {
 
   getInventory(){
     this.inventoryService.getInventory(this.parent_item_id)
-    .subscribe((response: Response<Inventory>) => {
+    .subscribe((response: Response<InventoryItem>) => {
       this.inventory = response.items;
-      this.total_amount = response.total_amount;
+      this.total = response.total;
     });
   }
 
   addItem() {
-    let addSubItemModalRef = this.modalService.show(AddSubItemComponent, { backdrop: 'static', keyboard: false });
-    addSubItemModalRef.content.saveAndPrintSubItems.subscribe(item => {
-      this.inventoryService.addSubItemInventory(item).subscribe(() => {
+    let addInventoryItemModalRef = this.modalService.show(AddInventoryItemComponent, { backdrop: 'static', keyboard: false });
+    addInventoryItemModalRef.content.saveAndPrintInventoryItems.subscribe(item => {
+      item.opening_stock = item.closing_stock;
+      item.opening_amount = item.closing_amount;
+      this.inventoryService.addInventoryItem(item).subscribe(() => {
         this.refreshItems.next(undefined);
       });
     });
