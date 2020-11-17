@@ -19,9 +19,9 @@ import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-i
   styleUrls: ['./inventory-list.component.scss']
 })
 export class InventoryListComponent implements OnInit {
-  inventory : InventoryItem[];
+  inventory: InventoryItem[];
+  inventoryParameters: Map<string, any> = new Map();
   total: any;
-  parent_item_id: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
   
@@ -30,11 +30,11 @@ export class InventoryListComponent implements OnInit {
     private salesService: SalesService,
     private manufactureService: ManufactureService,
     private modalService: BsModalService,
-    private route: ActivatedRoute
+    public route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    this.parent_item_id = this.route.snapshot.params.item_id;
+    this.inventoryParameters.set('parent_item_id', this.route.snapshot.params.item_id);
     this.getInventory();
     this.refreshItems.subscribe(() => {
       this.getInventory();
@@ -42,7 +42,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   getInventory(){
-    this.inventoryService.getInventory(this.parent_item_id)
+    this.inventoryService.getInventory(this.inventoryParameters)
     .subscribe((response: Response<InventoryItem>) => {
       this.inventory = response.items;
       this.total = response.total;
@@ -82,5 +82,10 @@ export class InventoryListComponent implements OnInit {
         this.refreshItems.next(undefined);
       });
     });
+  }
+
+  onSelect(data) {
+    this.inventoryParameters.set('retrieve_sub_items', data.heading === 'Sub Items' ? 1 : 0);
+    this.getInventory();
   }
 }

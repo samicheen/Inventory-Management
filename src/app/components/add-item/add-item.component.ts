@@ -27,6 +27,10 @@ export class AddItemComponent implements OnInit {
     return this.addItemForm.get('item.grade') as FormControl;
   }
 
+  get isSubItem(): FormControl {
+    return this.addItemForm.get('item.is_sub_item') as FormControl;
+  }
+
   ngOnInit(): void {
     this.saveItem = new Subject();
     this.addItemForm  =  this.formBuilder.group({
@@ -34,15 +38,16 @@ export class AddItemComponent implements OnInit {
         name: ['', Validators.required],
         size: ['', [Validators.required,
           Validators.pattern(/^\d+\.\d{1}$/)]],
-        grade: ['', Validators.required]
+        grade: ['', Validators.required],
+        is_sub_item: [false]
       })
     });
   }
 
   addItem() {
     if(this.addItemForm.valid) {
-       this.saveItem.next(this.addItemForm.value);
-       this.modalRef.hide();
+      this.saveItem.next(this.addItemForm.value);
+      this.modalRef.hide();
     } else {
       this.addItemForm.markAllAsTouched();
     }

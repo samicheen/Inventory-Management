@@ -46,6 +46,7 @@ export class SellItemComponent implements OnInit {
     });
     this.sell = new Subject();
     this.sellItemForm  =  this.formBuilder.group({
+      invoice_id: '',
       customer: this.formBuilder.group({ 
         name: ['', Validators.required]
       }),

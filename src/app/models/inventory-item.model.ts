@@ -4,6 +4,7 @@ import { Quantity } from './quantity.model';
 export interface InventoryItem {
     inventory_id?: string;
     item: Item;
+    initial_stock?: Quantity;
     opening_stock?: Quantity;
     closing_stock: Quantity;
     opening_amount?: string;

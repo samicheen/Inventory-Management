@@ -35,6 +35,13 @@
                 <div>Grade is required.</div>
             </div>
         </div>
+        <div class="form-group item_type" formGroupName="item">
+            <label for="is_sub_item">Is Sub Item?</label>
+            <input type="checkbox"
+                class="sub_item_check"
+                id="is_sub_item"
+                formControlName="is_sub_item">
+        </div>
         <div class="form-group">
             <button class="btn btn-primary btn-block"
                     (click)="addItem()">Add item</button> 

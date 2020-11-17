@@ -10,6 +10,7 @@
     <table class="table">
         <thead>
             <th scope="col">Date</th>
+            <th scope="col">Invoice Id</th>
             <th scope="col">Item Name</th>
             <th scope="col">Grade</th>
             <th scope="col">Size</th>
@@ -21,6 +22,7 @@
         <tbody>
           <tr *ngFor="let sale of sales">
               <td>{{sale.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
+              <td>{{sale.invoice_id}}</td> 
               <td>{{sale.item.name}}</td>
               <td>{{sale.item.grade}}</td>
               <td>{{sale.item.size}}</td>

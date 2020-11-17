@@ -18,6 +18,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { AddPurchaseComponent } from './components/add-purchase/add-purchase.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { AddInventoryItemComponent } from './components/add-inventory-item/add-inventory-item.component';
@@ -72,7 +73,8 @@ export function initGapi(gapiSession: GapiSession) {
     CollapseModule.forRoot(),
     ModalModule.forRoot(),
     BsDatepickerModule.forRoot(),
-    TypeaheadModule.forRoot()
+    TypeaheadModule.forRoot(),
+    TabsModule.forRoot()
   ],
   providers: [
     { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },

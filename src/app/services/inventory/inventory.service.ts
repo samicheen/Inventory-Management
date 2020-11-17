@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { InventoryItem } from '../../models/inventory-item.model';
 import { Response } from '../../models/response.model';
 import { Observable } from 'rxjs';
@@ -24,9 +24,12 @@ export class InventoryService {
   /**
    * Get inventory
    */
-  getInventory(parent_item_id): Observable<Response<InventoryItem>> {
-    const item_id_str = parent_item_id ? `?parent_item_id=${parent_item_id}` : '';
-    return this.http.get(`${this.baseUrl}/api/inventory/getInventory.php${item_id_str}`)
+  getInventory(inventoryParameters: Map<string, any>): Observable<Response<InventoryItem>> {
+    let params = new HttpParams();
+    inventoryParameters.forEach((value: any, key: string) => {
+      params = value ? params.append(key, value): params;
+    });
+    return this.http.get(`${this.baseUrl}/api/inventory/getInventory.php`, { params: params })
     .pipe(map((res: any) => {
       return {
         items: res.inventory,
