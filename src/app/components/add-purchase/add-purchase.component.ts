@@ -1,13 +1,15 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ControlContainer } from  '@angular/forms';
-import { InventoryItem } from 'src/app/models/inventory-item.model';
+import { InventoryItem } from '../../models/inventory-item.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { Subject } from 'rxjs';
-import { Purchase } from 'src/app/models/purchase.model';
-import { Item } from 'src/app/models/item.model';
+import { Purchase } from '../../models/purchase.model';
+import { Item } from '../../models/item.model';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
-import { ItemService } from 'src/app/services/item/item.service';
+import { ItemService } from '../../services/item/item.service';
+import { PartyService } from '../../services/party/party.service';
+import { Party } from '../../models/party.model';
 
 @Component({
   selector: 'app-add-purchase',
@@ -15,9 +17,11 @@ import { ItemService } from 'src/app/services/item/item.service';
   styleUrls: ['./add-purchase.component.scss']
 })
 export class AddPurchaseComponent implements OnInit {
+  parties: Party[];
   items: Item[];
   addPurchaseForm: FormGroup;
   selectedItemId: string;
+  selectedVendorId: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
   savePurchase: Subject<InventoryItem>;
@@ -25,10 +29,11 @@ export class AddPurchaseComponent implements OnInit {
   selectedVal: any;
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef,
+              private partyService: PartyService,
               private itemService: ItemService) { }
 
-  get vendor(): FormControl {
-    return this.addPurchaseForm.get('vendor.name') as FormControl;
+  get selectedVendor(): FormControl {
+    return this.addPurchaseForm.get('selected_vendor') as FormControl;
   }
 
   get selectedItem(): FormControl {
@@ -44,6 +49,9 @@ export class AddPurchaseComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.partyService.getParties('vendor').subscribe((response) => {
+      this.parties = response.items;
+    });
     this.itemService.getItems().subscribe((response) => {
       this.items = response.items;
     });
@@ -51,9 +59,7 @@ export class AddPurchaseComponent implements OnInit {
     this.saveAndPrintPurchases = new Subject();
     this.addPurchaseForm  =  this.formBuilder.group({
       invoice_id: '',
-      vendor: this.formBuilder.group({
-        name: ['', Validators.required]
-      }),
+      selected_vendor: ['', Validators.required],
       selected_item: ['', Validators. required],
       quantity: this.formBuilder.group({
         value: ['', Validators.required],
@@ -64,12 +70,16 @@ export class AddPurchaseComponent implements OnInit {
     });
   }
 
-  onSelect(event: TypeaheadMatch): void {
+  onSelectItem(event: TypeaheadMatch): void {
     const item = event.item;
     this.selectedItemId = item.item_id;
     this.addPurchaseForm.patchValue({
       selected_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size
     })
+  }
+
+  onSelectVendor(event: TypeaheadMatch): void {
+    this.selectedVendorId = event.item.party_id;
   }
 
   nextItem() {
@@ -84,9 +94,8 @@ export class AddPurchaseComponent implements OnInit {
     if(this.addPurchaseForm.valid) {
        const purchase = {
          ...this.addPurchaseForm.value,
-         item: {
-          item_id: this.selectedItemId
-         },
+         vendor_id: this.selectedVendorId,
+         item_id: this.selectedItemId,
          amount: (this.addPurchaseForm.value.quantity.value * this.addPurchaseForm.value.rate).toFixed(2)
        }
        this.saveAndPrintPurchases.next(purchase);

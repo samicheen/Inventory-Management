@@ -16,31 +16,29 @@ export class AddItemComponent implements OnInit {
               public modalRef: BsModalRef) { }
 
   get name(): FormControl {
-    return this.addItemForm.get('item.name') as FormControl;
+    return this.addItemForm.get('name') as FormControl;
   }
 
   get size(): FormControl {
-    return this.addItemForm.get('item.size') as FormControl;
+    return this.addItemForm.get('size') as FormControl;
   }
 
   get grade(): FormControl {
-    return this.addItemForm.get('item.grade') as FormControl;
+    return this.addItemForm.get('grade') as FormControl;
   }
 
   get isSubItem(): FormControl {
-    return this.addItemForm.get('item.is_sub_item') as FormControl;
+    return this.addItemForm.get('is_sub_item') as FormControl;
   }
 
   ngOnInit(): void {
     this.saveItem = new Subject();
     this.addItemForm  =  this.formBuilder.group({
-      item: this.formBuilder.group({
         name: ['', Validators.required],
         size: ['', [Validators.required,
           Validators.pattern(/^\d+\.\d{1}$/)]],
         grade: ['', Validators.required],
         is_sub_item: [false]
-      })
     });
   }
 

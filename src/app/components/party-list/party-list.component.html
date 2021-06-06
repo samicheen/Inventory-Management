@@ -1,0 +1,20 @@
+
+<div class="container-fluid">
+    <div class="flex-container">
+        <button type="button"
+        class="btn btn-primary add-party-btn"
+                    (click)=addParty()>
+            {{button_value}}
+        </button>
+    </div>
+    <table class="table">
+        <thead>
+            <th scope="col">Name</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let party of parties">
+                <td>{{party.name}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

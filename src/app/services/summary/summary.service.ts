@@ -12,20 +12,20 @@ const ENVIRONMENT = "environment";
 })
 export class SummaryService {
 
-  baseUrl: string;
+  apiUrl: string;
   items: Response<SummaryItem>;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
    * Get summary
    */
   getSummary(): Observable<Response<SummaryItem>> {
-    return this.http.get(`${this.baseUrl}/api/summary/getSummary.php`)
+    return this.http.get(`${this.apiUrl}/api/summary/getSummary.php`)
     .pipe(map((res: any) => {
       return {
         items: res.summary,

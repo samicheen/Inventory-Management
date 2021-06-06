@@ -7,7 +7,7 @@ export class GapiSession {
     constructor() {}
 
     initClient() {
-        return new Promise((resolve,reject)=>{
+        return new Promise<void>((resolve,reject)=>{
             gapi.load('client:auth2', () => {
                 return gapi.client.init({
                     clientId: '530178514460-kcmvg8a8ptos15olpjmtmdturvrrg0bm.apps.googleusercontent.com',

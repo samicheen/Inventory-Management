@@ -3,7 +3,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { PathLocationStrategy, LocationStrategy, APP_BASE_HREF } from '@angular/common';
 import { environment } from '../environments/environment';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
-import { FormControlDirective, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -33,6 +33,10 @@ import { AddItemComponent } from './components/add-item/add-item.component';
 import { ItemListComponent } from './components/item-list/item-list.component';
 import { SummaryComponent } from './components/summary/summary.component';
 import { DecimalNumberDirective } from './directives/decimal-number.directive';
+import { AddPartyComponent } from './components/add-party/add-party.component';
+import { PartyListComponent } from './components/party-list/party-list.component';
+import { AuthModule } from '@auth0/auth0-angular';
+import { LoadingComponent } from './components/loading/loading.component';
 
 const ENVIRONMENT = "environment";
 
@@ -58,7 +62,10 @@ export function initGapi(gapiSession: GapiSession) {
     AddItemComponent,
     ItemListComponent,
     SummaryComponent,
-    DecimalNumberDirective
+    DecimalNumberDirective,
+    AddPartyComponent,
+    PartyListComponent,
+    LoadingComponent
   ],
   imports: [
     BrowserModule,
@@ -74,7 +81,12 @@ export function initGapi(gapiSession: GapiSession) {
     ModalModule.forRoot(),
     BsDatepickerModule.forRoot(),
     TypeaheadModule.forRoot(),
-    TabsModule.forRoot()
+    TabsModule.forRoot(),
+    AuthModule.forRoot({
+      domain: 'vinayakashot.us.auth0.com',
+      clientId: '50fgJifDAG98Mak73bNJamStUK4gfpA9',
+      redirectUri: environment.baseUrl + environment.baseUri 
+    })
   ],
   providers: [
     { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
@@ -88,13 +100,14 @@ export function initGapi(gapiSession: GapiSession) {
       provide: LocationStrategy,
       useClass: PathLocationStrategy
     },
-    {provide: APP_BASE_HREF, useValue: '/inventory-management'}
+    {provide: APP_BASE_HREF, useValue: environment.baseUri}
   ],
   entryComponents: [AddPurchaseComponent,
                     AddInventoryItemComponent,
                     SellItemComponent,
                     AddManufacturingComponent,
-                    AddItemComponent],
+                    AddItemComponent,
+                    AddPartyComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

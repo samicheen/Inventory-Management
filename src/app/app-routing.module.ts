@@ -8,18 +8,22 @@ import { PurchaseListComponent } from './components/purchase-list/purchase-list.
 import { ManufacturingListComponent } from './components/manufacturing-list/manufacturing-list.component';
 import { ItemListComponent } from './components/item-list/item-list.component';
 import { SummaryComponent } from './components/summary/summary.component';
+import { PartyListComponent } from './components/party-list/party-list.component';
+import { AuthGuard } from '@auth0/auth0-angular';
 
 
 const routes: Routes = [
-  { path: 'item', component: ItemListComponent }, 
-  { path: 'purchase', component: PurchaseListComponent },
-  { path: 'inventory', component: InventoryListComponent },
-  { path: 'inventory/:item_id', component: InventoryListComponent }, 
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'manufacture', component: ManufacturingListComponent },
-  { path: 'sales', component: SalesListComponent },
-  { path: 'summary', component: SummaryComponent },
-  { path: 'email', component: EmailComponent },
+  { path: 'item', component: ItemListComponent, canActivate: [AuthGuard] },
+  { path: 'vendor', component: PartyListComponent, canActivate: [AuthGuard] },
+  { path: 'customer', component: PartyListComponent, canActivate: [AuthGuard] },
+  { path: 'purchase', component: PurchaseListComponent, canActivate: [AuthGuard] },
+  { path: 'inventory', component: InventoryListComponent, canActivate: [AuthGuard] },
+  { path: 'inventory/:item_id', component: InventoryListComponent, canActivate: [AuthGuard] }, 
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'manufacture', component: ManufacturingListComponent, canActivate: [AuthGuard] },
+  { path: 'sales', component: SalesListComponent, canActivate: [AuthGuard] },
+  { path: 'summary', component: SummaryComponent, canActivate: [AuthGuard] },
+  { path: 'email', component: EmailComponent, canActivate: [AuthGuard] },
   { path: '',
     redirectTo: '/purchase',
     pathMatch: 'full'

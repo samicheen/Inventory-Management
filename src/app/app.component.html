@@ -1,2 +1,8 @@
-<app-header></app-header>
-<router-outlet></router-outlet>
+<div class="container" *ngIf="isLoading; else loaded">
+    <app-loading></app-loading>
+</div>
+  
+<ng-template #loaded>
+    <app-header></app-header>
+    <router-outlet></router-outlet>
+</ng-template>

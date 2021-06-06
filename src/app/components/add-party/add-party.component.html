@@ -1,0 +1,19 @@
+<app-modal [modalRef]="modalRef" 
+            [title]=title>
+    <form [formGroup]="addPartyForm">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text"
+                    class="form-control"
+                    id="name"
+                    formControlName="name">
+            <div *ngIf="name.touched && name.errors?.required" class="alert alert-danger">
+                <div>Name is required.</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary btn-block"
+                    (click)="addParty()">{{title}}</button> 
+        </div>
+    </form>
+</app-modal>

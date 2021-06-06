@@ -1,7 +1,7 @@
 <app-modal [modalRef]="modalRef" 
             title="Add Item">
     <form [formGroup]="addItemForm">
-        <div class="form-group" formGroupName="item">
+        <div class="form-group">
             <label for="name">Name</label>
             <input type="text"
                     class="form-control"
@@ -11,7 +11,7 @@
                 <div>Name is required.</div>
             </div>
         </div>
-        <div class="form-group" formGroupName="item">
+        <div class="form-group">
             <label for="size">Size</label>
             <input type="text"
                     class="form-control"
@@ -25,7 +25,7 @@
                 <div>Size should be in correct format</div>
             </div>
         </div>
-        <div class="form-group" formGroupName="item">
+        <div class="form-group">
             <label for="grade">Grade</label>
             <input type="text"
                 class="form-control"
@@ -35,7 +35,7 @@
                 <div>Grade is required.</div>
             </div>
         </div>
-        <div class="form-group item_type" formGroupName="item">
+        <div class="form-group item_type">
             <label for="is_sub_item">Is Sub Item?</label>
             <input type="checkbox"
                 class="sub_item_check"

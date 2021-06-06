@@ -12,19 +12,19 @@ const ENVIRONMENT = "environment";
   providedIn: 'root'
 })
 export class PurchaseService {
-  baseUrl: string;
+  apiUrl: string;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
    * Get purchases
    */
   getPurchases(): Observable<Response<Purchase>> {
-    return this.http.get<Response<Purchase>>(`${this.baseUrl}/api/purchase/getPurchases.php`)
+    return this.http.get<Response<Purchase>>(`${this.apiUrl}/api/purchase/getPurchases.php`)
     .pipe(map((res: any) => {
       return {
         items: res.purchases,
@@ -39,7 +39,7 @@ export class PurchaseService {
    * @param purchase Purchase to add
    */
   addPurchase(purchase: Purchase): Observable<AddItemResponse> {
-    return this.http.post<AddItemResponse>(`${this.baseUrl}/api/purchase/addPurchase.php`, purchase);
+    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/purchase/addPurchase.php`, purchase);
   }
 
   /**
@@ -47,7 +47,7 @@ export class PurchaseService {
    * @param item Item to update
    */
   // updateItem(item: Item) {
-  //   return this.http.post(`${this.baseUrl}/api/inventory/updateItem.php`, item);
+  //   return this.http.post(`${this.apiUrl}/api/inventory/updateItem.php`, item);
   // }
 
   /**
@@ -55,6 +55,6 @@ export class PurchaseService {
    * @param itemNumber Item to remove
    */
   removeItem(itemNumber) {
-    return this.http.delete(`${this.baseUrl}/api/inventory/removeItem.php?itemNumber=${itemNumber}`);
+    return this.http.delete(`${this.apiUrl}/api/inventory/removeItem.php?itemNumber=${itemNumber}`);
   }
 }

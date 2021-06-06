@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  baseUrl: 'http://vinayakashot.net'
+  baseUrl: 'https://vinayakashot.net',
+  baseUri: '/inventory-management',
+  apiUrl: 'https://vinayakashot.net'
 };

@@ -13,19 +13,19 @@ const ENVIRONMENT = "environment";
 })
 export class ManufactureService {
 
-  baseUrl: string;
+  apiUrl: string;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
    * Get items in Manufacturing
    */
   getManufacturingItems(): Observable<Response<Manufacture>> {
-    return this.http.get<Response<Manufacture>>(`${this.baseUrl}/api/manufacture/getManufacturingItems.php`)
+    return this.http.get<Response<Manufacture>>(`${this.apiUrl}/api/manufacture/getManufacturingItems.php`)
     .pipe(map((res: any) => {
       return {
         items: res.manufactures,
@@ -39,6 +39,6 @@ export class ManufactureService {
    * @param sale 
    */
   addToManufacturing(manufacture: Manufacture): Observable<AddItemResponse> {
-    return this.http.post<AddItemResponse>(`${this.baseUrl}/api/manufacture/addToManufacturing.php`, manufacture);
+    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/manufacture/addToManufacturing.php`, manufacture);
   }
 }

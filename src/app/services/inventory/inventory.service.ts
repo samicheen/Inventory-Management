@@ -12,13 +12,13 @@ const ENVIRONMENT = "environment";
   providedIn: 'root'
 })
 export class InventoryService {
-  baseUrl: string;
+  apiUrl: string;
   items: Response<InventoryItem>;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
@@ -29,7 +29,7 @@ export class InventoryService {
     inventoryParameters.forEach((value: any, key: string) => {
       params = value ? params.append(key, value): params;
     });
-    return this.http.get(`${this.baseUrl}/api/inventory/getInventory.php`, { params: params })
+    return this.http.get(`${this.apiUrl}/api/inventory/getInventory.php`, { params: params })
     .pipe(map((res: any) => {
       return {
         items: res.inventory,
@@ -44,6 +44,6 @@ export class InventoryService {
    * @param item Item to add
    */
    addInventoryItem(item: InventoryItem): Observable<AddItemResponse> {
-     return this.http.post<AddItemResponse>(`${this.baseUrl}/api/inventory/addInventoryItem.php`, item);
+     return this.http.post<AddItemResponse>(`${this.apiUrl}/api/inventory/addInventoryItem.php`, item);
    }
 }

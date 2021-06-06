@@ -18,13 +18,17 @@
                     [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY', containerClass: 'theme-dark-blue' }" />
             </div>
         </div>
-        <div class="form-group" formGroupName="customer">
+        <div class="form-group">
             <label for="party_name">Party Name</label>
             <input type="text"
                    class="form-control"
-                   id="party_name"
-                   formControlName="name">
-            <div *ngIf="party_name.touched && party_name.errors?.required" class="alert alert-danger">
+                   id="vendor"
+                   [typeahead]="parties"
+                   typeaheadOptionField="name"
+                   (typeaheadOnSelect)="onSelectCustomer($event)"
+                   [typeaheadScrollable]="true"
+                   formControlName="selected_customer">
+            <div *ngIf="selectedCustomer.touched && selectedCustomer.errors?.required" class="alert alert-danger">
                 <div>Party name is required.</div>
             </div>
         </div>
@@ -38,7 +42,7 @@
                 [typeahead]="items"
                 [typeaheadItemTemplate]="customItemTemplate"
                 typeaheadOptionField="name"
-                (typeaheadOnSelect)="onSelect($event)"
+                (typeaheadOnSelect)="onSelectItem($event)"
                 [typeaheadScrollable]="true"
                 formControlName="selected_item">
                 <ng-template #customItemTemplate let-item="item">
