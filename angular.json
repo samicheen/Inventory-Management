@@ -124,5 +124,7 @@
       }
     }
   },
-  "defaultProject": "inventory-management"
+  "cli": {
+    "analytics": false
+  }
 }
