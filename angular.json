@@ -76,18 +76,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "inventory-management:build"
+            "buildTarget": "inventory-management:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "inventory-management:build:production"
+              "buildTarget": "inventory-management:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "inventory-management:build"
+            "buildTarget": "inventory-management:build"
           }
         },
         "test": {
