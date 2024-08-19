@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Item } from '../../models/item.model';
 import { ItemService } from 'src/app/services/item/item.service';
 import { BehaviorSubject } from 'rxjs';
-import { BsModalService } from 'ngx-bootstrap';
+import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from '../../models/response.model'
 import { AddItemComponent } from '../add-item/add-item.component';
 

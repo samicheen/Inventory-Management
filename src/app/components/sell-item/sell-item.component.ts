@@ -1,9 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { BsModalRef, TypeaheadMatch } from 'ngx-bootstrap';
+import { BsModalRef } from 'ngx-bootstrap/modal';
+import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { QuantityUnit, QuantityUnitToLabelMapping } from '../../models/quantity.model';
 import { Subject } from 'rxjs';
 import { Item } from '../../models/item.model';
+import { Sale } from '../../models/sale.model';
 import { ItemService } from '../../services/item/item.service';
 import { Party } from '../../models/party.model';
 import { PartyService } from '../../services/party/party.service';
@@ -22,7 +24,7 @@ export class SellItemComponent implements OnInit {
   sellItemForm: FormGroup;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
-  sell: Subject<Item>;
+  sell: Subject<Sale>;
 
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef,
@@ -73,7 +75,7 @@ export class SellItemComponent implements OnInit {
          item_id: this.item ? this.item.item_id: this.selectedItemId,
          ...this.sellItemForm.value,
          amount: (this.sellItemForm.value.quantity.value * this.sellItemForm.value.selling_price).toFixed(2)
-       }
+       } as Sale
        this.sell.next(item);
        this.modalRef.hide();
     } else {

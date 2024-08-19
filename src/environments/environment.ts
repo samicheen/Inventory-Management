@@ -5,7 +5,7 @@ export const environment = {
   production: false,
   baseUrl: 'http://localhost:4200',
   baseUri: '',
-  apiUrl: 'http://localhost:8888',
+  apiUrl: 'https://vinayakashot.net/'
 };
 
 /*

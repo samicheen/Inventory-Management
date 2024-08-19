@@ -37,6 +37,18 @@ export class PurchaseListComponent implements OnInit {
     addItemModalRef.content.saveAndPrintPurchases.subscribe(purchase => this.saveAndPrintPurchases(purchase));
   }
 
+  editPurchase(purchase: Purchase) {
+    const initialState = {
+      purchase: purchase
+    };
+    let editItemModalRef = this.modalService.show(AddPurchaseComponent, { initialState, backdrop: 'static', keyboard: false });
+    editItemModalRef.content.saveAndPrintPurchases.subscribe((purchase:Purchase) => {
+      this.purchaseService.updatePurchase(purchase).subscribe(() => {
+        this.refreshItems.next(undefined);
+      });
+    });
+  }
+
   saveAndPrintPurchases(purchase: Purchase) {
     this.purchaseService.addPurchase(purchase).subscribe(response => {
       this.refreshItems.next(undefined);
@@ -56,11 +68,4 @@ export class PurchaseListComponent implements OnInit {
       this.total_amount = response.total_amount;
     });
   }
-
-  // updateItem(inventory: Inventory) {
-  //   this.inventoryService.updateItem(inventory).subscribe(() => {
-  //     this.refreshItems.next(undefined);
-  //   });
-  // }
-
 }

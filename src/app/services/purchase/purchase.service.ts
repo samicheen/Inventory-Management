@@ -43,12 +43,12 @@ export class PurchaseService {
   }
 
   /**
-   * Update item in the inventory
-   * @param item Item to update
+   * Update purchase
+   * @param purchase Purchase to update
    */
-  // updateItem(item: Item) {
-  //   return this.http.post(`${this.apiUrl}/api/inventory/updateItem.php`, item);
-  // }
+  updatePurchase(purchase: Purchase) {
+    return this.http.post(`${this.apiUrl}/api//updateItem.php`, purchase);
+  }
 
   /**
    * Remove item from inventory

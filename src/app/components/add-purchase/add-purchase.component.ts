@@ -17,6 +17,9 @@ import { Party } from '../../models/party.model';
   styleUrls: ['./add-purchase.component.scss']
 })
 export class AddPurchaseComponent implements OnInit {
+  @Input()
+  purchase: Purchase
+
   parties: Party[];
   items: Item[];
   addPurchaseForm: FormGroup;
@@ -58,15 +61,15 @@ export class AddPurchaseComponent implements OnInit {
     this.savePurchase = new Subject();
     this.saveAndPrintPurchases = new Subject();
     this.addPurchaseForm  =  this.formBuilder.group({
-      invoice_id: '',
-      selected_vendor: ['', Validators.required],
-      selected_item: ['', Validators. required],
+      invoice_id: this.purchase?.invoice_id || '',
+      selected_vendor: [this.purchase?.vendor || '', Validators.required],
+      selected_item: [this.purchase?.item || '', Validators. required],
       quantity: this.formBuilder.group({
-        value: ['', Validators.required],
-        unit: QuantityUnit.KG
+        value: [this.purchase?.quantity?.value || '', Validators.required],
+        unit: this.purchase?.quantity?.unit || QuantityUnit.KG
       }),
-      rate: ['', Validators.required],
-      timestamp: [new Date()]
+      rate: [this.purchase?.rate || '', Validators.required],
+      timestamp: [this.purchase?.timestamp ? new Date(this.purchase.timestamp) : new Date()]
     });
   }
 

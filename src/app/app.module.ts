@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { PathLocationStrategy, LocationStrategy, APP_BASE_HREF } from '@angular/common';
 import { environment } from '../environments/environment';
 import { NgModule, APP_INITIALIZER } from '@angular/core';
@@ -44,8 +44,7 @@ export function initGapi(gapiSession: GapiSession) {
   return () => gapiSession.initClient();
 }
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         InventoryListComponent,
         PurchaseListComponent,
@@ -67,9 +66,7 @@ export function initGapi(gapiSession: GapiSession) {
         PartyListComponent,
         LoadingComponent
     ],
-    imports: [
-        BrowserModule,
-        HttpClientModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
         FormsModule,
@@ -85,10 +82,10 @@ export function initGapi(gapiSession: GapiSession) {
         AuthModule.forRoot({
             domain: 'vinayakashot.us.auth0.com',
             clientId: '50fgJifDAG98Mak73bNJamStUK4gfpA9',
-            redirectUri: environment.baseUrl + environment.baseUri
-        })
-    ],
-    providers: [
+            authorizationParams: {
+                redirect_uri: environment.baseUrl + environment.baseUri
+            }
+        })], providers: [
         { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
         HttpClient,
         GapiSession,
@@ -100,8 +97,7 @@ export function initGapi(gapiSession: GapiSession) {
             provide: LocationStrategy,
             useClass: PathLocationStrategy
         },
-        { provide: APP_BASE_HREF, useValue: environment.baseUri }
-    ],
-    bootstrap: [AppComponent]
-})
+        { provide: APP_BASE_HREF, useValue: environment.baseUri },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule { }

@@ -40,7 +40,7 @@
                 <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
                     role="menu" aria-labelledby="button-split">
                   <li role="menuitem"><a class="dropdown-item" (click)="removeItem(purchase.purchase_id)">Remove Item</a></li>
-                  <li role="menuitem"><a class="dropdown-item">Edit Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="editPurchase(purchase)">Edit Item</a></li>
                 </ul>
               </div>
             </td>
