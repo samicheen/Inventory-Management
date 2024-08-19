@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { PartyListComponent } from './party-list.component';
 
@@ -6,7 +6,7 @@ describe('PartyListComponent', () => {
   let component: PartyListComponent;
   let fixture: ComponentFixture<PartyListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ PartyListComponent ]
     })
