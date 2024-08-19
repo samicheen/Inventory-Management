@@ -45,69 +45,63 @@ export function initGapi(gapiSession: GapiSession) {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    InventoryListComponent,
-    PurchaseListComponent,
-    DashboardComponent,
-    HeaderComponent,
-    AddPurchaseComponent,
-    ModalComponent,
-    AddInventoryItemComponent,
-    AddManufacturingComponent,
-    ManufacturingListComponent,
-    SellItemComponent,
-    SalesListComponent,
-    EmailComponent,
-    AddItemComponent,
-    ItemListComponent,
-    SummaryComponent,
-    DecimalNumberDirective,
-    AddPartyComponent,
-    PartyListComponent,
-    LoadingComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    FormsModule,
-    NgSelectModule,
-    ReactiveFormsModule,
-    BsDropdownModule.forRoot(),
-    AlertModule.forRoot(),
-    CollapseModule.forRoot(),
-    ModalModule.forRoot(),
-    BsDatepickerModule.forRoot(),
-    TypeaheadModule.forRoot(),
-    TabsModule.forRoot(),
-    AuthModule.forRoot({
-      domain: 'vinayakashot.us.auth0.com',
-      clientId: '50fgJifDAG98Mak73bNJamStUK4gfpA9',
-      redirectUri: environment.baseUrl + environment.baseUri 
-    })
-  ],
-  providers: [
-    { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
-    HttpClient,
-    GapiSession,
-    {
-      provide: ENVIRONMENT,
-      useValue: environment
-    },
-    {
-      provide: LocationStrategy,
-      useClass: PathLocationStrategy
-    },
-    {provide: APP_BASE_HREF, useValue: environment.baseUri}
-  ],
-  entryComponents: [AddPurchaseComponent,
-                    AddInventoryItemComponent,
-                    SellItemComponent,
-                    AddManufacturingComponent,
-                    AddItemComponent,
-                    AddPartyComponent],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        InventoryListComponent,
+        PurchaseListComponent,
+        DashboardComponent,
+        HeaderComponent,
+        AddPurchaseComponent,
+        ModalComponent,
+        AddInventoryItemComponent,
+        AddManufacturingComponent,
+        ManufacturingListComponent,
+        SellItemComponent,
+        SalesListComponent,
+        EmailComponent,
+        AddItemComponent,
+        ItemListComponent,
+        SummaryComponent,
+        DecimalNumberDirective,
+        AddPartyComponent,
+        PartyListComponent,
+        LoadingComponent
+    ],
+    imports: [
+        BrowserModule,
+        HttpClientModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        FormsModule,
+        NgSelectModule,
+        ReactiveFormsModule,
+        BsDropdownModule.forRoot(),
+        AlertModule.forRoot(),
+        CollapseModule.forRoot(),
+        ModalModule.forRoot(),
+        BsDatepickerModule.forRoot(),
+        TypeaheadModule.forRoot(),
+        TabsModule.forRoot(),
+        AuthModule.forRoot({
+            domain: 'vinayakashot.us.auth0.com',
+            clientId: '50fgJifDAG98Mak73bNJamStUK4gfpA9',
+            redirectUri: environment.baseUrl + environment.baseUri
+        })
+    ],
+    providers: [
+        { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
+        HttpClient,
+        GapiSession,
+        {
+            provide: ENVIRONMENT,
+            useValue: environment
+        },
+        {
+            provide: LocationStrategy,
+            useClass: PathLocationStrategy
+        },
+        { provide: APP_BASE_HREF, useValue: environment.baseUri }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
