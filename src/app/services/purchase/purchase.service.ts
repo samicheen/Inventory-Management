@@ -38,23 +38,63 @@ export class PurchaseService {
    * Add purchase
    * @param purchase Purchase to add
    */
-  addPurchase(purchase: Purchase): Observable<AddItemResponse> {
-    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/purchase/addPurchase.php`, purchase);
+  addPurchase(purchase: any): Observable<AddItemResponse> {
+    // Transform the purchase data to match backend expectations
+    // Frontend sends flat structure, backend expects nested objects
+    const purchasePayload = {
+      invoice_id: purchase.invoice_id,
+      item: {
+        item_id: purchase.item_id
+      },
+      vendor: {
+        name: purchase.selected_vendor || (purchase.vendor && purchase.vendor.name) || purchase.vendor
+      },
+      quantity: purchase.quantity,
+      rate: purchase.rate,
+      amount: purchase.amount,
+      timestamp: purchase.timestamp
+    };
+    
+    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/purchase/addPurchase.php`, purchasePayload);
   }
 
   /**
    * Update purchase
    * @param purchase Purchase to update
    */
-  updatePurchase(purchase: Purchase) {
-    return this.http.post(`${this.apiUrl}/api//updateItem.php`, purchase);
+  updatePurchase(purchase: any): Observable<AddItemResponse> {
+    // Transform the purchase data to match backend expectations (same as addPurchase)
+    const purchasePayload = {
+      purchase_id: purchase.purchase_id,
+      invoice_id: purchase.invoice_id,
+      item: {
+        item_id: purchase.item_id
+      },
+      vendor: {
+        name: purchase.selected_vendor || (purchase.vendor && purchase.vendor.name) || purchase.vendor
+      },
+      quantity: purchase.quantity,
+      rate: purchase.rate,
+      amount: purchase.amount,
+      timestamp: purchase.timestamp
+    };
+    
+    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/purchase/updatePurchase.php`, purchasePayload);
   }
 
   /**
-   * Remove item from inventory
-   * @param itemNumber Item to remove
+   * Remove purchase
+   * @param purchaseId Purchase ID to remove
    */
-  removeItem(itemNumber) {
-    return this.http.delete(`${this.apiUrl}/api/inventory/removeItem.php?itemNumber=${itemNumber}`);
+  removeItem(purchaseId) {
+    return this.http.delete(`${this.apiUrl}/api/purchase/removePurchase.php?purchase_id=${purchaseId}`);
+  }
+
+  /**
+   * Get processed quantities for a purchase (for UI validation hint)
+   * @param barcode Purchase barcode
+   */
+  getProcessedQuantities(barcode: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/api/purchase/getProcessedQuantities.php?barcode=${encodeURIComponent(barcode)}`);
   }
 }

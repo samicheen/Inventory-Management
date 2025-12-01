@@ -3,14 +3,15 @@
     <form [formGroup]="addPurchaseForm">
         <div class="form-row">
             <div class="form-group col-md-6">
-                <label for="invoiceNo">Invoice No.</label>
+                <label for="invoiceNo"><i class="fa fa-file-invoice"></i> Invoice No.</label>
                 <input type="text"
                     class="form-control"
                     id="invoiceNo"
+                    placeholder="Enter invoice number..."
                     formControlName="invoice_id">
             </div>
             <div class="form-group col-md-6">
-                <label for="timestamp">Date</label>
+                <label for="timestamp"><i class="fa fa-calendar"></i> Date</label>
                 <input type="text"
                     class="form-control"
                     bsDatepicker
@@ -19,10 +20,11 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="vendor">Vendor</label>
+            <label for="vendor"><i class="fa fa-building"></i> Vendor</label>
             <input type="text"
                    class="form-control"
                    id="vendor"
+                   placeholder="Search vendor..."
                    [typeahead]="parties"
                    typeaheadOptionField="name"
                    (typeaheadOnSelect)="onSelectVendor($event)"
@@ -33,11 +35,12 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="item">Item</label>
+            <label for="item"><i class="fa fa-box"></i> Item</label>
             <input type="text"
                 class="form-control"
                 id="item"
                 name="purchase-item"
+                placeholder="Search item..."
                 [typeahead]="items"
                 [typeaheadItemTemplate]="customItemTemplate"
                 typeaheadOptionField="name"
@@ -53,7 +56,7 @@
         </div>
         <div class="form-row">
             <div class="form-group col-md-6" formGroupName="quantity">
-                <label for="value">Quantity</label>
+                <label for="value"><i class="fa fa-balance-scale"></i> Quantity</label>
                 <div class="input-group">
                     <input appDecimalNumber
                            type="text"
@@ -69,12 +72,26 @@
                           </select>
                     </div>
                 </div>
+                <!-- Show minimum quantity hint when editing -->
+                <small *ngIf="purchase?.purchase_id && processedInfo && processedInfo.total_processed > 0" 
+                       class="form-text text-info">
+                    <i class="fa fa-info-circle"></i> Minimum: {{minQuantity | number:'1.2-2'}} {{quantityUnitToLabelMapping[value.parent?.get('unit')?.value || 'KG']}} 
+                    ({{processedInfo.total_manufacturing | number:'1.2-2'}} in manufacturing, 
+                    {{processedInfo.total_finished | number:'1.2-2'}} in finished goods,
+                    {{processedInfo.total_sold || 0 | number:'1.2-2'}} sold)
+                </small>
                 <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
                     <div>Quantity is required.</div>
                 </div>
+                <div *ngIf="value.touched && value.errors?.minQuantity" class="alert alert-danger">
+                    <div>Quantity cannot be less than {{minQuantity | number:'1.2-2'}} {{quantityUnitToLabelMapping[value.parent?.get('unit')?.value || 'KG']}} 
+                    (already processed: {{processedInfo?.total_manufacturing | number:'1.2-2'}} in manufacturing, 
+                    {{processedInfo?.total_finished | number:'1.2-2'}} in finished goods,
+                    {{processedInfo?.total_sold || 0 | number:'1.2-2'}} sold)</div>
+                </div>
             </div>
             <div class="form-group col-md-6">
-                <label for="rate">Rate</label>
+                <label for="rate"><i class="fa fa-rupee"></i> Rate</label>
                 <input appDecimalNumber
                        type="text"
                        class="form-control"
@@ -86,19 +103,23 @@
             </div>
         </div>
         
-        <div class="row">
-            <div class="form-group col-md-6 add-purchase__apply-next">
-                <button class="btn btn-secondary add-purchase__button"
-                        (click)="applyToNext()">Apply to Next</button>
+        <div class="button-group mt-3">
+            <div class="button-row">
+                <button class="btn btn-secondary"
+                        (click)="applyToNext()">
+                  <i class="fa fa-redo"></i> Apply to Next
+                </button>
+                <button class="btn btn-info"
+                        (click)="nextItem()">
+                  <i class="fa fa-arrow-right"></i> Next Item
+                </button>
             </div>
-            <div class="form-group col-md-6 add-purchase__next-item">
-                <button class="btn btn-primary add-purchase__button"
-                        (click)="nextItem()">Next Item</button>
+            <div class="button-row">
+                <button class="btn btn-primary"
+                        (click)="doneAndPrintLabels()">
+                  <i class="fa fa-check"></i> Done and Print Labels
+                </button>
             </div>
-        </div>
-        <div class="form-group add-purchase__done-and-print">
-            <button class="btn btn-light add-purchase__button"
-                    (click)="doneAndPrintLabels()">Done and Print Labels</button> 
         </div>
     </form>
 </app-modal>

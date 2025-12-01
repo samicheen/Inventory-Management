@@ -4,12 +4,13 @@
     <button type="button"
             class="btn btn-primary add-purchase-btn"
             (click)=addPurchase()>
-      Add Purchase
+      <i class="fa fa-plus"></i> Add Purchase
     </button>
   </div>
   <table class="table">
       <thead>
           <th scope="col">Date</th>
+          <th scope="col">Barcode</th>
           <th scope="col">Invoice Id</th>
           <th scope="col">Vendor</th>
           <th scope="col">Item Name</th>
@@ -21,8 +22,14 @@
           <th scope="col">Actions</th> 
       </thead>
       <tbody>
-        <tr *ngFor="let purchase of purchases">
+        <tr *ngFor="let purchase of purchases; trackBy: trackByPurchaseId">
             <td>{{purchase.timestamp | date: 'dd/MM/yyyy'}}</td>
+            <td>
+              <span *ngIf="purchase?.barcode">
+                <i class="fa fa-barcode" style="margin-right: 4px;"></i><span>{{purchase.barcode}}</span>
+              </span>
+              <span *ngIf="!purchase?.barcode" class="text-muted">-</span>
+            </td>
             <td>{{purchase.invoice_id}}</td>
             <td>{{purchase.vendor.name}}</td>
             <td>{{purchase.item.name}}</td>
@@ -39,8 +46,8 @@
                 </button>
                 <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
                     role="menu" aria-labelledby="button-split">
-                  <li role="menuitem"><a class="dropdown-item" (click)="removeItem(purchase.purchase_id)">Remove Item</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="editPurchase(purchase)">Edit Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="removeItem(purchase.purchase_id)"><i class="fa fa-trash"></i> Remove Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="editPurchase(purchase)"><i class="fa fa-edit"></i> Edit Item</a></li>
                 </ul>
               </div>
             </td>

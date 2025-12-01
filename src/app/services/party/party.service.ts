@@ -13,24 +13,28 @@ const ENVIRONMENT = "environment";
 })
 export class PartyService {
 
-  baseUrl: string;
+  apiUrl: string;
   items: Response<Party>;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
    * Get parties
    */
   getParties(party_type: string): Observable<Response<Party>> {
-    return this.http.get(`${this.baseUrl}/api/party/getParties.php?party_type=${party_type}`)
+    const endpoint = party_type === 'customer' 
+      ? `${this.apiUrl}/api/customer/getCustomers.php`
+      : `${this.apiUrl}/api/vendor/getVendors.php`;
+    
+    return this.http.get(endpoint)
     .pipe(map((res: any) => {
       return {
         items: res.parties,
-        alerts: res.alerts
+        alerts: res.alerts || []
       };
     }));
   }
@@ -40,6 +44,10 @@ export class PartyService {
    * @param party
    */
   addParty(party: Party): Observable<AddItemResponse> {
-    return this.http.post<AddItemResponse>(`${this.baseUrl}/api/party/addParty.php`, party);
+    const endpoint = party.type === 'customer'
+      ? `${this.apiUrl}/api/customer/addCustomer.php`
+      : `${this.apiUrl}/api/vendor/addVendor.php`;
+    
+    return this.http.post<AddItemResponse>(endpoint, { name: party.name });
   }
 }

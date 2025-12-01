@@ -13,20 +13,25 @@ const ENVIRONMENT = "environment";
 })
 export class ItemService {
 
-  baseUrl: string;
+  apiUrl: string;
   items: Response<Item>;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
    * Get items
+   * @param isSubItem Optional: true to get only sub-items, false to get only main items, undefined to get all
    */
-  getItems(): Observable<Response<Item>> {
-    return this.http.get(`${this.baseUrl}/api/item/getItems.php`)
+  getItems(isSubItem?: boolean): Observable<Response<Item>> {
+    let url = `${this.apiUrl}/api/item/getItems.php`;
+    if (isSubItem !== undefined) {
+      url += `?is_sub_item=${isSubItem ? 1 : 0}`;
+    }
+    return this.http.get(url)
     .pipe(map((res: any) => {
       return {
         items: res.items,
@@ -40,6 +45,6 @@ export class ItemService {
    * @param item
    */
   addItem(item: Item): Observable<AddItemResponse> {
-    return this.http.post<AddItemResponse>(`${this.baseUrl}/api/item/addItem.php`, item);
+    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/item/addItem.php`, { item: item });
   }
 }

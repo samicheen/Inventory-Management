@@ -46,4 +46,12 @@ export class InventoryService {
    addInventoryItem(item: InventoryItem): Observable<AddItemResponse> {
      return this.http.post<AddItemResponse>(`${this.apiUrl}/api/inventory/addInventoryItem.php`, item);
    }
+
+  /**
+   * Get inventory by barcode (for barcode scanning)
+   * @param barcode Barcode to lookup
+   */
+   getInventoryByBarcode(barcode: string): Observable<any> {
+     return this.http.get(`${this.apiUrl}/api/inventory/getInventoryByBarcode.php?barcode=${encodeURIComponent(barcode)}`);
+   }
 }

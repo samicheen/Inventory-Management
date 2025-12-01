@@ -1,0 +1,176 @@
+.print-labels-container {
+  padding: 20px;
+}
+
+.print-header {
+  margin-bottom: 20px;
+}
+
+.labels-print-area {
+  display: block;
+  margin-top: 20px;
+}
+
+// Preview styles (visible on screen)
+.barcode-label {
+  width: 3.0in;
+  height: 1.0in;
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 5px;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.label-content {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+}
+
+.item-info {
+  font-size: 10px;
+  margin-bottom: 3px;
+  line-height: 1.1;
+  font-weight: bold;
+}
+
+.quantity-info {
+  font-size: 8px;
+  color: #666;
+  margin-bottom: 5px;
+  line-height: 1;
+}
+
+.barcode-svg {
+  width: 100%;
+  max-width: 2.5in;
+  height: auto;
+  margin: 5px 0;
+  display: block;
+}
+
+.barcode-text {
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 3px;
+  font-family: 'Courier New', monospace;
+  line-height: 1;
+}
+
+@media print {
+  // Hide everything except labels
+  body * {
+    visibility: hidden;
+  }
+
+  .print-labels-container,
+  .print-labels-container * {
+    visibility: visible;
+  }
+
+  .print-labels-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  // Hide header, controls, and modal wrapper
+  .print-header,
+  .button-group,
+  .form-group,
+  .modal-backdrop,
+  .modal,
+  .modal-dialog,
+  .modal-content,
+  .modal-header,
+  .modal-body {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  // Page setup for label printer
+  @page {
+    size: 4in 2in; // Standard 4x2 inch label
+    margin: 0;
+  }
+
+  html, body {
+    width: 4in;
+    height: 2in;
+    margin: 0;
+    padding: 0;
+  }
+
+  .labels-print-area {
+    margin: 0;
+    padding: 0;
+  }
+
+  // Label size: 4x2 inches
+  .barcode-label {
+    width: 4in !important;
+    height: 2in !important;
+    border: 1px solid #000;
+    padding: 0.1in !important;
+    margin: 0 !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+    display: block !important;
+    box-sizing: border-box;
+  }
+
+  // Hide clear float div
+  .clear-float {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .label-content {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.05in;
+  }
+
+  .item-info {
+    font-size: 12px;
+    margin-bottom: 5px;
+    line-height: 1.2;
+    font-weight: bold;
+  }
+
+  .quantity-info {
+    font-size: 10px;
+    color: #000;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .barcode-svg {
+    width: 100% !important;
+    max-width: 3.5in !important;
+    height: auto !important;
+    margin: 5px 0 !important;
+    display: block !important;
+  }
+
+  .barcode-text {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.2;
+  }
+}
+

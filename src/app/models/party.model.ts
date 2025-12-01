@@ -1,4 +1,5 @@
 export interface Party {
-    type: string;
+    party_id?: string;
+    type?: string;
     name: string;
 }

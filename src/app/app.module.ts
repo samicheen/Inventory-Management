@@ -35,8 +35,13 @@ import { SummaryComponent } from './components/summary/summary.component';
 import { DecimalNumberDirective } from './directives/decimal-number.directive';
 import { AddPartyComponent } from './components/add-party/add-party.component';
 import { PartyListComponent } from './components/party-list/party-list.component';
-import { AuthModule } from '@auth0/auth0-angular';
 import { LoadingComponent } from './components/loading/loading.component';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
+import { PrintLabelsComponent } from './components/print-labels/print-labels.component';
+import { ChoiceDialogComponent } from './components/choice-dialog/choice-dialog.component';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 const ENVIRONMENT = "environment";
 
@@ -64,7 +69,11 @@ export function initGapi(gapiSession: GapiSession) {
         DecimalNumberDirective,
         AddPartyComponent,
         PartyListComponent,
-        LoadingComponent
+        LoadingComponent,
+        LoginComponent,
+        RegisterComponent,
+        PrintLabelsComponent,
+        ChoiceDialogComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
@@ -78,14 +87,7 @@ export function initGapi(gapiSession: GapiSession) {
         ModalModule.forRoot(),
         BsDatepickerModule.forRoot(),
         TypeaheadModule.forRoot(),
-        TabsModule.forRoot(),
-        AuthModule.forRoot({
-            domain: 'vinayakashot.us.auth0.com',
-            clientId: '50fgJifDAG98Mak73bNJamStUK4gfpA9',
-            authorizationParams: {
-                redirect_uri: environment.baseUrl + environment.baseUri
-            }
-        })], providers: [
+        TabsModule.forRoot()], providers: [
         { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
         HttpClient,
         GapiSession,
@@ -98,6 +100,11 @@ export function initGapi(gapiSession: GapiSession) {
             useClass: PathLocationStrategy
         },
         { provide: APP_BASE_HREF, useValue: environment.baseUri },
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withInterceptorsFromDi()),
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptor,
+            multi: true
+        }
     ] })
 export class AppModule { }

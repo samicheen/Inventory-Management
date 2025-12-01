@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
+import { Router, NavigationEnd } from '@angular/router';
+import { AuthService } from './services/auth/auth.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -8,16 +10,27 @@ import { AuthService } from '@auth0/auth0-angular';
 })
 export class AppComponent implements OnInit {
   title = 'inventory-management';
-  isLoading = true;
+  showHeader = true;
 
-  constructor(public authService: AuthService) { }
+  constructor(
+    public authService: AuthService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
-    this.authService.isAuthenticated$.subscribe((value) => {
-      if(!value) {
-        this.authService.loginWithRedirect();
-      }
-      this.isLoading = false;
+    // Check if user is authenticated on app load
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    }
+
+    // Hide header on login and register pages
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.showHeader = !['/login', '/register'].includes(event.url);
     });
+
+    // Check initial route
+    this.showHeader = !['/login', '/register'].includes(this.router.url);
   }
 }

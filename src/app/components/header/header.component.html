@@ -1,34 +1,66 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <span class="navbar-brand mb-0 h1">Inventory Management</span>
-  <div>
-    <ul class="navbar-nav">
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="item">Item</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="vendor">Vendor</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="customer">Customer</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="purchase">Purchase</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="inventory">Inventory</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="manufacture">Manufacturing</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="sales">Sales</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="summary">Summary</a>
-      </li>
-      <li [routerLinkActive]="['active']" class="nav-item">
-        <a class="nav-link" routerLink="email">Email</a>
-      </li>
-    </ul>
+  <ul class="navbar-nav me-auto">
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="item"><i class="fa fa-tag"></i> Item</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="vendor"><i class="fa fa-building"></i> Vendor</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="customer"><i class="fa fa-users"></i> Customer</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="purchase"><i class="fa fa-shopping-cart"></i> Purchase</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="inventory"><i class="fa fa-cubes"></i> Inventory</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="manufacture"><i class="fa fa-industry"></i> Manufacturing</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="sales"><i class="fa fa-shopping-bag"></i> Sales</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="summary"><i class="fa fa-list-alt"></i> Summary</a>
+    </li>
+    <li class="nav-item" [routerLinkActive]="['active']">
+      <a class="nav-link" routerLink="email"><i class="fa fa-envelope"></i> Email</a>
+    </li>
+  </ul>
+  <div class="navbar-nav" *ngIf="currentUser">
+    <!-- Barcode Scanner Input -->
+    <li class="nav-item">
+      <div class="input-group" style="width: 250px; margin-right: 10px;">
+        <input type="text" 
+               class="form-control form-control-sm" 
+               placeholder="Scan barcode..."
+               #barcodeInput
+               (keyup.enter)="scanBarcode(barcodeInput.value); barcodeInput.value = ''"
+               style="font-size: 0.875rem;">
+        <div class="input-group-append">
+          <button class="btn btn-sm btn-light" 
+                  type="button"
+                  (click)="scanBarcode(barcodeInput.value); barcodeInput.value = ''"
+                  title="Scan Barcode">
+            <i class="fa fa-barcode"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="nav-item dropdown" dropdown>
+      <a class="nav-link dropdown-toggle" dropdownToggle id="userDropdown" role="button">
+        <i class="fa fa-user"></i> {{ currentUser.username }}
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" *dropdownMenu aria-labelledby="userDropdown">
+        <li><a class="dropdown-item" href="javascript:void(0)" (click)="$event.preventDefault()"><i class="fa fa-user-circle"></i> Profile</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="javascript:void(0)" (click)="logout(); $event.preventDefault()"><i class="fa fa-sign-out"></i> Logout</a></li>
+      </ul>
+    </li>
   </div>
 </nav>

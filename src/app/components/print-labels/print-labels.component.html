@@ -1,0 +1,37 @@
+<div class="print-labels-container">
+  <div class="print-header d-print-none">
+    <h4><i class="fa fa-barcode"></i> Print Barcode Labels</h4>
+    <p>Barcode: <strong>{{barcode}}</strong></p>
+    <p>Item: {{itemName}}</p>
+    <p>Quantity: {{quantity}} {{unit}}</p>
+    <div class="form-group">
+      <label>Number of Labels:</label>
+      <input type="number" class="form-control" [(ngModel)]="labelCount" (ngModelChange)="onLabelCountChange()" min="1" max="100" style="width: 100px; display: inline-block; margin-left: 10px;">
+      <small class="form-text text-muted">Enter how many spools/coils you need to label</small>
+    </div>
+    <div class="button-group">
+      <button class="btn btn-primary" (click)="printLabels()">
+        <i class="fa fa-print"></i> Print Labels
+      </button>
+      <button class="btn btn-secondary" (click)="close()">
+        <i class="fa fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Print Area - Labels -->
+  <div class="labels-print-area">
+    <div *ngFor="let label of getLabelArray()" class="barcode-label">
+      <div class="label-content">
+        <div class="item-info">{{itemName}}</div>
+        <div class="quantity-info">{{quantity}} {{unit}}</div>
+        <!-- Barcode visual representation -->
+        <svg class="barcode-svg"></svg>
+        <div class="barcode-text">{{barcode}}</div>
+      </div>
+    </div>
+    <!-- Clear float after labels -->
+    <div class="clear-float" style="clear: both;"></div>
+  </div>
+</div>
+

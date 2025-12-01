@@ -1,8 +1,17 @@
 <app-modal [modalRef]="modalRef" 
-            title="Add Manufacturing">
+            title="Send to Manufacturing">
     <form [formGroup]="addManufacturingForm">
+        <!-- Show source item info if from barcode scan -->
+        <div *ngIf="barcode && item" class="alert alert-info">
+            <strong><i class="fa fa-barcode"></i> Source:</strong> {{item.name}} 
+            Grade: {{item.grade}} Size: {{item.size}}<br>
+            <strong>Barcode:</strong> {{barcode}}<br>
+            <strong>Available:</strong> {{available_quantity?.value}} {{quantityUnitToLabelMapping[available_quantity?.unit || 'KG']}}
+            <span *ngIf="rate"> at Rs. {{rate}}/{{quantityUnitToLabelMapping[available_quantity?.unit || 'KG']}}</span>
+        </div>
+
         <div class="form-group">
-            <label for="timestamp">Date</label>
+            <label for="timestamp"><i class="fa fa-calendar"></i> Date</label>
             <input type="text"
                 class="form-control"
                 bsDatepicker
@@ -10,12 +19,13 @@
                 [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY', containerClass: 'theme-dark-blue' }" />
         </div>
         <div class="form-group" formGroupName="quantity">
-            <label for="value">Quantity</label>
+            <label for="value"><i class="fa fa-balance-scale"></i> Quantity to Send</label>
             <div class="input-group">
                 <input appDecimalNumber type="text"
                     class="form-control"
                     id="value"
-                    formControlName="value">
+                    formControlName="value"
+                    [max]="available_quantity?.value">
                 <div class="input-group-append">
                     <select class="custom-select" formControlName="unit">
                         <option *ngFor="let unit of unitValues"
@@ -25,13 +35,34 @@
                         </select>
                 </div>
             </div>
+            <small *ngIf="available_quantity" class="form-text text-muted">
+                Max: {{available_quantity.value}} {{quantityUnitToLabelMapping[available_quantity.unit]}}
+                <span *ngIf="isSpool.value"> (Enter gross weight including spool; net material will be calculated)</span>
+            </small>
             <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
                 <div>Quantity is required.</div>
             </div>
+            <div *ngIf="value.touched && value.errors?.max" class="alert alert-danger">
+                <div>Quantity cannot exceed {{available_quantity?.value}} {{quantityUnitToLabelMapping[available_quantity?.unit]}}.</div>
+            </div>
         </div>
         <div class="form-group">
-            <button class="btn btn-primary btn-block"
-                    (click)="addManufacturing()">Add to Manufacturing</button> 
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="is_spool" formControlName="is_spool">
+                <label class="form-check-label" for="is_spool">
+                    <i class="fa fa-box"></i> Is Spool (Auto-subtract {{spoolWeight}} Kg)
+                </label>
+            </div>
+            <small *ngIf="isSpool.value && value.value" class="form-text text-success">
+                Net weight: {{getNetWeight().toFixed(2)}} {{quantityUnitToLabelMapping[available_quantity?.unit || 'KG']}} ({{value.value}} - {{spoolWeight}})
+            </small>
+        </div>
+        <div class="button-group">
+            <div class="button-row">
+                <button class="btn btn-primary"
+                        [disabled]="!addManufacturingForm.valid"
+                        (click)="addManufacturing()">Add to Manufacturing</button> 
+            </div>
         </div>
     </form>
 </app-modal>

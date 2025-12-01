@@ -1,0 +1,19 @@
+<app-modal [modalRef]="modalRef" [title]="title">
+    <div class="choice-dialog-content">
+        <div class="alert alert-info mb-3">
+            <strong><i class="fa fa-info-circle"></i> {{itemName}}</strong>
+        </div>
+        <p class="mb-4">{{message}}</p>
+        <div class="button-group">
+            <div class="button-row">
+                <button class="btn btn-primary" (click)="selectFirstChoice()">
+                    <i class="fa fa-shopping-bag"></i> Sell Item
+                </button>
+                <button class="btn btn-secondary" (click)="selectSecondChoice()">
+                    <i class="fa fa-industry"></i> Process Further (to Conditioned)
+                </button>
+            </div>
+        </div>
+    </div>
+</app-modal>
+

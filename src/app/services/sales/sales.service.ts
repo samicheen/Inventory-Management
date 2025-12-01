@@ -13,19 +13,19 @@ const ENVIRONMENT = "environment";
 })
 export class SalesService {
 
-  baseUrl: string;
+  apiUrl: string;
   constructor(
     private http: HttpClient,
     @Inject(ENVIRONMENT) private environment
   ) { 
-    this.baseUrl = this.environment.baseUrl;
+    this.apiUrl = this.environment.apiUrl;
   }
 
   /**
    * Get Sales
    */
   getSales(): Observable<Response<Sale>> {
-    return this.http.get<Response<Sale>>(`${this.baseUrl}/api/sales/getSales.php`)
+    return this.http.get<Response<Sale>>(`${this.apiUrl}/api/sales/getSales.php`)
     .pipe(map((res: any) => {
       return {
         items: res.sales,
@@ -36,6 +36,6 @@ export class SalesService {
   }
 
   sellItem(sale: Sale): Observable<AddItemResponse> {
-    return this.http.post<AddItemResponse>(`${this.baseUrl}/api/sales/sellItem.php`, sale);
+    return this.http.post<AddItemResponse>(`${this.apiUrl}/api/sales/sellItem.php`, sale);
   }
 }

@@ -17,6 +17,9 @@ import { PartyService } from '../../services/party/party.service';
 })
 export class SellItemComponent implements OnInit {
   @Input() item: Item;
+  @Input() barcode?: string; // From barcode scan
+  @Input() availableQuantity?: any; // Pre-filled from barcode scan
+  @Input() rate?: number; // Pre-filled from barcode scan
   parties: Party[];
   items: Item[];
   selectedCustomerId: string;
@@ -60,23 +63,49 @@ export class SellItemComponent implements OnInit {
       selected_customer: ['', Validators.required],
       selected_item: [this.item? this.item.name + ' Grade: ' + this.item.grade + ' Size: ' + this.item.size : '', Validators. required],
       quantity: this.formBuilder.group({
-        value: ['', Validators.required],
-        unit: QuantityUnit.KG
+        value: [this.availableQuantity?.value || '', Validators.required],
+        unit: [this.availableQuantity?.unit || QuantityUnit.KG]
       }),
       selling_price:  ['', Validators.required],
       timestamp: [new Date()]
     });
+    
+    // Pre-fill item ID if from barcode scan
+    if (this.item && this.item.item_id) {
+      this.selectedItemId = this.item.item_id;
+    }
   }
 
   sellItem() {
     if(this.sellItemForm.valid) {
-       const item = {
-         customer_id: this.selectedCustomerId,
-         item_id: this.item ? this.item.item_id: this.selectedItemId,
-         ...this.sellItemForm.value,
-         amount: (this.sellItemForm.value.quantity.value * this.sellItemForm.value.selling_price).toFixed(2)
-       } as Sale
-       this.sell.next(item);
+       // Get customer name from form or parties array
+       const customerName = this.sellItemForm.value.selected_customer;
+       
+       // Get item - either from @Input or from items array
+       let itemObj: Item;
+       if (this.item) {
+         itemObj = this.item;
+       } else if (this.selectedItemId && this.items) {
+         itemObj = this.items.find(i => i.item_id === this.selectedItemId);
+       }
+       
+       // Structure data to match backend expectations (nested objects)
+       const sale = {
+         barcode: this.barcode || null, // Include barcode if available (from barcode scan or inventory item)
+         invoice_id: this.sellItemForm.value.invoice_id,
+         item: {
+           item_id: itemObj ? itemObj.item_id : this.selectedItemId
+         },
+         customer: {
+           name: customerName
+         },
+         quantity: this.sellItemForm.value.quantity,
+         selling_price: this.sellItemForm.value.selling_price,
+         amount: (this.sellItemForm.value.quantity.value * this.sellItemForm.value.selling_price).toFixed(2),
+         timestamp: this.sellItemForm.value.timestamp
+       } as any;
+       
+       this.sell.next(sale);
        this.modalRef.hide();
     } else {
       this.sellItemForm.markAllAsTouched();

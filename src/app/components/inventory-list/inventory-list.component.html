@@ -11,12 +11,13 @@
     <button type="button"
             class="btn btn-primary add-item-btn"
             (click)=addItem()>
-      Add Item
+      <i class="fa fa-plus"></i> Add Item
     </button>
   </div> 
   <table class="table">
       <thead>
           <th scope="col">Date</th>
+          <th scope="col">Barcode</th>
           <th scope="col">Item Name</th>
           <th scope="col">Grade</th>
           <th scope="col">Size</th>
@@ -30,6 +31,12 @@
       <tbody>
         <tr *ngFor="let inv_item of inventory">
             <td>{{inv_item.timestamp | date: 'dd/MM/yyyy'}}</td>
+            <td>
+              <span *ngIf="inv_item.barcode || inv_item.source_barcode">
+                <i class="fa fa-barcode"></i> {{inv_item.barcode || inv_item.source_barcode}}
+              </span>
+              <span *ngIf="!inv_item.barcode && !inv_item.source_barcode" class="text-muted">-</span>
+            </td>
             <td *ngIf="!route.snapshot.params.item_id"><a [routerLink]="['/inventory', inv_item.item.item_id]">{{inv_item.item.name}}</a></td>
             <td *ngIf="route.snapshot.params.item_id">{{inv_item.item.name}}</td>
             <td>{{inv_item.item.grade}}</td>
@@ -47,9 +54,9 @@
                 </button>
                 <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
                     role="menu" aria-labelledby="button-split">
-                  <li role="menuitem"><a class="dropdown-item">Print Label</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item.item)">Move to Manufacturing</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="sellItem(inv_item.item)">Sell Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item"><i class="fa fa-print"></i> Print Label</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item)"><i class="fa fa-industry"></i> Move to Manufacturing</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="sellItem(inv_item)"><i class="fa fa-shopping-bag"></i> Sell Item</a></li>
                 </ul>
               </div>
             </td>

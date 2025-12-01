@@ -1,0 +1,59 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h2>Inventory Management</h2>
+      <h4>Sign In</h4>
+    </div>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username"
+          class="form-control" 
+          formControlName="username"
+          placeholder="Enter username"
+          [class.is-invalid]="username?.invalid && username?.touched">
+        <div class="invalid-feedback" *ngIf="username?.invalid && username?.touched">
+          Username is required
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password"
+          class="form-control" 
+          formControlName="password"
+          placeholder="Enter password"
+          [class.is-invalid]="password?.invalid && password?.touched">
+        <div class="invalid-feedback" *ngIf="password?.invalid && password?.touched">
+          Password is required
+        </div>
+      </div>
+      
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="fa fa-exclamation-circle"></i> {{ errorMessage }}
+      </div>
+      
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block"
+        [disabled]="isLoading || loginForm.invalid">
+        <span *ngIf="!isLoading">
+          <i class="fa fa-sign-in"></i> Sign In
+        </span>
+        <span *ngIf="isLoading">
+          <i class="fa fa-spinner fa-spin"></i> Signing in...
+        </span>
+      </button>
+      
+      <div class="text-center mt-3">
+        <p>Don't have an account? <a routerLink="/register">Register</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+

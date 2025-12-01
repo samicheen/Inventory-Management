@@ -1,16 +1,23 @@
 <app-modal [modalRef]="modalRef" 
             title="Sell Item">
     <form [formGroup]="sellItemForm">
+        <!-- Show barcode info if from scan -->
+        <div *ngIf="barcode && availableQuantity" class="alert alert-info">
+            <strong><i class="fa fa-barcode"></i> Barcode:</strong> {{barcode}}<br>
+            <strong>Available:</strong> {{availableQuantity.value}} {{quantityUnitToLabelMapping[availableQuantity.unit]}}
+            <span *ngIf="rate"> at Rs. {{rate}}/{{quantityUnitToLabelMapping[availableQuantity.unit]}}</span>
+        </div>
+
         <div class="form-row">
             <div class="form-group col-md-6">
-                <label for="invoiceNo">Invoice No.</label>
+                <label for="invoiceNo"><i class="fa fa-file-invoice"></i> Invoice No.</label>
                 <input type="text"
                     class="form-control"
                     id="invoiceNo"
                     formControlName="invoice_id">
             </div>
             <div class="form-group col-md-6">
-                <label for="timestamp">Date</label>
+                <label for="timestamp"><i class="fa fa-calendar"></i> Date</label>
                 <input type="text"
                     class="form-control"
                     bsDatepicker
@@ -19,21 +26,21 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="party_name">Party Name</label>
+            <label for="customer_name"><i class="fa fa-users"></i> Customer Name</label>
             <input type="text"
                    class="form-control"
-                   id="vendor"
+                   id="customer"
                    [typeahead]="parties"
                    typeaheadOptionField="name"
                    (typeaheadOnSelect)="onSelectCustomer($event)"
                    [typeaheadScrollable]="true"
                    formControlName="selected_customer">
             <div *ngIf="selectedCustomer.touched && selectedCustomer.errors?.required" class="alert alert-danger">
-                <div>Party name is required.</div>
+                <div>Customer name is required.</div>
             </div>
         </div>
         <div class="form-group">
-            <label for="item">Item</label>
+            <label for="item"><i class="fa fa-box"></i> Item</label>
             <input type="text"
                 class="form-control"
                 id="item"
@@ -53,13 +60,14 @@
             </div>
         </div>
         <div class="form-group" formGroupName="quantity">
-            <label for="value">Quantity</label>
+            <label for="value"><i class="fa fa-balance-scale"></i> Quantity</label>
             <div class="input-group">
                 <input appDecimalNumber
                        type="text"
                        class="form-control"
                        id="value"
-                      formControlName="value">
+                       formControlName="value"
+                       [max]="availableQuantity?.value">
                 <div class="input-group-append">
                     <select class="custom-select" formControlName="unit">
                         <option *ngFor="let unit of unitValues"
@@ -69,12 +77,15 @@
                         </select>
                 </div>
             </div>
+            <small *ngIf="availableQuantity" class="form-text text-muted">
+                Max: {{availableQuantity.value}} {{quantityUnitToLabelMapping[availableQuantity.unit]}}
+            </small>
             <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
                 <div>Quantity is required.</div>
             </div>
         </div>
         <div class="form-group">
-            <label for="selling_price">Selling Price</label>
+            <label for="selling_price"><i class="fa fa-rupee"></i> Selling Price</label>
             <input appDecimalNumber
                    type="text"
                    class="form-control"
@@ -84,9 +95,11 @@
                 <div>Selling Price is required.</div>
             </div>
         </div>
-        <div class="form-group sell-item__done-and-print">
-            <button class="btn btn-primary btn-block"
-                    (click)="sellItem()">Sell Item</button> 
+        <div class="button-group">
+            <div class="button-row">
+                <button class="btn btn-primary"
+                        (click)="sellItem()">Sell Item</button> 
+            </div>
         </div>
     </form>
 </app-modal>

@@ -4,4 +4,5 @@ export interface Item {
     name?: string;
     size?: string;
     grade?: string;
+    is_sub_item?: boolean;
 }

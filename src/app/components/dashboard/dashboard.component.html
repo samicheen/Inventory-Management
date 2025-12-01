@@ -1,1 +1,203 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <div class="container-fluid">
+    <h2 class="mb-4">Dashboard</h2>
+    
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading dashboard data...</p>
+    </div>
+
+    <div *ngIf="!isLoading">
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-muted mb-1">Total Inventory</h6>
+                  <h3 class="mb-0">{{ stats.totalInventory }}</h3>
+                  <small class="text-muted">Items</small>
+                </div>
+                <div class="stat-icon inventory">
+                  <i class="fa fa-cubes"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-muted mb-1">Inventory Value</h6>
+                  <h3 class="mb-0">{{ formatCurrency(stats.totalInventoryValue) }}</h3>
+                  <small class="text-muted">Total Stock</small>
+                </div>
+                <div class="stat-icon value">
+                  <i class="fa fa-rupee"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-muted mb-1">Total Purchases</h6>
+                  <h3 class="mb-0">{{ stats.totalPurchases }}</h3>
+                  <small class="text-muted">{{ formatCurrency(stats.totalPurchaseAmount) }}</small>
+                </div>
+                <div class="stat-icon purchase">
+                  <i class="fa fa-shopping-cart"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-muted mb-1">Total Sales</h6>
+                  <h3 class="mb-0">{{ stats.totalSales }}</h3>
+                  <small class="text-muted">{{ formatCurrency(stats.totalSalesAmount) }}</small>
+                </div>
+                <div class="stat-icon sales">
+                  <i class="fa fa-chart-line"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fa fa-shopping-cart"></i> Recent Purchases</h5>
+            </div>
+            <div class="card-body">
+              <div *ngIf="recentPurchases.length === 0" class="text-center text-muted py-3">
+                No purchases yet
+              </div>
+              <div *ngIf="recentPurchases.length > 0">
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Vendor</th>
+                        <th>Qty</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let purchase of recentPurchases">
+                        <td>{{ purchase.item?.name }} {{ purchase.item?.grade }}</td>
+                        <td>{{ purchase.vendor?.name }}</td>
+                        <td>{{ purchase.quantity?.value }} {{ purchase.quantity?.unit }}</td>
+                        <td>{{ formatCurrency(purchase.amount) }}</td>
+                        <td>{{ formatDate(purchase.timestamp) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="text-center mt-2">
+                  <a routerLink="/purchase" class="btn btn-sm btn-outline-primary">View All Purchases</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fa fa-chart-line"></i> Recent Sales</h5>
+            </div>
+            <div class="card-body">
+              <div *ngIf="recentSales.length === 0" class="text-center text-muted py-3">
+                No sales yet
+              </div>
+              <div *ngIf="recentSales.length > 0">
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Customer</th>
+                        <th>Qty</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let sale of recentSales">
+                        <td>{{ sale.item?.name }} {{ sale.item?.grade }}</td>
+                        <td>{{ sale.customer?.name }}</td>
+                        <td>{{ sale.quantity?.value }} {{ sale.quantity?.unit }}</td>
+                        <td>{{ formatCurrency(sale.amount) }}</td>
+                        <td>{{ formatDate(sale.timestamp) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="text-center mt-2">
+                  <a routerLink="/sales" class="btn btn-sm btn-outline-success">View All Sales</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3 mb-2">
+                  <a routerLink="/purchase" class="btn btn-primary btn-block">
+                    <i class="fa fa-plus"></i> Add Purchase
+                  </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                  <a routerLink="/inventory" class="btn btn-info btn-block">
+                    <i class="fa fa-cubes"></i> View Inventory
+                  </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                  <a routerLink="/sales" class="btn btn-success btn-block">
+                    <i class="fa fa-shopping-bag"></i> Add Sale
+                  </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                  <a routerLink="/item" class="btn btn-secondary btn-block">
+                    <i class="fa fa-box"></i> Manage Items
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
