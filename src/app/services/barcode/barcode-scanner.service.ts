@@ -9,6 +9,7 @@ import { ManufactureService } from '../manufacture/manufacture.service';
 import { ItemService } from '../item/item.service';
 import { ChoiceDialogComponent } from '../../components/choice-dialog/choice-dialog.component';
 import { PrintLabelsComponent } from '../../components/print-labels/print-labels.component';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,8 @@ export class BarcodeScannerService {
     private modalService: BsModalService,
     private salesService: SalesService,
     private manufactureService: ManufactureService,
-    private itemService: ItemService
+    private itemService: ItemService,
+    private notificationService: NotificationService
   ) { }
 
   /**
@@ -29,7 +31,7 @@ export class BarcodeScannerService {
    */
   scanBarcode(barcode: string): void {
     if (!barcode || barcode.trim() === '') {
-      alert('Invalid barcode');
+      this.notificationService.showError('Invalid barcode');
       return;
     }
 
@@ -48,14 +50,14 @@ export class BarcodeScannerService {
           this.openSalesForm(response);
         } else {
           console.error('Unknown action:', response.action, response); // Debug
-          alert('Unknown barcode type: ' + (response.action || 'no action'));
+          this.notificationService.showError('Unknown barcode type: ' + (response.action || 'no action'));
         }
       },
       (error) => {
         if (error.status === 404) {
-          alert('Barcode not found: ' + barcode);
+          this.notificationService.showError('Barcode not found: ' + barcode);
         } else {
-          alert('Error looking up barcode: ' + error.message);
+          this.notificationService.showError('Error looking up barcode: ' + error.message);
         }
       }
     );
@@ -89,10 +91,10 @@ export class BarcodeScannerService {
         this.manufactureService.addToManufacturing(manufacture).subscribe(
           () => {
             // Success - modal will close automatically
-            alert('Raw material sent to manufacturing. After processing, add sub-item from Manufacturing list.');
+            this.notificationService.showSuccess('Raw material sent to manufacturing. After processing, add sub-item from Manufacturing list.');
           },
           (error) => {
-            alert('Error sending to manufacturing: ' + (error.error?.message || error.message));
+            this.notificationService.showError('Error sending to manufacturing: ' + (error.error?.message || error.message));
           }
         );
       });
@@ -170,7 +172,7 @@ export class BarcodeScannerService {
             }
           },
           (error) => {
-            alert('Error processing SCUT: ' + (error.error?.message || error.message));
+            this.notificationService.showError('Error processing SCUT: ' + (error.error?.message || error.message));
           }
         );
       });
@@ -245,7 +247,7 @@ export class BarcodeScannerService {
             // Success - modal will close automatically
           },
           (error) => {
-            alert('Error selling item: ' + (error.error?.message || error.message));
+            this.notificationService.showError('Error selling item: ' + (error.error?.message || error.message));
           }
         );
       });

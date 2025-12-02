@@ -9,6 +9,7 @@ import { Purchase } from 'src/app/models/purchase.model';
 import { PurchaseService } from '../../services/purchase/purchase.service';
 import { ItemService } from '../../services/item/item.service';
 import { Item } from 'src/app/models/item.model';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-purchase-list',
@@ -23,6 +24,7 @@ export class PurchaseListComponent implements OnInit {
   private readonly refreshItems = new BehaviorSubject(undefined);
   
   constructor(
+    private notificationService: NotificationService,
     private purchaseService: PurchaseService,
     private modalService: BsModalService,
     private itemService: ItemService
@@ -56,7 +58,7 @@ export class PurchaseListComponent implements OnInit {
             console.error('Error updating purchase:', error);
             // Show backend validation error to user
             const errorMessage = error.error?.message || error.message || 'Unable to update purchase.';
-            alert(errorMessage);
+            this.notificationService.showError(errorMessage);
             this.refreshItems.next(undefined);
           }
         });
@@ -136,7 +138,7 @@ export class PurchaseListComponent implements OnInit {
   copyBarcode(barcode: string): void {
     // Copy barcode to clipboard
     navigator.clipboard.writeText(barcode).then(() => {
-      alert('Barcode copied: ' + barcode + '\n\nPaste it in the header scanner to test!');
+      this.notificationService.showSuccess('Barcode copied: ' + barcode + '. Paste it in the header scanner to test!');
     }).catch(() => {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -145,7 +147,7 @@ export class PurchaseListComponent implements OnInit {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert('Barcode copied: ' + barcode + '\n\nPaste it in the header scanner to test!');
+      this.notificationService.showSuccess('Barcode copied: ' + barcode + '. Paste it in the header scanner to test!');
     });
   }
 

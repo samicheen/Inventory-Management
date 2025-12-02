@@ -12,6 +12,7 @@ import { InventoryListComponent } from './components/inventory-list/inventory-li
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { HeaderComponent } from './components/header/header.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { ModalModule } from 'ngx-bootstrap/modal';
@@ -40,6 +41,7 @@ import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { PrintLabelsComponent } from './components/print-labels/print-labels.component';
 import { ChoiceDialogComponent } from './components/choice-dialog/choice-dialog.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -73,11 +75,13 @@ export function initGapi(gapiSession: GapiSession) {
         LoginComponent,
         RegisterComponent,
         PrintLabelsComponent,
-        ChoiceDialogComponent
+        ChoiceDialogComponent,
+        ConfirmDialogComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
+        MatSnackBarModule,
         FormsModule,
         NgSelectModule,
         ReactiveFormsModule,

@@ -5,6 +5,8 @@ import { BehaviorSubject } from 'rxjs';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from '../../models/response.model'
 import { AddItemComponent } from '../add-item/add-item.component';
+import { NotificationService } from '../../services/notification/notification.service';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-item-list',
@@ -18,7 +20,8 @@ export class ItemListComponent implements OnInit {
   
   constructor(
     private itemService: ItemService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -57,16 +60,35 @@ export class ItemListComponent implements OnInit {
   }
 
   removeItem(item_id: string) {
-    if (confirm('Are you sure you want to remove this item? This action cannot be undone if the item is not being used.')) {
-      this.itemService.removeItem(item_id).subscribe(
-        () => {
-          this.refreshItems.next(undefined);
-        },
-        (error) => {
-          const errorMessage = error.error?.message || 'Unable to delete item.';
-          alert(errorMessage);
+    const initialState = {
+      title: 'Confirm Removal',
+      message: 'Are you sure you want to remove this item? This action cannot be undone if the item is not being used.',
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    };
+
+    const modalRef = this.modalService.show(ConfirmDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.result.subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.itemService.removeItem(item_id).subscribe(
+            () => {
+              this.refreshItems.next(undefined);
+              this.notificationService.showSuccess('Item removed successfully');
+            },
+            (error) => {
+              const errorMessage = error.error?.message || 'Unable to delete item.';
+              this.notificationService.showError(errorMessage);
+            }
+          );
         }
-      );
+      });
     }
   }
 }

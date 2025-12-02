@@ -45,7 +45,10 @@ export class DashboardComponent implements OnInit {
       next: (response) => {
         if (response.items) {
           this.stats.totalInventory = response.items.length;
-          this.stats.totalInventoryValue = parseFloat(response.total?.closing_amount) || 0;
+          // Sum both main items and sub-items closing amounts for total inventory value
+          const mainItemsValue = parseFloat(response.total?.main_items?.closing_amount) || 0;
+          const subItemsValue = parseFloat(response.total?.sub_items?.closing_amount) || 0;
+          this.stats.totalInventoryValue = mainItemsValue + subItemsValue;
         }
         this.checkLoadingComplete();
       },

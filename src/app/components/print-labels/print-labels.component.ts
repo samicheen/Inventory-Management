@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import * as JsBarcode from 'jsbarcode';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-print-labels',
@@ -17,7 +18,10 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
 
   @ViewChild('barcodeSvg', { static: false }) barcodeSvg: ElementRef;
 
-  constructor(public modalRef: BsModalRef) { }
+  constructor(
+    public modalRef: BsModalRef,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     // Debug: Log to verify values are being passed
@@ -71,7 +75,7 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
 
   printLabels(): void {
     if (!this.barcode) {
-      alert('Barcode is required for printing');
+      this.notificationService.showError('Barcode is required for printing');
       return;
     }
 

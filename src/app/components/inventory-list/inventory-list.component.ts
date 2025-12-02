@@ -12,6 +12,7 @@ import { SalesService } from 'src/app/services/sales/sales.service';
 import { AddManufacturingComponent } from '../add-manufacturing/add-manufacturing.component';
 import { ManufactureService } from 'src/app/services/manufacture/manufacture.service';
 import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-item.component';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-inventory-list',
@@ -28,6 +29,7 @@ export class InventoryListComponent implements OnInit {
   
   constructor(
     private inventoryService: InventoryService,
+    private notificationService: NotificationService,
     private salesService: SalesService,
     private manufactureService: ManufactureService,
     private modalService: BsModalService,
@@ -108,7 +110,7 @@ export class InventoryListComponent implements OnInit {
   copyBarcode(barcode: string): void {
     // Copy barcode to clipboard
     navigator.clipboard.writeText(barcode).then(() => {
-      alert('Barcode copied: ' + barcode + '\n\nPaste it in the header scanner to test!');
+      this.notificationService.showSuccess('Barcode copied: ' + barcode + '. Paste it in the header scanner to test!');
     }).catch(() => {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -117,7 +119,7 @@ export class InventoryListComponent implements OnInit {
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert('Barcode copied: ' + barcode + '\n\nPaste it in the header scanner to test!');
+      this.notificationService.showSuccess('Barcode copied: ' + barcode + '. Paste it in the header scanner to test!');
     });
   }
 }

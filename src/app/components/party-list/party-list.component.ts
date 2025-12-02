@@ -6,6 +6,8 @@ import { Party } from '../../models/party.model';
 import { PartyService } from '../../services/party/party.service';
 import { Response } from '../../models/response.model'
 import { AddPartyComponent } from '../add-party/add-party.component';
+import { NotificationService } from '../../services/notification/notification.service';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-party-list',
@@ -22,7 +24,8 @@ export class PartyListComponent implements OnInit {
   constructor(
     private router: Router,
     private partyService: PartyService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private notificationService: NotificationService
     ) { }
 
   ngOnInit(): void {
@@ -70,17 +73,36 @@ export class PartyListComponent implements OnInit {
 
   removeParty(party: Party) {
     const partyType = this.party_type === 'customer' ? 'customer' : 'vendor';
-    if (confirm(`Are you sure you want to remove this ${partyType}? This action cannot be undone if the ${partyType} is not being used.`)) {
-      party.type = this.party_type;
-      this.partyService.removeParty(party).subscribe(
-        () => {
-          this.refreshItems.next(undefined);
-        },
-        (error) => {
-          const errorMessage = error.error?.message || `Unable to delete ${partyType}.`;
-          alert(errorMessage);
+    const initialState = {
+      title: 'Confirm Removal',
+      message: `Are you sure you want to remove this ${partyType}? This action cannot be undone if the ${partyType} is not being used.`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    };
+
+    const modalRef = this.modalService.show(ConfirmDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.result.subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          party.type = this.party_type;
+          this.partyService.removeParty(party).subscribe(
+            () => {
+              this.refreshItems.next(undefined);
+              this.notificationService.showSuccess(`${partyType.charAt(0).toUpperCase() + partyType.slice(1)} removed successfully`);
+            },
+            (error) => {
+              const errorMessage = error.error?.message || `Unable to delete ${partyType}.`;
+              this.notificationService.showError(errorMessage);
+            }
+          );
         }
-      );
+      });
     }
   }
 

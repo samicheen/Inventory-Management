@@ -1,3 +1,6 @@
+/* Angular Material Theme */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
 /* Global Styles - Clean Professional UI */
 
 /* Color Variables - Professional Palette */
@@ -534,4 +537,31 @@
   &:hover {
     background: var(--text-muted);
   }
+}
+
+/* Material Snackbar Styles */
+::ng-deep .mat-mdc-snack-bar-container {
+  &.success-snackbar {
+    --mdc-snackbar-container-color: var(--success-color);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+  
+  &.error-snackbar {
+    --mdc-snackbar-container-color: var(--danger-color);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+  
+  &.info-snackbar {
+    --mdc-snackbar-container-color: var(--info-color);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+  
+  &.warning-snackbar {
+    --mdc-snackbar-container-color: var(--warning-color);
+    --mdc-snackbar-supporting-text-color: white;
+  }
+}
+
+::ng-deep .mat-mdc-snack-bar-action {
+  color: white !important;
 }
