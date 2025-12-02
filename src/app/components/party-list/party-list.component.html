@@ -10,10 +10,24 @@
     <table class="table">
         <thead>
             <th scope="col">Name</th>
+            <th scope="col">Actions</th>
         </thead>
         <tbody>
             <tr *ngFor="let party of parties">
                 <td>{{party.name}}</td>
+                <td class="actions">
+                    <div class="btn-group" dropdown>
+                        <button id="button-split" type="button" dropdownToggle class="btn"
+                                aria-controls="dropdown-split">
+                                <i class="fa fa-ellipsis-v"></i>
+                        </button>
+                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                            role="menu" aria-labelledby="button-split">
+                            <li role="menuitem"><a class="dropdown-item" (click)="editParty(party)"><i class="fa fa-edit"></i> Edit</a></li>
+                            <li role="menuitem"><a class="dropdown-item" (click)="removeParty(party)"><i class="fa fa-trash"></i> Remove</a></li>
+                        </ul>
+                    </div>
+                </td>
             </tr>
         </tbody>
     </table>

@@ -53,4 +53,35 @@ export class PartyListComponent implements OnInit {
     });
   }
 
+  editParty(party: Party) {
+    const initialState = {
+      type: this.party_type,
+      party: party
+    };
+    let editPartyModalRef = this.modalService.show(AddPartyComponent, { initialState, backdrop: 'static', keyboard: false });
+    editPartyModalRef.content.saveParty.subscribe(updatedParty => {
+      updatedParty.party_id = party.party_id;
+      updatedParty.type = this.party_type;
+      this.partyService.updateParty(updatedParty).subscribe(() => {
+        this.refreshItems.next(undefined);
+      });
+    });
+  }
+
+  removeParty(party: Party) {
+    const partyType = this.party_type === 'customer' ? 'customer' : 'vendor';
+    if (confirm(`Are you sure you want to remove this ${partyType}? This action cannot be undone if the ${partyType} is not being used.`)) {
+      party.type = this.party_type;
+      this.partyService.removeParty(party).subscribe(
+        () => {
+          this.refreshItems.next(undefined);
+        },
+        (error) => {
+          const errorMessage = error.error?.message || `Unable to delete ${partyType}.`;
+          alert(errorMessage);
+        }
+      );
+    }
+  }
+
 }

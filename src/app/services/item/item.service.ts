@@ -47,4 +47,21 @@ export class ItemService {
   addItem(item: Item): Observable<AddItemResponse> {
     return this.http.post<AddItemResponse>(`${this.apiUrl}/api/item/addItem.php`, { item: item });
   }
+
+  /**
+   * Update item
+   * @param item_id
+   * @param item
+   */
+  updateItem(item_id: string, item: Item): Observable<AddItemResponse> {
+    return this.http.put<AddItemResponse>(`${this.apiUrl}/api/item/updateItem.php`, { item_id: item_id, item: item });
+  }
+
+  /**
+   * Remove item
+   * @param item_id
+   */
+  removeItem(item_id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/api/inventory/removeItem.php?itemNumber=${item_id}`);
+  }
 }

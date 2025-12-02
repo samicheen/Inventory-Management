@@ -43,4 +43,30 @@ export class ItemListComponent implements OnInit {
       });
     });
   }
+
+  editItem(item: Item) {
+    const initialState = {
+      item: item
+    };
+    let editItemModalRef = this.modalService.show(AddItemComponent, { initialState, backdrop: 'static', keyboard: false });
+    editItemModalRef.content.saveItem.subscribe(updatedItem => {
+      this.itemService.updateItem(item.item_id, updatedItem).subscribe(() => {
+        this.refreshItems.next(undefined);
+      });
+    });
+  }
+
+  removeItem(item_id: string) {
+    if (confirm('Are you sure you want to remove this item? This action cannot be undone if the item is not being used.')) {
+      this.itemService.removeItem(item_id).subscribe(
+        () => {
+          this.refreshItems.next(undefined);
+        },
+        (error) => {
+          const errorMessage = error.error?.message || 'Unable to delete item.';
+          alert(errorMessage);
+        }
+      );
+    }
+  }
 }

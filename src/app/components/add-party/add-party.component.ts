@@ -10,10 +10,12 @@ import { Party } from 'src/app/models/party.model';
   styleUrls: ['./add-party.component.scss']
 })
 export class AddPartyComponent implements OnInit {
-  @Input() type: string;
+  type: string; // Assigned from initialState by ngx-bootstrap
+  party: Party; // Assigned from initialState by ngx-bootstrap
   title: string;
   addPartyForm: FormGroup;
   saveParty: Subject<Party>;
+  isEditMode: boolean = false;
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef) { }
 
@@ -22,10 +24,15 @@ export class AddPartyComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.title = this.type === 'customer' ? 'Add Customer' : 'Add Vendor';
+    // Check if we're in edit mode
+    this.isEditMode = !!this.party;
+    
+    this.title = this.isEditMode 
+      ? (this.type === 'customer' ? 'Edit Customer' : 'Edit Vendor')
+      : (this.type === 'customer' ? 'Add Customer' : 'Add Vendor');
     this.saveParty = new Subject();
     this.addPartyForm  =  this.formBuilder.group({
-      name: ['', Validators.required]
+      name: [this.party?.name || '', Validators.required]
     });
   }
 

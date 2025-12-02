@@ -50,4 +50,35 @@ export class PartyService {
     
     return this.http.post<AddItemResponse>(endpoint, { name: party.name });
   }
+
+  /**
+   * Update party (customer or vendor)
+   * @param party
+   */
+  updateParty(party: Party): Observable<AddItemResponse> {
+    const endpoint = party.type === 'customer'
+      ? `${this.apiUrl}/api/customer/updateCustomer.php`
+      : `${this.apiUrl}/api/vendor/updateVendor.php`;
+    
+    const idField = party.type === 'customer' ? 'customer_id' : 'vendor_id';
+    const dataField = party.type === 'customer' ? 'customer' : 'vendor';
+    
+    return this.http.put<AddItemResponse>(endpoint, { 
+      [idField]: party.party_id,
+      [dataField]: { name: party.name }
+    });
+  }
+
+  /**
+   * Remove party (customer or vendor)
+   * @param party
+   */
+  removeParty(party: Party): Observable<any> {
+    const id = party.party_id;
+    const endpoint = party.type === 'customer'
+      ? `${this.apiUrl}/api/customer/removeCustomer.php?customer_id=${id}`
+      : `${this.apiUrl}/api/vendor/removeVendor.php?vendor_id=${id}`;
+    
+    return this.http.delete(endpoint);
+  }
 }

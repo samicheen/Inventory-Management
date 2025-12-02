@@ -12,12 +12,28 @@
             <th scope="col">Name</th>
             <th scope="col">Grade</th>
             <th scope="col">Size</th>
+            <th scope="col">Type</th>
+            <th scope="col">Actions</th>
         </thead>
         <tbody>
             <tr *ngFor="let item of items">
                 <td>{{item.name}}</td>
                 <td>{{item.grade}}</td>
                 <td>{{item.size}}</td>
+                <td>{{item.is_sub_item ? 'Sub Item' : 'Main Item'}}</td>
+                <td class="actions">
+                    <div class="btn-group" dropdown>
+                        <button id="button-split" type="button" dropdownToggle class="btn"
+                                aria-controls="dropdown-split">
+                                <i class="fa fa-ellipsis-v"></i>
+                        </button>
+                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                            role="menu" aria-labelledby="button-split">
+                            <li role="menuitem"><a class="dropdown-item" (click)="editItem(item)"><i class="fa fa-edit"></i> Edit</a></li>
+                            <li role="menuitem"><a class="dropdown-item" (click)="removeItem(item.item_id)"><i class="fa fa-trash"></i> Remove</a></li>
+                        </ul>
+                    </div>
+                </td>
             </tr>
         </tbody>
     </table>

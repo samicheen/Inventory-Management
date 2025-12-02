@@ -12,6 +12,8 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 export class AddItemComponent implements OnInit {
   addItemForm: FormGroup;
   saveItem: Subject<Item>;
+  item: Item; // Assigned from initialState by ngx-bootstrap
+  isEditMode: boolean = false;
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef) { }
 
@@ -32,13 +34,16 @@ export class AddItemComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Check if we're in edit mode
+    this.isEditMode = !!this.item;
+    
     this.saveItem = new Subject();
     this.addItemForm  =  this.formBuilder.group({
-        name: ['', Validators.required],
-        size: ['', [Validators.required,
+        name: [this.item?.name || '', Validators.required],
+        size: [this.item?.size || '', [Validators.required,
           Validators.pattern(/^\d+\.\d{1}$/)]],
-        grade: ['', Validators.required],
-        is_sub_item: [false]
+        grade: [this.item?.grade || '', Validators.required],
+        is_sub_item: [this.item?.is_sub_item || false]
     });
   }
 
