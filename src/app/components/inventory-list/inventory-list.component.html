@@ -5,8 +5,18 @@
   </tabset>
   <div class="flex-container">
     <div>
-    <div class="total">Total opening amount: Rs. {{total?.opening_amount | number:'1.2-2'}}</div>
-    <div class="total">Total closing amount: Rs. {{total?.closing_amount | number:'1.2-2'}}</div>
+    <div class="total" *ngIf="!route.snapshot.params.item_id">
+      <div *ngIf="currentTab === 'Main Items'">
+        Opening: Rs. {{total?.main_items?.opening_amount | number:'1.2-2'}} | Closing: Rs. {{total?.main_items?.closing_amount | number:'1.2-2'}}
+      </div>
+      <div *ngIf="currentTab === 'Sub Items'">
+        Opening: Rs. {{total?.sub_items?.opening_amount | number:'1.2-2'}} | Closing: Rs. {{total?.sub_items?.closing_amount | number:'1.2-2'}}
+      </div>
+    </div>
+    <div class="total" *ngIf="route.snapshot.params.item_id">
+      <div>Opening amount: Rs. {{total?.sub_items?.opening_amount | number:'1.2-2'}}</div>
+      <div>Closing amount: Rs. {{total?.sub_items?.closing_amount | number:'1.2-2'}}</div>
+    </div>
   </div>
     <button type="button"
             class="btn btn-primary add-item-btn"
@@ -21,7 +31,6 @@
           <th scope="col">Item Name</th>
           <th scope="col">Grade</th>
           <th scope="col">Size</th>
-          <th scope="col">Initial Stock</th>
           <th scope="col">Opening Stock</th>
           <th scope="col">Opening Amount</th>
           <th scope="col">Closing Stock</th>
@@ -41,7 +50,6 @@
             <td *ngIf="route.snapshot.params.item_id">{{inv_item.item.name}}</td>
             <td>{{inv_item.item.grade}}</td>
             <td>{{inv_item.item.size}}</td>
-            <td>{{inv_item.initial_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.initial_stock.unit]}}</td>
             <td>{{inv_item.opening_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.opening_stock.unit]}}</td>
             <td>Rs. {{inv_item.opening_amount | number:'1.2-2'}}</td>
             <td>{{inv_item.closing_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.closing_stock.unit]}}</td>

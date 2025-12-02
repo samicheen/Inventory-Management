@@ -24,6 +24,7 @@ export class InventoryListComponent implements OnInit {
   total: any;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
+  currentTab: string = 'Main Items'; // Track current tab
   
   constructor(
     private inventoryService: InventoryService,
@@ -35,6 +36,11 @@ export class InventoryListComponent implements OnInit {
 
   ngOnInit(): void {
     this.inventoryParameters.set('parent_item_id', this.route.snapshot.params.item_id);
+    // Initialize current tab based on route or default to Main Items
+    if (!this.route.snapshot.params.item_id) {
+      this.currentTab = 'Main Items';
+      this.inventoryParameters.set('retrieve_sub_items', 0);
+    }
     this.getInventory();
     this.refreshItems.subscribe(() => {
       this.getInventory();
@@ -94,6 +100,7 @@ export class InventoryListComponent implements OnInit {
   }
 
   onSelect(data) {
+    this.currentTab = data.heading;
     this.inventoryParameters.set('retrieve_sub_items', data.heading === 'Sub Items' ? 1 : 0);
     this.getInventory();
   }
