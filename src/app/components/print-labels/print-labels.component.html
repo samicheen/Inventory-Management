@@ -1,5 +1,8 @@
 <div class="print-labels-container">
   <div class="print-header d-print-none">
+    <button type="button" class="close-button" aria-label="Close" (click)="close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
     <h4><i class="fa fa-qrcode"></i> Print QR Code Labels</h4>
     <p>Barcode: <strong>{{barcode}}</strong></p>
     <p>Item: {{itemName}}</p>
@@ -12,9 +15,6 @@
     <div class="button-group">
       <button class="btn btn-primary" (click)="printLabels()">
         <i class="fa fa-print"></i> Print Labels
-      </button>
-      <button class="btn btn-secondary" (click)="close()">
-        <i class="fa fa-times"></i> Close
       </button>
     </div>
   </div>
