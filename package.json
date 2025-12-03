@@ -27,11 +27,13 @@
     "@types/gapi.client.gmail": "^1.0.5",
     "@types/gapi.client.sheets": "^4.0.9",
     "@types/jsbarcode": "^3.11.4",
+    "@types/qrcode": "^1.5.6",
     "bootstrap": "5.3.3",
     "font-awesome": "^4.7.0",
     "googleapi": "^1.0.2",
     "jsbarcode": "^3.12.1",
     "ngx-bootstrap": "^18.0.2",
+    "qrcode": "^1.5.4",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.3",
     "zone.js": "~0.14.10"

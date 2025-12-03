@@ -97,4 +97,28 @@ export class PurchaseService {
   getProcessedQuantities(barcode: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/api/purchase/getProcessedQuantities.php?barcode=${encodeURIComponent(barcode)}`);
   }
+
+  /**
+   * Receive purchase - add package details and create inventory
+   * @param purchaseId Purchase ID
+   * @param packages Array of package details (quantity, packaging_weight optional, net_quantity)
+   * @param unit Unit of measurement (KG, NOS, LITRES)
+   */
+  receivePurchase(purchaseId: string, packages: any[], unit: string = 'KG'): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/purchase/receivePurchase.php`, {
+      purchase_id: purchaseId,
+      packages: packages,
+      unit: unit
+    });
+  }
+
+  /**
+   * Get packages for a purchase (for reprinting labels)
+   * @param purchaseId Purchase ID
+   */
+  getPurchasePackages(purchaseId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/purchase/getPurchasePackages.php`, {
+      purchase_id: purchaseId
+    });
+  }
 }

@@ -40,8 +40,7 @@ export class AddItemComponent implements OnInit {
     this.saveItem = new Subject();
     this.addItemForm  =  this.formBuilder.group({
         name: [this.item?.name || '', Validators.required],
-        size: [this.item?.size || '', [Validators.required,
-          Validators.pattern(/^\d+\.\d{1}$/)]],
+        size: [this.item?.size || '', Validators.required],
         grade: [this.item?.grade || '', Validators.required],
         is_sub_item: [this.item?.is_sub_item || false]
     });

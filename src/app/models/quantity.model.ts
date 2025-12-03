@@ -5,10 +5,12 @@ export interface Quantity {
 
 export enum QuantityUnit {
     KG = 'KG',
-    NOS = 'NOS'
+    NOS = 'NOS',
+    LITRES = 'LITRES'
 }
 
 export const QuantityUnitToLabelMapping: Record<QuantityUnit, string> = {
     [QuantityUnit.KG]: "Kg.",
-    [QuantityUnit.NOS]: "Nos."
+    [QuantityUnit.NOS]: "Nos.",
+    [QuantityUnit.LITRES]: "Litres"
 };

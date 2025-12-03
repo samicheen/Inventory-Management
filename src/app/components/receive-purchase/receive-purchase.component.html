@@ -1,0 +1,127 @@
+<app-modal [modalRef]="modalRef" 
+            [title]="'Receive Purchase: ' + purchase_barcode">
+    <form [formGroup]="receiveForm">
+        <div class="alert alert-info mb-3">
+            <strong><i class="fa fa-info-circle"></i> Purchase:</strong> {{purchase_barcode}}<br>
+            <strong>Item:</strong> {{item_name}}<br>
+            <strong>Total Quantity:</strong> {{purchaseQuantity.toFixed(2)}} {{quantityUnitToLabelMapping[unit] || unit}}
+            <div *ngIf="isReceived" class="mt-2">
+                <strong class="text-warning"><i class="fa fa-exclamation-triangle"></i> This purchase has already been received.</strong>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fa fa-list"></i> Package Details</label>
+            <div formArrayName="packages">
+                <div *ngFor="let package of packages.controls; let i = index" 
+                     [formGroupName]="i" 
+                     class="package-row mb-3 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Package #{{i + 1}}</h6>
+                        <button type="button" 
+                                class="btn btn-sm btn-danger" 
+                                *ngIf="packages.length > 1"
+                                (click)="removePackage(i)">
+                            <i class="fa fa-trash"></i> Remove
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <div [ngClass]="hasPackagingWeight ? 'col-md-4' : 'col-md-6'">
+                            <label>{{hasPackagingWeight ? 'Gross Weight' : 'Quantity'}} per Package ({{quantityUnitToLabelMapping[unit] || unit}})</label>
+                            <input appDecimalNumber 
+                                   type="text" 
+                                   class="form-control" 
+                                   formControlName="quantity"
+                                   (input)="calculateTotal()"
+                                   [placeholder]="hasPackagingWeight ? 'Enter gross weight' : 'Enter quantity'">
+                            <div *ngIf="package.get('quantity')?.touched && package.get('quantity')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                {{hasPackagingWeight ? 'Gross weight' : 'Quantity'}} is required.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4" *ngIf="hasPackagingWeight">
+                            <label>Packaging Weight ({{quantityUnitToLabelMapping[unit] || unit}})</label>
+                            <input appDecimalNumber 
+                                   type="text" 
+                                   class="form-control" 
+                                   formControlName="packaging_weight"
+                                   (input)="calculateTotal()"
+                                   placeholder="Enter packaging weight (e.g., spool weight)">
+                            <small class="form-text text-muted">
+                                Weight of packaging (spool, box, etc.)
+                            </small>
+                            <div *ngIf="package.get('packaging_weight')?.touched && package.get('packaging_weight')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Packaging weight is required.
+                            </div>
+                        </div>
+                        
+                        <div [ngClass]="hasPackagingWeight ? 'col-md-4' : 'col-md-6'">
+                            <label><i class="fa fa-hashtag"></i> Number of Packages</label>
+                            <input type="number"
+                                   class="form-control"
+                                   formControlName="package_quantity"
+                                   (input)="calculateTotal()"
+                                   min="1"
+                                   placeholder="1">
+                            <small class="form-text text-muted">
+                                How many packages have this same {{hasPackagingWeight ? 'weight' : 'quantity'}}?
+                            </small>
+                            <div *ngIf="package.get('package_quantity')?.touched && package.get('package_quantity')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Number of packages is required.
+                            </div>
+                            <div *ngIf="package.get('package_quantity')?.touched && package.get('package_quantity')?.errors?.min" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Must be at least 1 package.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2" *ngIf="hasPackagingWeight">
+                        <small class="text-success">
+                            <strong>Net {{quantityUnitToLabelMapping[unit] || unit}}:</strong> {{getNetQuantity(i).toFixed(2)}} {{quantityUnitToLabelMapping[unit] || unit}}
+                            <span *ngIf="package.get('package_quantity')?.value > 1">
+                                ({{getNetQuantity(i).toFixed(2)}} × {{package.get('package_quantity')?.value}} = {{(getNetQuantity(i) * (package.get('package_quantity')?.value || 1)).toFixed(2)}})
+                            </span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" 
+                    class="btn btn-sm btn-secondary mt-2" 
+                    (click)="addPackage()">
+                <i class="fa fa-plus"></i> Add Another Package
+            </button>
+        </div>
+
+        <div [ngClass]="quantityMatches ? 'alert alert-success' : 'alert alert-warning'">
+            <strong>Total Net {{quantityUnitToLabelMapping[unit] || unit}}:</strong> {{totalNetQuantity.toFixed(2)}} {{quantityUnitToLabelMapping[unit] || unit}}
+            <span *ngIf="!quantityMatches" class="ml-2">
+                <i class="fa fa-exclamation-triangle"></i> 
+                Purchase quantity: {{purchaseQuantity.toFixed(2)}} {{quantityUnitToLabelMapping[unit] || unit}} 
+                (Difference: {{quantityDifference.toFixed(2)}} {{quantityUnitToLabelMapping[unit] || unit}})
+            </span>
+            <span *ngIf="quantityMatches" class="ml-2">
+                <i class="fa fa-check-circle"></i> Matches purchase quantity
+            </span>
+        </div>
+
+        <div class="button-group">
+            <div class="button-row">
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        (click)="cancel()">Cancel</button>
+                <button type="button" 
+                        class="btn btn-primary" 
+                        [disabled]="!receiveForm.valid || totalNetQuantity <= 0 || !quantityMatches"
+                        (click)="receivePurchase()">
+                    <i class="fa fa-check"></i> Receive Purchase & Print Labels
+                </button>
+            </div>
+        </div>
+    </form>
+</app-modal>

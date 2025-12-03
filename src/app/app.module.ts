@@ -42,6 +42,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { PrintLabelsComponent } from './components/print-labels/print-labels.component';
 import { ChoiceDialogComponent } from './components/choice-dialog/choice-dialog.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { ReceivePurchaseComponent } from './components/receive-purchase/receive-purchase.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -76,7 +77,8 @@ export function initGapi(gapiSession: GapiSession) {
         RegisterComponent,
         PrintLabelsComponent,
         ChoiceDialogComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        ReceivePurchaseComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

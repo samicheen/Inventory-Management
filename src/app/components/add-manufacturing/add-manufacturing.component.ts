@@ -22,7 +22,7 @@ export class AddManufacturingComponent implements OnInit {
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
   addToManufacturing: Subject<Manufacture>;
-  spoolWeight: number = 2.5; // Fixed spool weight in Kg
+  defaultSpoolWeight: number = 2.5; // Default spool weight in Kg
 
   constructor(private formBuilder: FormBuilder,
               public modalRef: BsModalRef) { }
@@ -33,6 +33,10 @@ export class AddManufacturingComponent implements OnInit {
 
   get isSpool(): FormControl {
     return this.addManufacturingForm.get('is_spool') as FormControl;
+  }
+
+  get spoolWeight(): FormControl {
+    return this.addManufacturingForm.get('spool_weight') as FormControl;
   }
 
   ngOnInit(): void {
@@ -54,13 +58,26 @@ export class AddManufacturingComponent implements OnInit {
         unit: [initialUnit]
       }),
       is_spool: [false], // Default to false (coil)
+      spool_weight: [this.defaultSpoolWeight, [Validators.min(0)]], // Spool weight input (required only when is_spool is true)
       timestamp: [new Date()]
+    });
+
+    // Update spool_weight validation when is_spool changes
+    this.isSpool.valueChanges.subscribe(isSpool => {
+      if (isSpool) {
+        this.spoolWeight.setValidators([Validators.required, Validators.min(0)]);
+      } else {
+        this.spoolWeight.clearValidators();
+        this.spoolWeight.setValue(this.defaultSpoolWeight); // Reset to default
+      }
+      this.spoolWeight.updateValueAndValidity();
     });
   }
 
   getNetWeight(): number {
-    if (this.isSpool.value && this.value.value) {
-      return Math.max(0, parseFloat(this.value.value) - this.spoolWeight);
+    if (this.isSpool.value && this.value.value && this.spoolWeight.value) {
+      const spoolWeightValue = parseFloat(this.spoolWeight.value) || 0;
+      return Math.max(0, parseFloat(this.value.value) - spoolWeightValue);
     }
     return parseFloat(this.value.value) || 0;
   }
@@ -72,8 +89,9 @@ export class AddManufacturingComponent implements OnInit {
        // If spool is checked, use net weight (entered - spool weight) for the actual quantity
        // The entered value is gross weight (material + spool), but we track net material
        let actualQuantity = formValue.quantity.value;
-       if (formValue.is_spool && formValue.quantity.value) {
-         actualQuantity = Math.max(0, parseFloat(formValue.quantity.value) - this.spoolWeight);
+       if (formValue.is_spool && formValue.quantity.value && formValue.spool_weight) {
+         const spoolWeightValue = parseFloat(formValue.spool_weight) || 0;
+         actualQuantity = Math.max(0, parseFloat(formValue.quantity.value) - spoolWeightValue);
        }
        
        const manufacture = {

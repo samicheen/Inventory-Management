@@ -48,44 +48,63 @@ export class ManufacturingListComponent implements OnInit {
       manufactureEntry: manufacture // Pass full manufacturing entry with source_barcode, rate, etc.
     };
     let addSubItemModalRef = this.modalService.show(AddInventoryItemComponent, { initialState, backdrop: 'static', keyboard: false });
-    addSubItemModalRef.content.saveAndPrintInventoryItems.subscribe(item => {
-      this.inventoryService.addInventoryItem(item).subscribe((response: any) => {
+    addSubItemModalRef.content.saveAndPrintInventoryItems.subscribe(data => {
+      this.inventoryService.addInventoryItem(data).subscribe((response: any) => {
         this.refreshItems.next(undefined);
         
-        // Open print labels modal if barcode is returned
-        if (response && response.barcode) {
-          // Get the sub-item details (the item that was created, not the parent)
-          this.itemService.getItems(true).subscribe((itemsResponse: any) => {
-            const createdItem = itemsResponse.items.find((i: Item) => i.item_id === item.item.item_id);
-            const itemName = createdItem 
-              ? `${createdItem.name} Grade: ${createdItem.grade} Size: ${createdItem.size}`
-              : 'Item';
-            
-            // Extract quantity value (handle both Quantity object and number)
-            const quantityValue = typeof item.closing_stock === 'object' 
-              ? (item.closing_stock?.value || 0)
-              : (item.closing_stock || 0);
-            const quantityUnit = typeof item.closing_stock === 'object'
-              ? (item.closing_stock?.unit || 'KG')
-              : 'KG';
-            
-            const printInitialState = {
-              barcode: response.barcode,
-              itemName: itemName,
-              quantity: quantityValue,
-              unit: quantityUnit,
-              labelCount: 1
-            };
-            
-            this.modalService.show(PrintLabelsComponent, { 
-              initialState: printInitialState, 
-              backdrop: 'static', 
-              keyboard: false,
-              class: 'modal-lg'
-            });
-          });
+        // Handle multiple packages and print labels
+        if (response && response.packages && response.packages.length > 0) {
+          this.printLabelsForPackages(response.packages);
         }
+      }, (error) => {
+        console.error('Error adding inventory:', error);
       });
     });
+  }
+
+  printLabelsForPackages(packages: any[]): void {
+    // Print labels for all packages
+    // Group by item and weight to batch print
+    const groupedPackages = new Map<string, any[]>();
+    
+    packages.forEach(pkg => {
+      const key = `${pkg.item_name}_${pkg.item_grade}_${pkg.item_size}_${pkg.weight}_${pkg.unit}`;
+      if (!groupedPackages.has(key)) {
+        groupedPackages.set(key, []);
+      }
+      groupedPackages.get(key)!.push(pkg);
+    });
+    
+    // Print labels for each group
+    let firstPackage = true;
+    groupedPackages.forEach((pkgGroup, key) => {
+      const firstPkg = pkgGroup[0];
+      const initialState = {
+        barcode: firstPkg.barcode,
+        itemName: `${firstPkg.item_name} Grade: ${firstPkg.item_grade} Size: ${firstPkg.item_size}`,
+        quantity: firstPkg.weight,
+        netQuantity: firstPkg.net_quantity || firstPkg.weight, // Include net quantity for QR code
+        unit: firstPkg.unit,
+        labelCount: pkgGroup.length,
+        allPackages: pkgGroup // Pass all packages for QR code generation
+      };
+      
+      if (firstPackage) {
+        this.modalService.show(PrintLabelsComponent, {
+          initialState,
+          backdrop: 'static',
+          keyboard: false,
+          class: 'modal-lg'
+        });
+        firstPackage = false;
+      }
+    });
+    
+    if (packages.length > 1) {
+      setTimeout(() => {
+        // Show notification about other packages
+        console.log(`Created ${packages.length} packages. Print labels for each package.`);
+      }, 500);
+    }
   }
 }

@@ -47,10 +47,10 @@
   line-height: 1;
 }
 
-.barcode-svg {
-  width: 100%;
+.qrcode-canvas {
+  width: 150px;
+  height: 150px;
   max-width: 2.5in;
-  height: auto;
   margin: 5px 0;
   display: block;
 }
@@ -157,10 +157,10 @@
     line-height: 1.2;
   }
 
-  .barcode-svg {
-    width: 100% !important;
+  .qrcode-canvas {
+    width: 200px !important;
+    height: 200px !important;
     max-width: 3.5in !important;
-    height: auto !important;
     margin: 5px 0 !important;
     display: block !important;
   }

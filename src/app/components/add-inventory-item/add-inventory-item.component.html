@@ -1,8 +1,8 @@
 <app-modal [modalRef]="modalRef" 
-            title="Process Raw Material">
+            [title]="isInitialStockMode ? 'Add Initial Stock' : 'Process Raw Material'">
     <form [formGroup]="addInventoryItemForm">
-        <!-- Show source item info (always show if parentItem exists) -->
-        <div *ngIf="parentItem" class="alert alert-info">
+        <!-- Show source item info (only for processing mode) -->
+        <div *ngIf="!isInitialStockMode && parentItem" class="alert alert-info">
             <strong><i class="fa fa-industry"></i> Source:</strong> {{parentItem.name}} 
             Grade: {{parentItem.grade}} Size: {{parentItem.size}}<br>
             <span *ngIf="availableQuantity">
@@ -16,13 +16,14 @@
             <label for="timestamp"><i class="fa fa-calendar"></i> Date</label>
             <input type="text"
                 class="form-control"
+                id="timestamp"
                 bsDatepicker
                 formControlName="timestamp"
                 [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY', containerClass: 'theme-dark-blue' }" />
         </div>
 
-        <!-- Processing Type (required) -->
-        <div class="form-group">
+        <!-- Processing Type (required only for processing mode) -->
+        <div *ngIf="!isInitialStockMode" class="form-group">
             <label for="processing_type"><i class="fa fa-cog"></i> Processing Type</label>
             <select class="form-control" formControlName="processing_type">
                 <option value="">Select processing type...</option>
@@ -35,70 +36,127 @@
             </div>
         </div>
 
+        <!-- Packages FormArray -->
         <div class="form-group">
-            <label for="item"><i class="fa fa-box"></i> Sub-Item</label>
-            <input type="text"
-                class="form-control"
-                id="item"
-                name="inventory-item"
-                placeholder="Search sub-item (S-Cut/Conditioned)..."
-                [typeahead]="items"
-                [typeaheadItemTemplate]="customItemTemplate"
-                typeaheadOptionField="name"
-                [typeaheadScrollable]="true"
-                [typeaheadMinLength]="0"
-                (typeaheadOnSelect)="onSelect($event)"
-                formControlName="selected_item">
-                <ng-template #customItemTemplate let-item="item">
-                   {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
-                </ng-template>
-            <div *ngIf="selectedItem.touched && selectedItem.errors?.required" class="alert alert-danger">
-                <div>Item is required.</div>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6" formGroupName="quantity">
-                <label for="value"><i class="fa fa-balance-scale"></i> Weight</label>
-                <div class="input-group">
-                    <input appDecimalNumber
-                           type="text"
-                           class="form-control"
-                           id="value"
-                           formControlName="value"
-                           [max]="availableQuantity?.value"
-                           placeholder="Enter weight">
-                    <div class="input-group-append">
-                        <select class="custom-select" formControlName="unit">
-                            <option *ngFor="let unit of unitValues"
-                                    [value]="unit">
-                                {{ quantityUnitToLabelMapping[unit] }}
-                            </option>
-                            </select>
+            <label><i class="fa fa-box"></i> Packages</label>
+            <div formArrayName="packages">
+                <div *ngFor="let package of packages.controls; let i = index" 
+                     [formGroupName]="i" 
+                     class="package-row mb-3 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Package #{{i + 1}}</h6>
+                        <button type="button" 
+                                class="btn btn-sm btn-danger" 
+                                *ngIf="packages.length > 1"
+                                (click)="removePackage(i)">
+                            <i class="fa fa-trash"></i> Remove
+                        </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Item</label>
+                        <input type="text"
+                            class="form-control"
+                            [id]="'item_' + i"
+                            [name]="'item_' + i"
+                            [placeholder]="isInitialStockMode ? 'Search item...' : 'Search sub-item (S-Cut/Conditioned)...'"
+                            [typeahead]="items"
+                            [typeaheadItemTemplate]="customItemTemplate"
+                            typeaheadOptionField="name"
+                            [typeaheadScrollable]="true"
+                            [typeaheadMinLength]="0"
+                            (typeaheadOnSelect)="onSelectItem($event, i)"
+                            formControlName="selected_item">
+                        <ng-template #customItemTemplate let-item="item">
+                           {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
+                        </ng-template>
+                        <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.required" 
+                             class="alert alert-danger mt-1 mb-0">
+                            Item is required.
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" [formGroupName]="'quantity'">
+                            <label><i class="fa fa-balance-scale"></i> Weight per Package</label>
+                            <div class="input-group">
+                                <input appDecimalNumber
+                                       type="text"
+                                       class="form-control"
+                                       formControlName="value"
+                                       [max]="!isInitialStockMode ? availableQuantity?.value : null"
+                                       placeholder="Enter weight">
+                                <div class="input-group-append">
+                                    <select class="custom-select" formControlName="unit">
+                                        <option *ngFor="let unit of unitValues"
+                                                [value]="unit">
+                                            {{ quantityUnitToLabelMapping[unit] }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <small *ngIf="!isInitialStockMode && availableQuantity" class="form-text text-muted">
+                                Max: {{availableQuantity.value}} {{quantityUnitToLabelMapping[availableQuantity.unit]}}
+                            </small>
+                            <div *ngIf="package.get('quantity.value')?.touched && package.get('quantity.value')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Weight is required.
+                            </div>
+                            <div *ngIf="package.get('quantity.value')?.touched && package.get('quantity.value')?.errors?.max" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Weight cannot exceed {{availableQuantity?.value}} {{quantityUnitToLabelMapping[availableQuantity?.unit]}}.
+                            </div>
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label><i class="fa fa-hashtag"></i> Number of Packages</label>
+                            <input type="number"
+                                   class="form-control"
+                                   formControlName="package_quantity"
+                                   min="1"
+                                   placeholder="1">
+                            <small class="form-text text-muted">
+                                How many packages have this same weight?
+                            </small>
+                            <div *ngIf="package.get('package_quantity')?.touched && package.get('package_quantity')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Number of packages is required.
+                            </div>
+                            <div *ngIf="package.get('package_quantity')?.touched && package.get('package_quantity')?.errors?.min" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Must be at least 1 package.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fa fa-rupee"></i> Rate {{isInitialStockMode ? '' : '(Auto-calculated)'}}</label>
+                        <input appDecimalNumber
+                               type="text"
+                               class="form-control"
+                               formControlName="rate"
+                               [readonly]="!isInitialStockMode">
+                        <small *ngIf="!isInitialStockMode" class="form-text text-muted">
+                            Source rate + Processing charge
+                        </small>
+                        <small *ngIf="isInitialStockMode" class="form-text text-muted">
+                            Enter rate per {{quantityUnitToLabelMapping[package.get('quantity.unit')?.value || 'KG']}}
+                        </small>
+                        <div *ngIf="package.get('rate')?.touched && package.get('rate')?.errors?.required" 
+                             class="alert alert-danger mt-1 mb-0">
+                            Rate is required.
+                        </div>
                     </div>
                 </div>
-                <small *ngIf="availableQuantity" class="form-text text-muted">
-                    Max: {{availableQuantity.value}} {{quantityUnitToLabelMapping[availableQuantity.unit]}}
-                </small>
-                <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
-                    <div>Quantity is required.</div>
-                </div>
-                <div *ngIf="value.touched && value.errors?.max" class="alert alert-danger">
-                    <div>Quantity cannot exceed {{availableQuantity?.value}} {{quantityUnitToLabelMapping[availableQuantity?.unit]}}.</div>
-                </div>
             </div>
-            <div class="form-group col-md-6">
-                <label for="rate"><i class="fa fa-rupee"></i> Rate (Auto-calculated)</label>
-                <input appDecimalNumber
-                       type="text"
-                       class="form-control"
-                       id="rate"
-                       formControlName="rate"
-                       readonly>
-                <small class="form-text text-muted">
-                    Source rate + Processing charge
-                </small>
-            </div>
+            
+            <button type="button" 
+                    class="btn btn-sm btn-secondary mt-2" 
+                    (click)="addPackage()">
+                <i class="fa fa-plus"></i> Add Another Package
+            </button>
         </div>
+        
         <div class="button-group">
             <div class="button-row">
                 <button class="btn btn-primary"
