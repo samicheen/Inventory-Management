@@ -141,7 +141,6 @@ export class BarcodeScannerService {
       source_barcode: barcodeData.barcode,
       booked_quantity: barcodeData.available_quantity,
       quantity: barcodeData.available_quantity,
-      is_spool: false,
       timestamp: new Date().toISOString()
     };
     

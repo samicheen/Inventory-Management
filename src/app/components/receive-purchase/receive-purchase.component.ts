@@ -286,12 +286,20 @@ export class ReceivePurchaseComponent implements OnInit {
           } else {
             this.notificationService.showSuccess('Purchase received successfully! Package details saved.');
             
-            // Close receive modal
-            this.modalRef.hide();
-            
-            // Open print labels modal for all package barcodes
+            // Open print labels modal for all package barcodes BEFORE closing receive modal
+            // This ensures the modal opens properly and canvas elements are ready
             if (response.packages && response.packages.length > 0) {
-              this.openPrintLabelsModal(response.packages);
+              // Small delay to ensure response is processed
+              setTimeout(() => {
+                this.openPrintLabelsModal(response.packages);
+                // Close receive modal after print labels modal is opened
+                setTimeout(() => {
+                  this.modalRef.hide();
+                }, 300);
+              }, 100);
+            } else {
+              // No packages, just close the modal
+              this.modalRef.hide();
             }
           }
         },
@@ -322,13 +330,20 @@ export class ReceivePurchaseComponent implements OnInit {
       const totalLabels = packages.length;
       
       const firstPackage = packages[0];
+      const quantity = (firstPackage.net_quantity !== undefined && firstPackage.net_quantity !== null) 
+        ? Number(firstPackage.net_quantity) 
+        : ((firstPackage.quantity !== undefined && firstPackage.quantity !== null) ? Number(firstPackage.quantity) : 0);
+      const netQuantity = (firstPackage.net_quantity !== undefined && firstPackage.net_quantity !== null) 
+        ? Number(firstPackage.net_quantity) 
+        : undefined;
+      
       const initialState = {
-        barcode: firstPackage.package_barcode,
-        itemName: this.item_name,
-        quantity: firstPackage.net_quantity || firstPackage.quantity,
-        netQuantity: firstPackage.net_quantity, // Include net quantity for QR code
-        unit: this.unit,
-        labelCount: totalLabels, // Auto-set from total packages created
+        barcode: firstPackage.package_barcode || '',
+        itemName: this.item_name || 'Item',
+        quantity: quantity,
+        netQuantity: netQuantity, // Include net quantity for QR code
+        unit: this.unit || 'KG',
+        labelCount: totalLabels || 1, // Auto-set from total packages created
         allPackages: packages // Pass all packages for batch printing
       };
       

@@ -4,6 +4,7 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
 import { PrintLabelsComponent } from '../print-labels/print-labels.component';
 import { ReceivePurchaseComponent } from '../receive-purchase/receive-purchase.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { Response } from '../../models/response.model';
 import { BehaviorSubject } from 'rxjs';
 import { Purchase } from 'src/app/models/purchase.model';
@@ -115,10 +116,49 @@ export class PurchaseListComponent implements OnInit {
     });
   }
 
-  removeItem(itemNumber: string) {
-    this.purchaseService.removeItem(itemNumber).subscribe(() => {
-      this.refreshItems.next(undefined);
+  removeItem(purchaseId: string) {
+    const initialState = {
+      title: 'Confirm Removal',
+      message: 'Are you sure you want to remove this purchase? This action cannot be undone if the purchase is not being used.',
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    };
+
+    const modalRef = this.modalService.show(ConfirmDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
     });
+
+    if (modalRef.content) {
+      modalRef.content.result.subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.purchaseService.removeItem(purchaseId).subscribe({
+            next: (response: any) => {
+              this.notificationService.showSuccess(response.message || 'Purchase removed successfully.');
+              this.refreshItems.next(undefined);
+            },
+            error: (error) => {
+              // Display the error message from the API
+              // Angular HttpClient wraps error responses, so we need to check multiple places
+              let errorMessage = 'Error removing purchase';
+              
+              if (error.error && error.error.message) {
+                errorMessage = error.error.message;
+              } else if (error.message) {
+                errorMessage = error.message;
+              } else if (typeof error === 'string') {
+                errorMessage = error;
+              }
+              
+              console.error('Purchase deletion error:', error); // Debug log
+              this.notificationService.showError(errorMessage);
+            }
+          });
+        }
+      });
+    }
   }
 
   getPurchases(){

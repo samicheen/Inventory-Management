@@ -46,6 +46,7 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     // Generate QR codes after view is initialized
+    // Use a longer delay to ensure modal content is fully rendered
     this.generateQRCodes();
   }
 
@@ -53,16 +54,37 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
     if (!this.barcode) return;
 
     // Generate QR code for each label
-    setTimeout(() => {
-      const canvasElements = document.querySelectorAll('.qrcode-canvas');
-      canvasElements.forEach((canvas: any, index: number) => {
-        try {
-          this.generateQRCodeOnCanvas(canvas, index);
-        } catch (error) {
-          console.error('Error generating QR code:', error);
-        }
-      });
-    }, 100);
+    // Use a longer timeout and retry mechanism to ensure canvas elements are ready
+    const maxRetries = 10;
+    let retryCount = 0;
+    
+    const tryGenerate = () => {
+      // Look for canvas elements within the modal (more specific selector)
+      const modalElement = document.querySelector('.modal.show') || document.body;
+      const canvasElements = modalElement.querySelectorAll('.qrcode-canvas');
+      
+      if (canvasElements.length > 0) {
+        // Canvas elements found, generate QR codes
+        canvasElements.forEach((canvas: any, index: number) => {
+          try {
+            if (canvas instanceof HTMLCanvasElement) {
+              this.generateQRCodeOnCanvas(canvas, index);
+            }
+          } catch (error) {
+            console.error('Error generating QR code:', error);
+          }
+        });
+      } else if (retryCount < maxRetries) {
+        // Canvas elements not found yet, retry after a short delay
+        retryCount++;
+        setTimeout(tryGenerate, 100);
+      } else {
+        console.warn('QR code canvas elements not found after multiple retries. Label count:', this.labelCount);
+      }
+    };
+    
+    // Start trying after a short initial delay
+    setTimeout(tryGenerate, 200);
   }
 
   generateQRCodeOnCanvas(canvas: HTMLCanvasElement, index: number): void {
@@ -108,16 +130,36 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
   getTotalQuantity(): number {
     if (this.allPackages && this.allPackages.length > 0) {
       // Sum up all package quantities
-      return this.allPackages.reduce((total, pkg) => {
-        const qty = pkg.net_quantity || pkg.quantity || 0;
-        return total + qty;
+      const total = this.allPackages.reduce((total, pkg) => {
+        const qty = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
+          ? Number(pkg.net_quantity) 
+          : ((pkg.quantity !== undefined && pkg.quantity !== null) ? Number(pkg.quantity) : 0);
+        return total + (isNaN(qty) ? 0 : qty);
       }, 0);
+      return isNaN(total) ? 0 : total;
     }
     // If single package or no packages, return the quantity * labelCount
-    const singleQty = this.netQuantity !== undefined && this.netQuantity !== null 
-      ? this.netQuantity 
-      : this.quantity;
-    return singleQty * this.labelCount;
+    const singleQty = (this.netQuantity !== undefined && this.netQuantity !== null) 
+      ? Number(this.netQuantity) 
+      : ((this.quantity !== undefined && this.quantity !== null) ? Number(this.quantity) : 0);
+    const labelCount = (this.labelCount !== undefined && this.labelCount !== null) ? Number(this.labelCount) : 1;
+    const result = (isNaN(singleQty) ? 0 : singleQty) * (isNaN(labelCount) ? 1 : labelCount);
+    return isNaN(result) ? 0 : result;
+  }
+
+  getPackageQuantity(index: number): number {
+    if (this.allPackages && this.allPackages[index]) {
+      const pkg = this.allPackages[index];
+      const qty = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
+        ? Number(pkg.net_quantity) 
+        : ((pkg.quantity !== undefined && pkg.quantity !== null) ? Number(pkg.quantity) : 0);
+      return isNaN(qty) ? 0 : qty;
+    }
+    // Fallback to netQuantity or quantity
+    const qty = (this.netQuantity !== undefined && this.netQuantity !== null) 
+      ? Number(this.netQuantity) 
+      : ((this.quantity !== undefined && this.quantity !== null) ? Number(this.quantity) : 0);
+    return isNaN(qty) ? 0 : qty;
   }
 
   onLabelCountChange(): void {
@@ -271,15 +313,18 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
     for (let i = 0; i < packagesToPrint.length; i++) {
       const pkg = packagesToPrint[i];
       const packageBarcode = pkg.package_barcode || defaultBarcode;
-      const displayQuantity = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+      // Safely convert to number
+      const rawQuantity = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
         ? pkg.net_quantity 
-        : (pkg.quantity || defaultNetQuantity);
+        : ((pkg.quantity !== undefined && pkg.quantity !== null) ? pkg.quantity : defaultNetQuantity);
+      const displayQuantity = Number(rawQuantity);
+      const safeQuantity = isNaN(displayQuantity) ? 0 : displayQuantity;
       
       // Create QR code data (quantity is already the net quantity)
       const qrData: QRCodeData = {
         barcode: packageBarcode,
         itemName: itemName,
-        quantity: displayQuantity, // This is already the net quantity
+        quantity: safeQuantity, // This is already the net quantity
         unit: unit
       };
       
@@ -325,9 +370,12 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
     
     packagesToPrint.forEach((pkg: any, i: number) => {
       const packageBarcode = pkg.package_barcode || defaultBarcode;
-      const displayQuantity = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+      // Safely convert to number
+      const rawQuantity = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
         ? pkg.net_quantity 
-        : (pkg.quantity || defaultNetQuantity);
+        : ((pkg.quantity !== undefined && pkg.quantity !== null) ? pkg.quantity : defaultNetQuantity);
+      const displayQuantity = Number(rawQuantity);
+      const safeQuantity = isNaN(displayQuantity) ? 0 : displayQuantity;
       
       const qrCodeImage = qrCodeImages[i] || '';
       
@@ -335,7 +383,7 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
         <div class="barcode-label">
           <div class="label-content">
             <div class="item-info">${itemName}</div>
-            <div class="quantity-info">${displayQuantity.toFixed(2)} ${unit}</div>
+            <div class="quantity-info">${safeQuantity.toFixed(2)} ${unit}</div>
             ${qrCodeImage ? `<img src="${qrCodeImage}" alt="QR Code" class="qrcode-image" style="width: 200px; height: 200px; margin: 10px 0; display: block;" />` : '<div class="qrcode-placeholder" style="width: 200px; height: 200px; margin: 10px 0; display: block; background: #f0f0f0; border: 1px solid #ccc;"></div>'}
             <div class="barcode-text">${packageBarcode}</div>
           </div>

@@ -14,6 +14,7 @@ import { ManufactureService } from 'src/app/services/manufacture/manufacture.ser
 import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-item.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { PrintLabelsComponent } from '../print-labels/print-labels.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-inventory-list',
@@ -72,6 +73,60 @@ export class InventoryListComponent implements OnInit {
         this.notificationService.showError('Error adding inventory: ' + (error.error?.message || error.message));
       });
     });
+  }
+
+  removeInventory(inventoryItem: InventoryItem): void {
+    // Get barcode for deletion (since inventory_id might not be available due to grouping)
+    // Barcode might be comma-separated (from GROUP_CONCAT), so take the first one
+    let barcode = inventoryItem.barcode || inventoryItem.source_barcode;
+    if (barcode) {
+      // Handle comma-separated barcodes from GROUP_CONCAT
+      if (barcode.includes(',')) {
+        barcode = barcode.split(',')[0].trim();
+      }
+      // Remove any extra whitespace
+      barcode = barcode.trim();
+    }
+    const inventoryId = inventoryItem.inventory_id;
+    
+    if (!inventoryId && !barcode) {
+      this.notificationService.showError('Inventory ID or barcode is missing. Cannot remove inventory.');
+      return;
+    }
+    
+    const initialState = {
+      title: 'Confirm Removal',
+      message: `Are you sure you want to remove this inventory item?\n\nItem: ${inventoryItem.item.name} Grade: ${inventoryItem.item.grade} Size: ${inventoryItem.item.size}\nBarcode: ${barcode || inventoryId || 'N/A'}\n\nNote: This can only be done if the inventory is not being used in manufacturing, sales, or as a source for other items.`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    };
+
+    const modalRef = this.modalService.show(ConfirmDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.result.subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.inventoryService.removeInventory(
+            inventoryId ? String(inventoryId) : '', 
+            barcode || undefined
+          ).subscribe({
+            next: (response: any) => {
+              this.notificationService.showSuccess(response.message || 'Inventory removed successfully.');
+              this.refreshItems.next(undefined);
+            },
+            error: (error) => {
+              const errorMessage = error.error?.message || error.message || 'Error removing inventory';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+        }
+      });
+    }
   }
 
   printLabelsForPackages(packages: any[]): void {

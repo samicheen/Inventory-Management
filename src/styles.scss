@@ -500,8 +500,87 @@
   }
 }
 
+/* Snackbar/Notification Improvements - Centered and Modern */
+::ng-deep .mat-snack-bar-container {
+  min-width: 400px !important;
+  max-width: 600px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 16px 24px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin-top: 20px !important;
+}
+
+::ng-deep .success-snackbar {
+  background-color: #10b981 !important;
+  color: white !important;
+  
+  .mat-simple-snackbar-action {
+    color: white !important;
+    font-weight: 600 !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 4px !important;
+    }
+  }
+}
+
+::ng-deep .error-snackbar {
+  background-color: #ef4444 !important;
+  color: white !important;
+  
+  .mat-simple-snackbar-action {
+    color: white !important;
+    font-weight: 600 !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 4px !important;
+    }
+  }
+}
+
+::ng-deep .info-snackbar {
+  background-color: #3b82f6 !important;
+  color: white !important;
+  
+  .mat-simple-snackbar-action {
+    color: white !important;
+    font-weight: 600 !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 4px !important;
+    }
+  }
+}
+
+::ng-deep .warning-snackbar {
+  background-color: #f59e0b !important;
+  color: white !important;
+  
+  .mat-simple-snackbar-action {
+    color: white !important;
+    font-weight: 600 !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-radius: 4px !important;
+    }
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  /* Snackbar responsive */
+  ::ng-deep .mat-snack-bar-container {
+    min-width: 90% !important;
+    max-width: 95% !important;
+    margin: 10px auto !important;
+  }
+  
   .table {
     font-size: 0.8125rem;
     

@@ -25,7 +25,7 @@
       <div class="label-content">
         <div class="item-info">{{itemName}}</div>
         <div class="quantity-info">
-          {{(allPackages && allPackages[i] && allPackages[i].net_quantity) ? allPackages[i].net_quantity.toFixed(2) : ((netQuantity !== undefined && netQuantity !== null) ? netQuantity.toFixed(2) : quantity.toFixed(2))}} {{unit}}
+          {{getPackageQuantity(i).toFixed(2)}} {{unit}}
         </div>
         <!-- QR Code visual representation -->
         <canvas class="qrcode-canvas" [id]="'qrcode-' + i"></canvas>

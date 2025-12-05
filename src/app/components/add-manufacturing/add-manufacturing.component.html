@@ -37,7 +37,6 @@
             </div>
             <small *ngIf="available_quantity" class="form-text text-muted">
                 Max: {{available_quantity.value}} {{quantityUnitToLabelMapping[available_quantity.unit]}}
-                <span *ngIf="isSpool.value"> (Enter gross weight including spool; net material will be calculated)</span>
             </small>
             <div *ngIf="value.touched && value.errors?.required" class="alert alert-danger">
                 <div>Quantity is required.</div>
@@ -45,37 +44,6 @@
             <div *ngIf="value.touched && value.errors?.max" class="alert alert-danger">
                 <div>Quantity cannot exceed {{available_quantity?.value}} {{quantityUnitToLabelMapping[available_quantity?.unit]}}.</div>
             </div>
-        </div>
-        <div class="form-group">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="is_spool" formControlName="is_spool">
-                <label class="form-check-label" for="is_spool">
-                    <i class="fa fa-box"></i> Is Spool
-                </label>
-            </div>
-        </div>
-        <div class="form-group" *ngIf="isSpool.value">
-            <label for="spool_weight"><i class="fa fa-weight"></i> Spool Weight (Kg)</label>
-            <input appDecimalNumber type="text"
-                class="form-control"
-                id="spool_weight"
-                formControlName="spool_weight"
-                placeholder="Enter spool weight">
-            <small class="form-text text-muted">
-                Enter the weight of the spool. This will be subtracted from the gross weight to calculate net material weight.
-            </small>
-            <div *ngIf="spoolWeight.touched && spoolWeight.errors?.required" class="alert alert-danger">
-                <div>Spool weight is required when spool is selected.</div>
-            </div>
-            <div *ngIf="spoolWeight.touched && spoolWeight.errors?.min" class="alert alert-danger">
-                <div>Spool weight must be 0 or greater.</div>
-            </div>
-        </div>
-        <div class="form-group" *ngIf="isSpool.value && value.value && spoolWeight.value">
-            <small class="form-text text-success">
-                <strong>Net weight:</strong> {{getNetWeight().toFixed(2)}} {{quantityUnitToLabelMapping[available_quantity?.unit || 'KG']}} 
-                ({{value.value}} - {{spoolWeight.value}})
-            </small>
         </div>
         <div class="button-group">
             <div class="button-row">

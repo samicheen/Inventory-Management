@@ -54,4 +54,32 @@ export class InventoryService {
    getInventoryByBarcode(barcode: string): Observable<any> {
      return this.http.get(`${this.apiUrl}/api/inventory/getInventoryByBarcode.php?barcode=${encodeURIComponent(barcode)}`);
    }
+
+  /**
+   * Remove inventory item (only if not in use downstream)
+   * @param inventoryId Inventory ID (optional)
+   * @param barcode Barcode (optional, used if inventory_id is not available)
+   */
+   removeInventory(inventoryId?: string, barcode?: string): Observable<any> {
+     const params: string[] = [];
+     
+     if (inventoryId && inventoryId.trim() !== '') {
+       params.push(`inventory_id=${encodeURIComponent(inventoryId.trim())}`);
+     }
+     
+     if (barcode && barcode.trim() !== '') {
+       params.push(`barcode=${encodeURIComponent(barcode.trim())}`);
+     }
+     
+     if (params.length === 0) {
+       return new Observable(observer => {
+         observer.error({ error: { message: 'Either inventory_id or barcode must be provided' } });
+       });
+     }
+     
+     const queryString = params.join('&');
+     return this.http.delete(`${this.apiUrl}/api/inventory/removeInventory.php?${queryString}`, {
+       responseType: 'json'
+     });
+   }
 }

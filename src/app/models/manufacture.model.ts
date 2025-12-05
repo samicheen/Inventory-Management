@@ -7,6 +7,5 @@ export interface Manufacture{
     booked_quantity: Quantity;
     quantity: Quantity;
     source_barcode?: string;
-    is_spool?: boolean;
     timestamp: string;
 }
