@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { RefreshService } from '../../services/refresh/refresh.service';
 import { Sale } from 'src/app/models/sale.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { SalesService } from 'src/app/services/sales/sales.service';
@@ -12,15 +14,17 @@ import { BehaviorSubject } from 'rxjs';
   templateUrl: './sales-list.component.html',
   styleUrls: ['./sales-list.component.scss']
 })
-export class SalesListComponent implements OnInit {
+export class SalesListComponent implements OnInit, OnDestroy {
   sales : Sale[];
   total_amount: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping
   private readonly refreshItems = new BehaviorSubject(undefined);
+  private refreshSubscription: Subscription;
 
   constructor(
     private salesService: SalesService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private refreshService: RefreshService
     ) { }
 
   ngOnInit(): void {
@@ -28,6 +32,19 @@ export class SalesListComponent implements OnInit {
     this.refreshItems.subscribe(() => {
       this.getSales();
     });
+    
+    // Subscribe to refresh service for auto-refresh after barcode scans
+    this.refreshSubscription = this.refreshService.refresh$.subscribe((page: string) => {
+      if (page === 'sales' || page === 'all') {
+        this.getSales();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
   }
 
   getSales() {

@@ -10,6 +10,7 @@
         <thead>
             <th scope="col">Name</th>
             <th scope="col">Processing Charge (Rs./Kg)</th>
+            <th scope="col">Can Be Processed Further</th>
             <th scope="col">Description</th>
             <th scope="col">Actions</th>
         </thead>
@@ -17,6 +18,11 @@
             <tr *ngFor="let pt of processingTypes">
                 <td>{{pt.name}}</td>
                 <td>{{pt.processing_charge}}</td>
+                <td>
+                    <span class="badge" [ngClass]="pt.can_be_processed_further ? 'badge-success' : 'badge-secondary'">
+                        {{pt.can_be_processed_further ? 'Yes' : 'No'}}
+                    </span>
+                </td>
                 <td>{{pt.description || '-'}}</td>
                 <td class="actions">
                     <div class="btn-group" dropdown>

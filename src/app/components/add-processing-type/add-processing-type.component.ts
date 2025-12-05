@@ -32,6 +32,10 @@ export class AddProcessingTypeComponent implements OnInit {
     return this.addProcessingTypeForm.get('description') as FormControl;
   }
 
+  get canBeProcessedFurther(): FormControl {
+    return this.addProcessingTypeForm.get('can_be_processed_further') as FormControl;
+  }
+
   ngOnInit(): void {
     // Check if we're in edit mode
     this.isEditMode = !!this.processingType;
@@ -40,6 +44,7 @@ export class AddProcessingTypeComponent implements OnInit {
     this.addProcessingTypeForm = this.formBuilder.group({
       name: [this.processingType?.name || '', Validators.required],
       processing_charge: [this.processingType?.processing_charge || 0, [Validators.required, Validators.min(0)]],
+      can_be_processed_further: [this.processingType?.can_be_processed_further !== undefined ? this.processingType.can_be_processed_further : false],
       description: [this.processingType?.description || '']
     });
   }

@@ -1,31 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from 'src/app/models/response.model';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { Item } from 'src/app/models/item.model';
 import { ManufactureService } from 'src/app/services/manufacture/manufacture.service';
 import { Manufacture } from 'src/app/models/manufacture.model';
 import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-item.component';
 import { PrintLabelsComponent } from '../print-labels/print-labels.component';
 import { ItemService } from 'src/app/services/item/item.service';
+import { RefreshService } from '../../services/refresh/refresh.service';
 
 @Component({
   selector: 'app-manufacturing-list',
   templateUrl: './manufacturing-list.component.html',
   styleUrls: ['./manufacturing-list.component.scss']
 })
-export class ManufacturingListComponent implements OnInit {
+export class ManufacturingListComponent implements OnInit, OnDestroy {
   manufactures : Manufacture[];
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   private readonly refreshItems = new BehaviorSubject(undefined);
+  private refreshSubscription: Subscription;
   
   constructor(
     private manufactureService: ManufactureService,
     private inventoryService: InventoryService,
     private modalService: BsModalService,
-    private itemService: ItemService
+    private itemService: ItemService,
+    private refreshService: RefreshService
   ) { }
 
   ngOnInit(): void {
@@ -33,6 +36,19 @@ export class ManufacturingListComponent implements OnInit {
     this.refreshItems.subscribe(() => {
       this.getManufacturingItems();
     });
+    
+    // Subscribe to refresh service for auto-refresh after barcode scans
+    this.refreshSubscription = this.refreshService.refresh$.subscribe((page: string) => {
+      if (page === 'manufacturing' || page === 'all') {
+        this.getManufacturingItems();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+    }
   }
 
   getManufacturingItems(){
@@ -64,11 +80,15 @@ export class ManufacturingListComponent implements OnInit {
 
   printLabelsForPackages(packages: any[]): void {
     // Print labels for all packages
-    // Group by item and weight to batch print
+    // Group by item and net_quantity to batch print packages with same weight
     const groupedPackages = new Map<string, any[]>();
     
     packages.forEach(pkg => {
-      const key = `${pkg.item_name}_${pkg.item_grade}_${pkg.item_size}_${pkg.weight}_${pkg.unit}`;
+      // Use net_quantity for grouping if available, otherwise use weight
+      const quantity = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+        ? pkg.net_quantity 
+        : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0));
+      const key = `${pkg.item_name}_${pkg.item_grade}_${pkg.item_size}_${quantity}_${pkg.unit}`;
       if (!groupedPackages.has(key)) {
         groupedPackages.set(key, []);
       }
@@ -79,14 +99,33 @@ export class ManufacturingListComponent implements OnInit {
     let firstPackage = true;
     groupedPackages.forEach((pkgGroup, key) => {
       const firstPkg = pkgGroup[0];
+      
+      // Calculate total quantity (sum of all package net_quantities)
+      let totalQuantity = 0;
+      pkgGroup.forEach(pkg => {
+        const qty = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+          ? Number(pkg.net_quantity) 
+          : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0));
+        totalQuantity += isNaN(qty) ? 0 : qty;
+      });
+      
+      // Format packages for print labels component
+      const formattedPackages = pkgGroup.map(pkg => ({
+        package_barcode: pkg.package_barcode || pkg.barcode,
+        net_quantity: pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+          ? Number(pkg.net_quantity) 
+          : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)),
+        quantity: pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)
+      }));
+      
       const initialState = {
-        barcode: firstPkg.barcode,
+        barcode: firstPkg.package_barcode || firstPkg.barcode,
         itemName: `${firstPkg.item_name} Grade: ${firstPkg.item_grade} Size: ${firstPkg.item_size}`,
-        quantity: firstPkg.weight,
-        netQuantity: firstPkg.net_quantity || firstPkg.weight, // Include net quantity for QR code
-        unit: firstPkg.unit,
-        labelCount: pkgGroup.length,
-        allPackages: pkgGroup // Pass all packages for QR code generation
+        quantity: totalQuantity, // Total quantity for all packages in this group
+        netQuantity: totalQuantity, // Net quantity (sum of all package net_quantities)
+        unit: firstPkg.unit || 'KG',
+        labelCount: pkgGroup.length, // Number of packages = number of labels
+        allPackages: formattedPackages // Pass all packages with correct structure
       };
       
       if (firstPackage) {

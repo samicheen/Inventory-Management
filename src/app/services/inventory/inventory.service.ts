@@ -56,6 +56,14 @@ export class InventoryService {
    }
 
   /**
+   * Get packages for an inventory item (for sub-items/processed items)
+   * @param itemId Item ID to get packages for
+   */
+  getInventoryPackages(itemId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/inventory/getInventoryPackages.php?item_id=${itemId}`);
+  }
+
+  /**
    * Remove inventory item (only if not in use downstream)
    * @param inventoryId Inventory ID (optional)
    * @param barcode Barcode (optional, used if inventory_id is not available)

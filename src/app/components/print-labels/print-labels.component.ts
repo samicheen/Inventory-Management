@@ -39,8 +39,10 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       barcode: this.barcode,
       itemName: this.itemName,
       quantity: this.quantity,
+      netQuantity: this.netQuantity,
       unit: this.unit,
-      labelCount: this.labelCount
+      labelCount: this.labelCount,
+      allPackages: this.allPackages
     });
   }
 
@@ -128,23 +130,25 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
   }
 
   getTotalQuantity(): number {
+    // If allPackages is provided and has entries, sum up all package net_quantities
     if (this.allPackages && this.allPackages.length > 0) {
-      // Sum up all package quantities
-      const total = this.allPackages.reduce((total, pkg) => {
+      const total = this.allPackages.reduce((sum, pkg) => {
+        // Try net_quantity first, then quantity, then fallback to 0
         const qty = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
           ? Number(pkg.net_quantity) 
-          : ((pkg.quantity !== undefined && pkg.quantity !== null) ? Number(pkg.quantity) : 0);
-        return total + (isNaN(qty) ? 0 : qty);
+          : ((pkg.quantity !== undefined && pkg.quantity !== null) 
+            ? Number(pkg.quantity) 
+            : 0);
+        return sum + (isNaN(qty) ? 0 : qty);
       }, 0);
       return isNaN(total) ? 0 : total;
     }
-    // If single package or no packages, return the quantity * labelCount
+    // If no allPackages, use the quantity passed in (already represents total)
+    // Prefer netQuantity over quantity
     const singleQty = (this.netQuantity !== undefined && this.netQuantity !== null) 
       ? Number(this.netQuantity) 
       : ((this.quantity !== undefined && this.quantity !== null) ? Number(this.quantity) : 0);
-    const labelCount = (this.labelCount !== undefined && this.labelCount !== null) ? Number(this.labelCount) : 1;
-    const result = (isNaN(singleQty) ? 0 : singleQty) * (isNaN(labelCount) ? 1 : labelCount);
-    return isNaN(result) ? 0 : result;
+    return isNaN(singleQty) ? 0 : singleQty;
   }
 
   getPackageQuantity(index: number): number {

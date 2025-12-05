@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { InventoryService } from '../inventory/inventory.service';
 import { SellItemComponent } from '../../components/sell-item/sell-item.component';
@@ -10,6 +11,7 @@ import { ItemService } from '../item/item.service';
 import { ChoiceDialogComponent } from '../../components/choice-dialog/choice-dialog.component';
 import { PrintLabelsComponent } from '../../components/print-labels/print-labels.component';
 import { NotificationService } from '../notification/notification.service';
+import { RefreshService } from '../refresh/refresh.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,9 @@ export class BarcodeScannerService {
     private salesService: SalesService,
     private manufactureService: ManufactureService,
     private itemService: ItemService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router,
+    private refreshService: RefreshService
   ) { }
 
   /**
@@ -38,7 +42,6 @@ export class BarcodeScannerService {
     // Lookup barcode
     this.inventoryService.getInventoryByBarcode(barcode.trim()).subscribe(
       (response: any) => {
-        console.log('Barcode scan response:', response); // Debug: Check what action is returned
         if (response.action === 'manufacture') {
           // Raw material (PUR-xxx) → Open manufacturing form to send to manufacturing
           this.openSendToManufacturingForm(response);
@@ -69,7 +72,8 @@ export class BarcodeScannerService {
    */
   private openSendToManufacturingForm(barcodeData: any): void {
     // If it's a package barcode with complete data (net_quantity), directly add to manufacturing
-    if (barcodeData.is_package && barcodeData.packaging_weight !== undefined && barcodeData.packaging_weight > 0) {
+    // Package barcodes have is_package flag and available_quantity is already the net quantity
+    if (barcodeData.is_package && barcodeData.available_quantity && barcodeData.available_quantity.value > 0) {
       this.directlyAddToManufacturing(barcodeData);
       return;
     }
@@ -98,6 +102,9 @@ export class BarcodeScannerService {
           () => {
             // Success - modal will close automatically
             this.notificationService.showSuccess('Raw material sent to manufacturing. After processing, add sub-item from Manufacturing list.');
+            // Trigger refresh for manufacturing and inventory pages
+            this.refreshService.triggerRefresh('manufacturing');
+            this.refreshService.triggerRefresh('inventory');
           },
           (error) => {
             this.notificationService.showError('Error sending to manufacturing: ' + (error.error?.message || error.message));
@@ -110,13 +117,19 @@ export class BarcodeScannerService {
   /**
    * Directly add package to manufacturing without showing form
    * Used when package barcode has complete data (net_quantity already calculated)
+   * Groups packages by parent purchase barcode (source_barcode)
    */
   private directlyAddToManufacturing(barcodeData: any): void {
+    // Use parent purchase barcode (source_barcode) for grouping, not the individual package barcode
+    // This ensures all packages from the same purchase are grouped together
+    const parentBarcode = barcodeData.source_barcode || barcodeData.barcode;
+    
     const manufacture: any = {
       item: {
         item_id: barcodeData.item.item_id
       },
-      source_barcode: barcodeData.barcode,
+      source_barcode: parentBarcode, // Use parent purchase barcode for grouping
+      package_barcode: barcodeData.barcode, // Include package barcode to check for duplicates
       booked_quantity: {
         value: barcodeData.available_quantity.value, // This is already net quantity
         unit: barcodeData.available_quantity.unit
@@ -131,12 +144,21 @@ export class BarcodeScannerService {
     this.manufactureService.addToManufacturing(manufacture).subscribe(
       () => {
         this.notificationService.showSuccess(
-          `Package ${barcodeData.barcode} sent to manufacturing. ` +
+          `Package ${barcodeData.barcode} sent to manufacturing (grouped under ${parentBarcode}). ` +
           `After processing, add sub-item from Manufacturing list.`
         );
+        // Trigger refresh for manufacturing and inventory pages
+        this.refreshService.triggerRefresh('manufacturing');
+        this.refreshService.triggerRefresh('inventory');
       },
       (error) => {
-        this.notificationService.showError('Error sending to manufacturing: ' + (error.error?.message || error.message));
+        const errorMessage = error.error?.message || error.message;
+        // Check if it's a duplicate package error
+        if (errorMessage.includes('already been added') || errorMessage.includes('duplicate')) {
+          this.notificationService.showError(`Package ${barcodeData.barcode} has already been added to manufacturing.`);
+        } else {
+          this.notificationService.showError('Error sending to manufacturing: ' + errorMessage);
+        }
       }
     );
   }
@@ -205,6 +227,9 @@ export class BarcodeScannerService {
         this.inventoryService.addInventoryItem(item).subscribe(
           (response: any) => {
             // Success - modal will close automatically
+            // Trigger refresh for manufacturing and inventory pages
+            this.refreshService.triggerRefresh('manufacturing');
+            this.refreshService.triggerRefresh('inventory');
             if (response && response.barcode) {
               // Open print labels modal
               this.openPrintLabelsModal(response, item);
@@ -284,6 +309,9 @@ export class BarcodeScannerService {
         this.salesService.sellItem(sale).subscribe(
           () => {
             // Success - modal will close automatically
+            // Trigger refresh for sales and inventory pages
+            this.refreshService.triggerRefresh('sales');
+            this.refreshService.triggerRefresh('inventory');
           },
           (error) => {
             this.notificationService.showError('Error selling item: ' + (error.error?.message || error.message));

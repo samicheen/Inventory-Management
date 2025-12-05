@@ -123,7 +123,8 @@ export class AddInventoryItemComponent implements OnInit {
             if (this.manufactureEntry?.quantity) {
               this.availableQuantity = this.manufactureEntry.quantity;
             }
-            if (this.processingType.value) {
+            // Update rates for all existing packages if processing type is already selected
+            if (this.processingType.value && this.sourceRate > 0) {
               setTimeout(() => this.updateAllPackageRates(), 100);
             }
           },
@@ -170,6 +171,10 @@ export class AddInventoryItemComponent implements OnInit {
 
   addPackage(): void {
     this.packages.push(this.createPackageFormGroup());
+    // Calculate rate for the new package if in processing mode
+    if (!this.isInitialStockMode && this.sourceRate > 0 && this.processingType.value) {
+      this.updateAllPackageRates();
+    }
   }
 
   removePackage(index: number): void {
