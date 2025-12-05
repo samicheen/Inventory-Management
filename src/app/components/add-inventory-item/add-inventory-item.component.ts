@@ -75,7 +75,7 @@ export class AddInventoryItemComponent implements OnInit {
     this.packages = this.addInventoryItemForm.get('packages') as FormArray;
 
     // Load processing types from master data
-    this.processingTypeService.getProcessingTypes(true).subscribe(
+    this.processingTypeService.getProcessingTypes().subscribe(
       (response) => {
         this.processingTypes = response.processing_types.map(pt => ({
           value: pt.processing_type_id!,

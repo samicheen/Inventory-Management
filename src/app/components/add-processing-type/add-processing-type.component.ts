@@ -40,8 +40,7 @@ export class AddProcessingTypeComponent implements OnInit {
     this.addProcessingTypeForm = this.formBuilder.group({
       name: [this.processingType?.name || '', Validators.required],
       processing_charge: [this.processingType?.processing_charge || 0, [Validators.required, Validators.min(0)]],
-      description: [this.processingType?.description || ''],
-      is_active: [this.processingType?.is_active !== undefined ? this.processingType.is_active : true]
+      description: [this.processingType?.description || '']
     });
   }
 

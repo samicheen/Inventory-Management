@@ -30,7 +30,7 @@ export class ProcessingTypeListComponent implements OnInit {
   }
 
   getProcessingTypes() {
-    this.processingTypeService.getProcessingTypes(true)
+    this.processingTypeService.getProcessingTypes()
     .subscribe((response) => {
       this.processingTypes = response.processing_types;
     }, (error) => {
@@ -81,7 +81,7 @@ export class ProcessingTypeListComponent implements OnInit {
   removeProcessingType(processingType: ProcessingType) {
     const initialState = {
       title: 'Confirm Removal',
-      message: `Are you sure you want to remove "${processingType.name}"? This will deactivate the processing type.`,
+      message: `Are you sure you want to delete "${processingType.name}"? This action cannot be undone.`,
       confirmText: 'Remove',
       cancelText: 'Cancel'
     };

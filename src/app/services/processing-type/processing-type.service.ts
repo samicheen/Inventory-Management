@@ -8,7 +8,6 @@ export interface ProcessingType {
   name: string;
   processing_charge: number;
   description?: string;
-  is_active?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -21,8 +20,8 @@ export class ProcessingTypeService {
 
   constructor(private http: HttpClient) { }
 
-  getProcessingTypes(activeOnly: boolean = true): Observable<{processing_types: ProcessingType[]}> {
-    return this.http.get<{processing_types: ProcessingType[]}>(`${this.apiUrl}/api/processing_type/getProcessingTypes.php?active_only=${activeOnly}`);
+  getProcessingTypes(): Observable<{processing_types: ProcessingType[]}> {
+    return this.http.get<{processing_types: ProcessingType[]}>(`${this.apiUrl}/api/processing_type/getProcessingTypes.php`);
   }
 
   addProcessingType(processingType: ProcessingType): Observable<any> {

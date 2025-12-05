@@ -11,7 +11,6 @@
             <th scope="col">Name</th>
             <th scope="col">Processing Charge (Rs./Kg)</th>
             <th scope="col">Description</th>
-            <th scope="col">Status</th>
             <th scope="col">Actions</th>
         </thead>
         <tbody>
@@ -19,11 +18,6 @@
                 <td>{{pt.name}}</td>
                 <td>{{pt.processing_charge}}</td>
                 <td>{{pt.description || '-'}}</td>
-                <td>
-                    <span class="badge" [ngClass]="pt.is_active ? 'badge-success' : 'badge-secondary'">
-                        {{pt.is_active ? 'Active' : 'Inactive'}}
-                    </span>
-                </td>
                 <td class="actions">
                     <div class="btn-group" dropdown>
                         <button id="button-split" type="button" dropdownToggle class="btn"
