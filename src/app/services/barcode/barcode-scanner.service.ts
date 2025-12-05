@@ -68,6 +68,12 @@ export class BarcodeScannerService {
    * This is Step 1: Move raw material to manufacturing
    */
   private openSendToManufacturingForm(barcodeData: any): void {
+    // If it's a package barcode with complete data (net_quantity), directly add to manufacturing
+    if (barcodeData.is_package && barcodeData.packaging_weight !== undefined && barcodeData.packaging_weight > 0) {
+      this.directlyAddToManufacturing(barcodeData);
+      return;
+    }
+    
     const initialState = {
       item: barcodeData.item,
       barcode: barcodeData.barcode,
@@ -99,6 +105,40 @@ export class BarcodeScannerService {
         );
       });
     }
+  }
+
+  /**
+   * Directly add package to manufacturing without showing form
+   * Used when package barcode has complete data (net_quantity already calculated)
+   */
+  private directlyAddToManufacturing(barcodeData: any): void {
+    const manufacture: any = {
+      item: {
+        item_id: barcodeData.item.item_id
+      },
+      source_barcode: barcodeData.barcode,
+      booked_quantity: {
+        value: barcodeData.available_quantity.value, // This is already net quantity
+        unit: barcodeData.available_quantity.unit
+      },
+      quantity: {
+        value: barcodeData.available_quantity.value, // This is already net quantity
+        unit: barcodeData.available_quantity.unit
+      },
+      timestamp: new Date().toISOString()
+    };
+
+    this.manufactureService.addToManufacturing(manufacture).subscribe(
+      () => {
+        this.notificationService.showSuccess(
+          `Package ${barcodeData.barcode} sent to manufacturing. ` +
+          `After processing, add sub-item from Manufacturing list.`
+        );
+      },
+      (error) => {
+        this.notificationService.showError('Error sending to manufacturing: ' + (error.error?.message || error.message));
+      }
+    );
   }
 
   /**

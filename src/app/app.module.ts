@@ -43,6 +43,8 @@ import { PrintLabelsComponent } from './components/print-labels/print-labels.com
 import { ChoiceDialogComponent } from './components/choice-dialog/choice-dialog.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { ReceivePurchaseComponent } from './components/receive-purchase/receive-purchase.component';
+import { ProcessingTypeListComponent } from './components/processing-type-list/processing-type-list.component';
+import { AddProcessingTypeComponent } from './components/add-processing-type/add-processing-type.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -78,7 +80,9 @@ export function initGapi(gapiSession: GapiSession) {
         PrintLabelsComponent,
         ChoiceDialogComponent,
         ConfirmDialogComponent,
-        ReceivePurchaseComponent
+        ReceivePurchaseComponent,
+        ProcessingTypeListComponent,
+        AddProcessingTypeComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

@@ -8,6 +8,7 @@ import { Item } from 'src/app/models/item.model';
 import { InventoryItem } from 'src/app/models/inventory-item.model';
 import { ItemService } from 'src/app/services/item/item.service';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
+import { ProcessingTypeService } from 'src/app/services/processing-type/processing-type.service';
 import { Manufacture } from 'src/app/models/manufacture.model';
 
 @Component({
@@ -26,18 +27,18 @@ export class AddInventoryItemComponent implements OnInit {
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
   saveAndPrintInventoryItems: Subject<any>; // Changed to accept array of packages
-  processingTypes = [
-    { value: 'cut', label: 'S-Cut', charge: 20 },
-    { value: 'conditioned', label: 'Conditioned', charge: 5 }
-  ];
+  processingTypes: Array<{value: string, label: string, charge: number}> = [];
   availableQuantity: any = null; // From manufacturing entry
   sourceRate: number = 0; // Source rate from purchase/inventory
   isInitialStockMode: boolean = false; // True when adding initial stock (no manufactureEntry)
 
-  constructor(private formBuilder: FormBuilder,
-              private itemService: ItemService,
-              private inventoryService: InventoryService,
-              public modalRef: BsModalRef) { }
+  constructor(
+    private formBuilder: FormBuilder,
+    private itemService: ItemService,
+    private inventoryService: InventoryService,
+    private processingTypeService: ProcessingTypeService,
+    public modalRef: BsModalRef
+  ) { }
 
   get timestamp(): FormControl {
     return this.addInventoryItemForm.get('timestamp') as FormControl;
@@ -70,6 +71,25 @@ export class AddInventoryItemComponent implements OnInit {
     });
     
     this.packages = this.addInventoryItemForm.get('packages') as FormArray;
+
+    // Load processing types from master data
+    this.processingTypeService.getProcessingTypes(true).subscribe(
+      (response) => {
+        this.processingTypes = response.processing_types.map(pt => ({
+          value: pt.code,
+          label: pt.name,
+          charge: pt.processing_charge
+        }));
+      },
+      (error) => {
+        console.error('Error loading processing types:', error);
+        // Fallback to default if API fails
+        this.processingTypes = [
+          { value: 'cut', label: 'S-Cut', charge: 20 },
+          { value: 'conditioned', label: 'Conditioned', charge: 25 }
+        ];
+      }
+    );
 
     // Load items based on mode
     if (this.isInitialStockMode) {
@@ -128,7 +148,7 @@ export class AddInventoryItemComponent implements OnInit {
       ? ['', rateValidators] // Enabled for initial stock
       : [{value: '', disabled: true}, rateValidators]; // Disabled for processing
     
-    return this.formBuilder.group({
+    const formGroup = this.formBuilder.group({
       selected_item: ['', Validators.required],
       selected_item_id: ['', Validators.required],
       quantity: this.formBuilder.group({
@@ -139,6 +159,13 @@ export class AddInventoryItemComponent implements OnInit {
       rate: rateState,
       is_manual_rate: [this.isInitialStockMode] // Allow manual rate entry for initial stock
     });
+    
+    // Add packaging_weight field for processed items (SCUT/COND) when unit is KG
+    if (!this.isInitialStockMode) {
+      formGroup.addControl('packaging_weight', this.formBuilder.control(0, [Validators.min(0)]));
+    }
+    
+    return formGroup;
   }
 
   addPackage(): void {
@@ -209,6 +236,9 @@ export class AddInventoryItemComponent implements OnInit {
         const quantityValue = parseFloat(packageGroup.get('quantity.value')?.value) || 0;
         const rateValue = parseFloat(packageGroup.get('rate')?.value) || 0;
         const packageQuantity = parseInt(packageGroup.get('package_quantity')?.value) || 1;
+        const packagingWeight = !this.isInitialStockMode && pkg.quantity?.unit === 'KG' 
+          ? parseFloat(packageGroup.get('packaging_weight')?.value) || 0 
+          : 0;
         
         return {
           item: {
@@ -224,6 +254,7 @@ export class AddInventoryItemComponent implements OnInit {
           rate: rateValue,
           closing_amount: (quantityValue * rateValue).toFixed(2),
           package_quantity: packageQuantity, // Number of packages with same weight
+          packaging_weight: packagingWeight, // Packaging weight for processed items
           timestamp: formValue.timestamp
         };
       });

@@ -129,6 +129,24 @@
                         </div>
                     </div>
                     
+                    <!-- Packaging Weight (only for processed items with KG unit) -->
+                    <div *ngIf="!isInitialStockMode && package.get('quantity.unit')?.value === 'KG'" class="form-group">
+                        <label><i class="fa fa-weight"></i> Packaging Weight (Kg)</label>
+                        <input appDecimalNumber
+                               type="text"
+                               class="form-control"
+                               formControlName="packaging_weight"
+                               placeholder="0.00">
+                        <small class="form-text text-muted">
+                            Weight of packaging material (e.g., box, spool). This will be subtracted from gross weight to calculate net quantity.
+                        </small>
+                        <div *ngIf="package.get('packaging_weight')?.touched && package.get('packaging_weight')?.errors?.min" 
+                             class="alert alert-danger mt-1 mb-0">
+                            Packaging weight must be 0 or greater.
+                        </div>
+                    </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label><i class="fa fa-rupee"></i> Rate {{isInitialStockMode ? '' : '(Auto-calculated)'}}</label>
                         <input appDecimalNumber

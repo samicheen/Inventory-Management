@@ -1,0 +1,46 @@
+<div class="container-fluid">
+    <div class="flex-container">
+        <button type="button"
+                class="btn btn-primary add-item-btn"
+                (click)="addProcessingType()">
+            Add Processing Type
+        </button>
+    </div>
+    <table class="table">
+        <thead>
+            <th scope="col">Name</th>
+            <th scope="col">Code</th>
+            <th scope="col">Processing Charge (Rs./Kg)</th>
+            <th scope="col">Description</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let pt of processingTypes">
+                <td>{{pt.name}}</td>
+                <td><code>{{pt.code}}</code></td>
+                <td>{{pt.processing_charge}}</td>
+                <td>{{pt.description || '-'}}</td>
+                <td>
+                    <span class="badge" [ngClass]="pt.is_active ? 'badge-success' : 'badge-secondary'">
+                        {{pt.is_active ? 'Active' : 'Inactive'}}
+                    </span>
+                </td>
+                <td class="actions">
+                    <div class="btn-group" dropdown>
+                        <button id="button-split" type="button" dropdownToggle class="btn"
+                                aria-controls="dropdown-split">
+                                <i class="fa fa-ellipsis-v"></i>
+                        </button>
+                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                            role="menu" aria-labelledby="button-split">
+                            <li role="menuitem"><a class="dropdown-item" (click)="editProcessingType(pt)"><i class="fa fa-edit"></i> Edit</a></li>
+                            <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeProcessingType(pt)"><i class="fa fa-trash"></i> Remove</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
