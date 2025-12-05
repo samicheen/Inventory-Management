@@ -6,7 +6,6 @@ import { environment } from '../../../environments/environment';
 export interface ProcessingType {
   processing_type_id?: number;
   name: string;
-  code: string;
   processing_charge: number;
   description?: string;
   is_active?: boolean;

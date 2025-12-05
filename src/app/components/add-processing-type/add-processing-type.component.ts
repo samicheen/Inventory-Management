@@ -24,10 +24,6 @@ export class AddProcessingTypeComponent implements OnInit {
     return this.addProcessingTypeForm.get('name') as FormControl;
   }
 
-  get code(): FormControl {
-    return this.addProcessingTypeForm.get('code') as FormControl;
-  }
-
   get processingCharge(): FormControl {
     return this.addProcessingTypeForm.get('processing_charge') as FormControl;
   }
@@ -43,7 +39,6 @@ export class AddProcessingTypeComponent implements OnInit {
     this.saveProcessingType = new Subject();
     this.addProcessingTypeForm = this.formBuilder.group({
       name: [this.processingType?.name || '', Validators.required],
-      code: [this.processingType?.code || '', [Validators.required, Validators.pattern(/^[a-z0-9_]+$/)]],
       processing_charge: [this.processingType?.processing_charge || 0, [Validators.required, Validators.min(0)]],
       description: [this.processingType?.description || ''],
       is_active: [this.processingType?.is_active !== undefined ? this.processingType.is_active : true]

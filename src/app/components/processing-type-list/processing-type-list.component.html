@@ -9,7 +9,6 @@
     <table class="table">
         <thead>
             <th scope="col">Name</th>
-            <th scope="col">Code</th>
             <th scope="col">Processing Charge (Rs./Kg)</th>
             <th scope="col">Description</th>
             <th scope="col">Status</th>
@@ -18,7 +17,6 @@
         <tbody>
             <tr *ngFor="let pt of processingTypes">
                 <td>{{pt.name}}</td>
-                <td><code>{{pt.code}}</code></td>
                 <td>{{pt.processing_charge}}</td>
                 <td>{{pt.description || '-'}}</td>
                 <td>

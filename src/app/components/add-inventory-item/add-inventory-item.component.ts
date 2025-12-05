@@ -9,6 +9,7 @@ import { InventoryItem } from 'src/app/models/inventory-item.model';
 import { ItemService } from 'src/app/services/item/item.service';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { ProcessingTypeService } from 'src/app/services/processing-type/processing-type.service';
+import { NotificationService } from 'src/app/services/notification/notification.service';
 import { Manufacture } from 'src/app/models/manufacture.model';
 
 @Component({
@@ -27,7 +28,7 @@ export class AddInventoryItemComponent implements OnInit {
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
   saveAndPrintInventoryItems: Subject<any>; // Changed to accept array of packages
-  processingTypes: Array<{value: string, label: string, charge: number}> = [];
+  processingTypes: Array<{value: number, label: string, charge: number}> = [];
   availableQuantity: any = null; // From manufacturing entry
   sourceRate: number = 0; // Source rate from purchase/inventory
   isInitialStockMode: boolean = false; // True when adding initial stock (no manufactureEntry)
@@ -37,6 +38,7 @@ export class AddInventoryItemComponent implements OnInit {
     private itemService: ItemService,
     private inventoryService: InventoryService,
     private processingTypeService: ProcessingTypeService,
+    private notificationService: NotificationService,
     public modalRef: BsModalRef
   ) { }
 
@@ -76,18 +78,15 @@ export class AddInventoryItemComponent implements OnInit {
     this.processingTypeService.getProcessingTypes(true).subscribe(
       (response) => {
         this.processingTypes = response.processing_types.map(pt => ({
-          value: pt.code,
+          value: pt.processing_type_id!,
           label: pt.name,
           charge: pt.processing_charge
         }));
       },
       (error) => {
         console.error('Error loading processing types:', error);
-        // Fallback to default if API fails
-        this.processingTypes = [
-          { value: 'cut', label: 'S-Cut', charge: 20 },
-          { value: 'conditioned', label: 'Conditioned', charge: 25 }
-        ];
+        this.notificationService.showError('Error loading processing types. Please refresh the page.');
+        this.processingTypes = [];
       }
     );
 
@@ -148,7 +147,8 @@ export class AddInventoryItemComponent implements OnInit {
       ? ['', rateValidators] // Enabled for initial stock
       : [{value: '', disabled: true}, rateValidators]; // Disabled for processing
     
-    const formGroup = this.formBuilder.group({
+    // Build form group with all fields (including packaging_weight for processed items)
+    const formGroupConfig: any = {
       selected_item: ['', Validators.required],
       selected_item_id: ['', Validators.required],
       quantity: this.formBuilder.group({
@@ -158,14 +158,14 @@ export class AddInventoryItemComponent implements OnInit {
       package_quantity: [1, [Validators.required, Validators.min(1)]], // Number of packages with same weight
       rate: rateState,
       is_manual_rate: [this.isInitialStockMode] // Allow manual rate entry for initial stock
-    });
+    };
     
-    // Add packaging_weight field for processed items (SCUT/COND) when unit is KG
+    // Add packaging_weight field for processed items (SCUT/COND)
     if (!this.isInitialStockMode) {
-      formGroup.addControl('packaging_weight', this.formBuilder.control(0, [Validators.min(0)]));
+      formGroupConfig.packaging_weight = [0, [Validators.min(0)]];
     }
     
-    return formGroup;
+    return this.formBuilder.group(formGroupConfig);
   }
 
   addPackage(): void {
@@ -194,7 +194,8 @@ export class AddInventoryItemComponent implements OnInit {
 
   updateAllPackageRates(): void {
     if (this.sourceRate > 0 && this.processingType.value) {
-      const processingType = this.processingTypes.find(pt => pt.value === this.processingType.value);
+      const processingTypeId = Number(this.processingType.value);
+      const processingType = this.processingTypes.find(pt => pt.value === processingTypeId);
       const processingCharge = processingType ? processingType.charge : 0;
       const sourceRateNum = typeof this.sourceRate === 'string' ? parseFloat(this.sourceRate) : (this.sourceRate || 0);
       const newRate = sourceRateNum + processingCharge;
