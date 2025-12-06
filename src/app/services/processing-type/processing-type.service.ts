@@ -7,7 +7,6 @@ export interface ProcessingType {
   processing_type_id?: number;
   name: string;
   processing_charge: number;
-  can_be_processed_further?: boolean;
   description?: string;
   created_at?: string;
   updated_at?: string;

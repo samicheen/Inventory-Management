@@ -46,9 +46,6 @@ export class AddInventoryItemComponent implements OnInit {
     return this.addInventoryItemForm.get('timestamp') as FormControl;
   }
 
-  get processingType(): FormControl {
-    return this.addInventoryItemForm.get('processing_type') as FormControl;
-  }
 
 
   ngOnInit(): void {
@@ -64,10 +61,7 @@ export class AddInventoryItemComponent implements OnInit {
     this.saveAndPrintInventoryItems = new Subject();
     
     // Build form with packages FormArray
-    const processingTypeValidators = this.isInitialStockMode ? [] : [Validators.required];
-    
     this.addInventoryItemForm = this.formBuilder.group({
-      processing_type: ['', processingTypeValidators], // Required only for processing mode
       timestamp: [new Date()],
       packages: this.formBuilder.array([this.createPackageFormGroup()])
     });
@@ -108,13 +102,6 @@ export class AddInventoryItemComponent implements OnInit {
         this.items = [];
       });
       
-      // Auto-calculate rate when processing type changes
-      this.processingType.valueChanges.subscribe(() => {
-        if (this.sourceRate > 0) {
-          this.updateAllPackageRates();
-        }
-      });
-      
       // Get source rate from source_barcode
       if (this.manufactureEntry?.source_barcode) {
         this.inventoryService.getInventoryByBarcode(this.manufactureEntry.source_barcode).subscribe(
@@ -123,8 +110,8 @@ export class AddInventoryItemComponent implements OnInit {
             if (this.manufactureEntry?.quantity) {
               this.availableQuantity = this.manufactureEntry.quantity;
             }
-            // Update rates for all existing packages if processing type is already selected
-            if (this.processingType.value && this.sourceRate > 0) {
+            // Update rates for all existing packages if they have processing types selected
+            if (this.sourceRate > 0) {
               setTimeout(() => this.updateAllPackageRates(), 100);
             }
           },
@@ -148,7 +135,9 @@ export class AddInventoryItemComponent implements OnInit {
       ? ['', rateValidators] // Enabled for initial stock
       : [{value: '', disabled: true}, rateValidators]; // Disabled for processing
     
-    // Build form group with all fields (including packaging_weight for processed items)
+    // Build form group with all fields (including packaging_weight and processing_type for processed items)
+    const processingTypeValidators = this.isInitialStockMode ? [] : [Validators.required];
+    
     const formGroupConfig: any = {
       selected_item: ['', Validators.required],
       selected_item_id: ['', Validators.required],
@@ -161,9 +150,10 @@ export class AddInventoryItemComponent implements OnInit {
       is_manual_rate: [this.isInitialStockMode] // Allow manual rate entry for initial stock
     };
     
-    // Add packaging_weight field for processed items (SCUT/COND)
+    // Add packaging_weight and processing_type fields for processed items
     if (!this.isInitialStockMode) {
       formGroupConfig.packaging_weight = [0, [Validators.min(0)]];
+      formGroupConfig.processing_type = ['', processingTypeValidators]; // Processing type per package
     }
     
     return this.formBuilder.group(formGroupConfig);
@@ -171,10 +161,6 @@ export class AddInventoryItemComponent implements OnInit {
 
   addPackage(): void {
     this.packages.push(this.createPackageFormGroup());
-    // Calculate rate for the new package if in processing mode
-    if (!this.isInitialStockMode && this.sourceRate > 0 && this.processingType.value) {
-      this.updateAllPackageRates();
-    }
   }
 
   removePackage(index: number): void {
@@ -197,21 +183,31 @@ export class AddInventoryItemComponent implements OnInit {
     }
   }
 
-  updateAllPackageRates(): void {
-    if (this.sourceRate > 0 && this.processingType.value) {
-      const processingTypeId = Number(this.processingType.value);
-      const processingType = this.processingTypes.find(pt => pt.value === processingTypeId);
+  updatePackageRate(index: number): void {
+    if (this.isInitialStockMode) return;
+    
+    const packageGroup = this.packages.at(index);
+    const processingTypeId = packageGroup.get('processing_type')?.value;
+    
+    if (this.sourceRate > 0 && processingTypeId) {
+      const processingType = this.processingTypes.find(pt => pt.value === Number(processingTypeId));
       const processingCharge = processingType ? processingType.charge : 0;
       const sourceRateNum = typeof this.sourceRate === 'string' ? parseFloat(this.sourceRate) : (this.sourceRate || 0);
       const newRate = sourceRateNum + processingCharge;
       
-      this.packages.controls.forEach(control => {
-        const rateControl = control.get('rate');
-        rateControl?.enable({ emitEvent: false });
-        control.patchValue({ rate: newRate.toFixed(2) }, { emitEvent: false });
-        rateControl?.disable({ emitEvent: false });
-      });
+      const rateControl = packageGroup.get('rate');
+      rateControl?.enable({ emitEvent: false });
+      packageGroup.patchValue({ rate: newRate.toFixed(2) }, { emitEvent: false });
+      rateControl?.disable({ emitEvent: false });
     }
+  }
+  
+  updateAllPackageRates(): void {
+    if (this.isInitialStockMode) return;
+    
+    this.packages.controls.forEach((control, index) => {
+      this.updatePackageRate(index);
+    });
   }
 
   doneAndPrintLabels() {
@@ -252,7 +248,7 @@ export class AddInventoryItemComponent implements OnInit {
             parent_item_id: this.parentItem?.item_id || null
           },
           source_barcode: this.manufactureEntry?.source_barcode || null,
-          processing_type: this.isInitialStockMode ? null : formValue.processing_type,
+          processing_type: this.isInitialStockMode ? null : (pkg.processing_type || null), // Processing type per package
           closing_stock: {
             value: quantityValue,
             unit: pkg.quantity.unit

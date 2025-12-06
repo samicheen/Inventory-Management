@@ -8,7 +8,6 @@ import { AddManufacturingComponent } from '../../components/add-manufacturing/ad
 import { SalesService } from '../sales/sales.service';
 import { ManufactureService } from '../manufacture/manufacture.service';
 import { ItemService } from '../item/item.service';
-import { ChoiceDialogComponent } from '../../components/choice-dialog/choice-dialog.component';
 import { PrintLabelsComponent } from '../../components/print-labels/print-labels.component';
 import { NotificationService } from '../notification/notification.service';
 import { RefreshService } from '../refresh/refresh.service';
@@ -45,9 +44,6 @@ export class BarcodeScannerService {
         if (response.action === 'manufacture') {
           // Raw material (PUR-xxx) → Open manufacturing form to send to manufacturing
           this.openSendToManufacturingForm(response);
-        } else if (response.action === 'choice') {
-          // SCUT that can be sold OR processed further → Show choice
-          this.showChoiceDialog(response);
         } else if (response.action === 'sell') {
           // Processed item (COND-xxx or SCUT that can't be processed further) → Open sales form
           this.openSalesForm(response);
@@ -163,85 +159,6 @@ export class BarcodeScannerService {
     );
   }
 
-  /**
-   * Show choice dialog for SCUT: Sell or Process Further
-   */
-  private showChoiceDialog(barcodeData: any): void {
-    const initialState = {
-      title: 'Choose Action',
-      message: 'What would you like to do with this SCUT item?',
-      itemName: `${barcodeData.item.name} Grade: ${barcodeData.item.grade} Size: ${barcodeData.item.size}`
-    };
-
-    const modalRef = this.modalService.show(ChoiceDialogComponent, {
-      initialState,
-      backdrop: 'static',
-      keyboard: false,
-      class: 'modal-md'
-    });
-
-    if (modalRef.content) {
-      modalRef.content.choice.subscribe((choice: boolean) => {
-        if (choice) {
-          // User chose to sell (first choice)
-          this.openSalesForm(barcodeData);
-        } else {
-          // User chose to process further (second choice)
-          this.openProcessFurtherForm(barcodeData);
-        }
-      });
-    }
-  }
-
-  /**
-   * Open form to process SCUT further to Conditioned
-   */
-  private openProcessFurtherForm(barcodeData: any): void {
-    // Create a mock manufacture entry for the SCUT
-    const manufactureEntry = {
-      item: barcodeData.item,
-      source_barcode: barcodeData.barcode,
-      booked_quantity: barcodeData.available_quantity,
-      quantity: barcodeData.available_quantity,
-      timestamp: new Date().toISOString()
-    };
-    
-    const initialState = {
-      parentItem: barcodeData.item,
-      manufactureEntry: manufactureEntry
-    };
-    
-    const modalRef = this.modalService.show(AddInventoryItemComponent, { 
-      initialState, 
-      backdrop: 'static', 
-      keyboard: false 
-    });
-    
-    // Pre-select Conditioned processing type only (user will select the specific Conditioned item from dropdown)
-    if (modalRef.content) {
-      setTimeout(() => {
-        modalRef.content.processingType.setValue('conditioned');
-      }, 100);
-      
-      modalRef.content.saveAndPrintInventoryItems.subscribe((item: any) => {
-        this.inventoryService.addInventoryItem(item).subscribe(
-          (response: any) => {
-            // Success - modal will close automatically
-            // Trigger refresh for manufacturing and inventory pages
-            this.refreshService.triggerRefresh('manufacturing');
-            this.refreshService.triggerRefresh('inventory');
-            if (response && response.barcode) {
-              // Open print labels modal
-              this.openPrintLabelsModal(response, item);
-            }
-          },
-          (error) => {
-            this.notificationService.showError('Error processing SCUT: ' + (error.error?.message || error.message));
-          }
-        );
-      });
-    }
-  }
 
   /**
    * Open print labels modal after creating inventory item

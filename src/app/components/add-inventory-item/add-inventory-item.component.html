@@ -22,19 +22,6 @@
                 [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY', containerClass: 'theme-dark-blue' }" />
         </div>
 
-        <!-- Processing Type (required only for processing mode) -->
-        <div *ngIf="!isInitialStockMode" class="form-group">
-            <label for="processing_type"><i class="fa fa-cog"></i> Processing Type</label>
-            <select class="form-control" formControlName="processing_type">
-                <option value="">Select processing type...</option>
-                <option *ngFor="let pt of processingTypes" [value]="pt.value">
-                    {{pt.label}} (+Rs. {{pt.charge}}/{{quantityUnitToLabelMapping[availableQuantity?.unit || 'KG']}})
-                </option>
-            </select>
-            <div *ngIf="processingType.touched && processingType.errors?.required" class="alert alert-danger">
-                <div>Processing type is required.</div>
-            </div>
-        </div>
 
         <!-- Packages FormArray -->
         <div class="form-group">
@@ -53,26 +40,45 @@
                         </button>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Item</label>
-                        <input type="text"
-                            class="form-control"
-                            [id]="'item_' + i"
-                            [name]="'item_' + i"
-                            [placeholder]="isInitialStockMode ? 'Search item...' : 'Search sub-item (S-Cut/Conditioned)...'"
-                            [typeahead]="items"
-                            [typeaheadItemTemplate]="customItemTemplate"
-                            typeaheadOptionField="name"
-                            [typeaheadScrollable]="true"
-                            [typeaheadMinLength]="0"
-                            (typeaheadOnSelect)="onSelectItem($event, i)"
-                            formControlName="selected_item">
-                        <ng-template #customItemTemplate let-item="item">
-                           {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
-                        </ng-template>
-                        <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.required" 
-                             class="alert alert-danger mt-1 mb-0">
-                            Item is required.
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Item</label>
+                            <input type="text"
+                                class="form-control"
+                                [id]="'item_' + i"
+                                [name]="'item_' + i"
+                                [placeholder]="isInitialStockMode ? 'Search item...' : 'Search sub-item...'"
+                                [typeahead]="items"
+                                [typeaheadItemTemplate]="customItemTemplate"
+                                typeaheadOptionField="name"
+                                [typeaheadScrollable]="true"
+                                [typeaheadMinLength]="0"
+                                (typeaheadOnSelect)="onSelectItem($event, i)"
+                                formControlName="selected_item">
+                            <ng-template #customItemTemplate let-item="item">
+                               {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
+                            </ng-template>
+                            <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Item is required.
+                            </div>
+                        </div>
+                        
+                        <!-- Processing Type (per package, only for processing mode) -->
+                        <div *ngIf="!isInitialStockMode" class="form-group col-md-6">
+                            <label><i class="fa fa-cog"></i> Processing Type</label>
+                            <select class="form-control" 
+                                    formControlName="processing_type"
+                                    (change)="updatePackageRate(i)">
+                                <option value="">Select processing type...</option>
+                                <option *ngFor="let pt of processingTypes" [value]="pt.value">
+                                    {{pt.label}} (+Rs. {{pt.charge}}/{{quantityUnitToLabelMapping[availableQuantity?.unit || 'KG']}})
+                                </option>
+                            </select>
+                            <div *ngIf="package.get('processing_type')?.touched && package.get('processing_type')?.errors?.required" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Processing type is required.
+                            </div>
                         </div>
                     </div>
                     
