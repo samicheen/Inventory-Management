@@ -5,9 +5,14 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:mobile": "ng build --configuration=mobile",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "cap:add": "npx cap add",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open",
+    "cap:run": "npx cap run"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +26,11 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/barcode-scanner": "^2.2.0",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
     "@ng-select/ng-select": "^13.7.0",
     "@types/gapi": "^0.0.47",
     "@types/gapi.auth2": "^0.0.60",

@@ -1,5 +1,6 @@
 <div class="container-fluid">
-    <table class="table">
+    <div class="table-responsive">
+        <table class="table">
         <thead>
             <th scope="col">Item Name</th>
             <th scope="col">Purchase</th>
@@ -22,5 +23,6 @@
               <td>{{item.sub_sales_qty | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
           </tr>
         </tbody>
-    </table>
+        </table>
+    </div>
 </div>

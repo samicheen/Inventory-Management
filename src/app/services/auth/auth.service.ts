@@ -30,10 +30,14 @@ export class AuthService {
    */
   login(username: string, password: string): Observable<LoginResponse> {
     const loginData: LoginRequest = { username, password };
+    const loginUrl = `${this.apiUrl}/api/auth/login.php`;
     
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/auth/login.php`, loginData)
+    console.log('Attempting login to:', loginUrl); // Debug log
+    
+    return this.http.post<LoginResponse>(loginUrl, loginData)
       .pipe(
         tap(response => {
+          console.log('Login response:', response); // Debug log
           if (response.success && response.token && response.user) {
             this.setToken(response.token);
             this.setUser(response.user);

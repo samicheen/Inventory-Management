@@ -31,6 +31,11 @@
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
   
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+    min-width: 600px; // Force horizontal scroll on mobile
+  }
+  
   thead {
     background: #f1f5f9;
     color: var(--text-primary);
@@ -43,6 +48,11 @@
       padding: 1rem;
       border-bottom: 2px solid var(--border-color);
       color: var(--text-primary);
+      
+      @media (max-width: 768px) {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.7rem;
+      }
     }
   }
   
@@ -63,6 +73,11 @@
         padding: 1rem;
         vertical-align: middle;
         color: var(--text-primary);
+        
+        @media (max-width: 768px) {
+          padding: 0.75rem 0.5rem;
+          white-space: nowrap;
+        }
       }
     }
   }
@@ -185,6 +200,19 @@
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  
+  @media (max-width: 768px) {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+    border-radius: 6px;
+  }
+}
+
+.modal-dialog {
+  @media (max-width: 768px) {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
 }
 
 .modal-header {

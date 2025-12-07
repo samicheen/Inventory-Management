@@ -55,7 +55,17 @@ export class LoginComponent implements OnInit {
           }
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Invalid username or password';
+          console.error('Login error:', error);
+          // Show more detailed error messages
+          if (error.status === 0) {
+            this.errorMessage = 'Cannot connect to server. Please check if the server is running and accessible.';
+          } else if (error.status === 401) {
+            this.errorMessage = error.error?.message || 'Invalid username or password';
+          } else if (error.status === 400) {
+            this.errorMessage = error.error?.message || 'Username and password are required';
+          } else {
+            this.errorMessage = error.error?.message || `Login failed: ${error.statusText || 'Unknown error'}`;
+          }
           this.isLoading = false;
         }
       });

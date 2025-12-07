@@ -41,7 +41,17 @@
   <div class="navbar-nav" *ngIf="currentUser">
     <!-- Barcode Scanner Input -->
     <li class="nav-item">
-      <div class="input-group" style="width: 250px; margin-right: 10px;">
+      <!-- Mobile: Only show camera button -->
+      <button class="btn btn-sm btn-primary" 
+              type="button"
+              (click)="openBarcodeScanner()"
+              title="Scan Barcode with Camera"
+              *ngIf="isMobile">
+        <i class="fa fa-camera"></i> Scan
+      </button>
+      
+      <!-- Web: Show input field with barcode button -->
+      <div class="input-group" style="width: 250px; margin-right: 10px;" *ngIf="!isMobile">
         <input type="text" 
                class="form-control form-control-sm" 
                placeholder="Scan barcode..."
@@ -52,7 +62,7 @@
           <button class="btn btn-sm btn-light" 
                   type="button"
                   (click)="scanBarcode(barcodeInput.value); barcodeInput.value = ''"
-                  title="Scan Barcode">
+                  title="Submit Barcode">
             <i class="fa fa-barcode"></i>
           </button>
         </div>

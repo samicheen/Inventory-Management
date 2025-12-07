@@ -27,6 +27,7 @@ import { SellItemComponent } from './components/sell-item/sell-item.component';
 import { SalesListComponent } from './components/sales-list/sales-list.component';
 import { EmailComponent } from './components/email/email.component';
 import { GapiSession } from './sessions/gapi.session';
+import { GoogleService } from './services/google.service';
 import { PurchaseListComponent } from './components/purchase-list/purchase-list.component';
 import { AddManufacturingComponent } from './components/add-manufacturing/add-manufacturing.component';
 import { ManufacturingListComponent } from './components/manufacturing-list/manufacturing-list.component';
@@ -53,9 +54,8 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 const ENVIRONMENT = "environment";
 
-export function initGapi(gapiSession: GapiSession) {
-  return () => gapiSession.initClient();
-}
+// GAPI initialization removed - Email functionality will work only if GAPI is manually initialized
+// This prevents blocking app startup on mobile
 
 @NgModule({ declarations: [
         AppComponent,
@@ -104,9 +104,9 @@ export function initGapi(gapiSession: GapiSession) {
         BsDatepickerModule.forRoot(),
         TypeaheadModule.forRoot(),
         TabsModule.forRoot()], providers: [
-        { provide: APP_INITIALIZER, useFactory: initGapi, deps: [GapiSession], multi: true },
         HttpClient,
         GapiSession,
+        GoogleService,
         {
             provide: ENVIRONMENT,
             useValue: environment

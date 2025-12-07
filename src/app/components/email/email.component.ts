@@ -22,7 +22,9 @@ export class EmailComponent implements OnInit {
   @ViewChild("send") sendView: ElementRef;
 
   ngOnInit(): void {
-    this.updateSigninStatus(this.isSignedIn());
+    // Email functionality disabled - GAPI removed
+    console.log('Email component: Marketing email functionality is disabled');
+    this.showSignIn = false;
   }
 
   /**
@@ -38,39 +40,34 @@ export class EmailComponent implements OnInit {
   }
 
   isSignedIn(){
-    return this.gapiSession.isSignedIn;
+    try {
+      return this.gapiSession && this.gapiSession.isSignedIn;
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
    *  Sign in the user upon button click.
    */
   async handleAuthClick() {
-    const res = await this.gapiSession.signIn();
-    console.log(typeof res);
+    if (!this.gapiSession || typeof gapi === 'undefined') {
+      console.error('GAPI not available. Email functionality requires Google API.');
+      return;
+    }
+    try {
+      const res = await this.gapiSession.signIn();
+      console.log(typeof res);
+    } catch (error) {
+      console.error('Failed to sign in to Google:', error);
+    }
   }
 
   /**
    * 
    */
   async sendEmails() {
-    const response = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: '1rYrDIeKC8IpDLnoxlM6UP4EF8S-r4DwkGjVqFxZTpAE',
-      range: 'Emails!B2:B'
-    });
-    console.log(response.result.values);
-    for (let email of response.result.values) {
-      const emailStr = "To: " + email+ "\r\n";
-      const message = emailStr +
-        "Subject: How to Make Shot Blasting Process Profitable\r\n" +
-        "Content-Type: text/html; charset=UTF-8\r\n" +
-        "Content-Transfer-Encoding: base64\r\n\r\n" +
-        this.sendView.nativeElement.innerHTML;
-
-      // The body needs to be base64url encoded.
-      const encodedMessage = btoa(message);
-
-      const reallyEncodedMessage = encodedMessage.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      this.googleService.sendMail(reallyEncodedMessage, this.gapiSession.currentUser.getAuthResponse().access_token).subscribe(() => { console.log("done!")});
-    }
+    console.warn('Email functionality is disabled. GAPI has been removed.');
+    alert('Email functionality is currently disabled. This feature required Google API which has been removed.');
   }
 }
