@@ -45,6 +45,8 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
 import { ReceivePurchaseComponent } from './components/receive-purchase/receive-purchase.component';
 import { ProcessingTypeListComponent } from './components/processing-type-list/processing-type-list.component';
 import { AddProcessingTypeComponent } from './components/add-processing-type/add-processing-type.component';
+import { ProcessFurtherPackagesComponent } from './components/process-further-packages/process-further-packages.component';
+import { ScanSalesPackagesComponent } from './components/scan-sales-packages/scan-sales-packages.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -82,7 +84,9 @@ export function initGapi(gapiSession: GapiSession) {
         ConfirmDialogComponent,
         ReceivePurchaseComponent,
         ProcessingTypeListComponent,
-        AddProcessingTypeComponent
+        AddProcessingTypeComponent,
+        ProcessFurtherPackagesComponent,
+        ScanSalesPackagesComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

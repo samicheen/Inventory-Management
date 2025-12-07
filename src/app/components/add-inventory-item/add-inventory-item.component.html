@@ -32,56 +32,173 @@
                      class="package-row mb-3 p-3 border rounded">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">Package #{{i + 1}}</h6>
-                        <button type="button" 
-                                class="btn btn-sm btn-danger" 
-                                *ngIf="packages.length > 1"
-                                (click)="removePackage(i)">
-                            <i class="fa fa-trash"></i> Remove
-                        </button>
+                        <div>
+                            <!-- Mixed Mode Toggle (only for processing mode) -->
+                            <button type="button" 
+                                    class="btn btn-sm btn-info mr-2" 
+                                    *ngIf="!isInitialStockMode"
+                                    (click)="toggleMixedMode(i)">
+                                <i class="fa" [ngClass]="isMixedMode[i] ? 'fa-toggle-on' : 'fa-toggle-off'"></i> 
+                                {{isMixedMode[i] ? 'Mixed Items' : 'Single Source'}}
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm btn-danger" 
+                                    *ngIf="packages.length > 1"
+                                    (click)="removePackage(i)">
+                                <i class="fa fa-trash"></i> Remove
+                            </button>
+                        </div>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label>Item</label>
+                    <!-- Single Source Mode -->
+                    <div *ngIf="!isMixedMode[i]">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Item</label>
+                                <input type="text"
+                                    class="form-control"
+                                    [id]="'item_' + i"
+                                    [name]="'item_' + i"
+                                    [placeholder]="isInitialStockMode ? 'Search item...' : 'Search sub-item...'"
+                                    [typeahead]="items"
+                                    [typeaheadItemTemplate]="customItemTemplate"
+                                    typeaheadOptionField="name"
+                                    [typeaheadScrollable]="true"
+                                    [typeaheadMinLength]="0"
+                                    (typeaheadOnSelect)="onSelectItem($event, i)"
+                                    formControlName="selected_item">
+                                <ng-template #customItemTemplate let-item="item">
+                                   {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
+                                </ng-template>
+                                <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.required" 
+                                     class="alert alert-danger mt-1 mb-0">
+                                    Item is required.
+                                </div>
+                            </div>
+                            
+                            <!-- Processing Type (per package, only for processing mode) -->
+                            <div *ngIf="!isInitialStockMode" class="form-group col-md-6">
+                                <label><i class="fa fa-cog"></i> Processing Type</label>
+                                <select class="form-control" 
+                                        formControlName="processing_type"
+                                        (change)="updatePackageRate(i)">
+                                    <option value="">Select processing type...</option>
+                                    <option *ngFor="let pt of processingTypes" [value]="pt.value">
+                                        {{pt.label}} (+Rs. {{pt.charge}}/{{quantityUnitToLabelMapping[availableQuantity?.unit || 'KG']}})
+                                    </option>
+                                </select>
+                                <div *ngIf="package.get('processing_type')?.touched && package.get('processing_type')?.errors?.required" 
+                                     class="alert alert-danger mt-1 mb-0">
+                                    Processing type is required.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mixed Source Mode -->
+                    <div *ngIf="isMixedMode[i] && !isInitialStockMode">
+                        <div class="alert alert-info mb-3">
+                            <i class="fa fa-info-circle"></i> <strong>Mixed Items Mode:</strong> This package contains items from multiple sources. Select sources and quantities below.
+                        </div>
+                        
+                        <!-- Sources FormArray -->
+                        <div class="form-group">
+                            <label><i class="fa fa-list"></i> Sources</label>
+                            <div formArrayName="sources">
+                                <div *ngFor="let source of getSources(i).controls; let j = index" 
+                                     [formGroupName]="j"
+                                     class="source-row mb-2 p-2 border rounded">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-5">
+                                            <label>Source Item</label>
+                                            <select class="form-control" 
+                                                    formControlName="manufacture_id"
+                                                    (change)="onSelectSource($event, i, j)">
+                                                <option value="">Select source...</option>
+                                                <option *ngFor="let mfg of manufacturingEntries" 
+                                                        [value]="mfg.manufacture_id">
+                                                    {{mfg.item.name}} Grade: {{mfg.item.grade}} Size: {{mfg.item.size}} 
+                                                    (Available: {{mfg.quantity.value}} {{quantityUnitToLabelMapping[mfg.quantity.unit]}})
+                                                </option>
+                                            </select>
+                                            <div *ngIf="source.get('manufacture_id')?.touched && source.get('manufacture_id')?.errors?.required" 
+                                                 class="alert alert-danger mt-1 mb-0">
+                                                Source is required.
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label>Quantity</label>
+                                            <input appDecimalNumber
+                                                   type="text"
+                                                   class="form-control"
+                                                   formControlName="quantity"
+                                                   placeholder="0.00"
+                                                   (blur)="updatePackageRate(i)">
+                                            <small class="form-text text-muted" *ngIf="source.get('available_quantity')?.value">
+                                                Available: {{source.get('available_quantity')?.value}} {{quantityUnitToLabelMapping[package.get('quantity.unit')?.value || 'KG']}}
+                                            </small>
+                                            <div *ngIf="source.get('quantity')?.touched && source.get('quantity')?.errors?.required" 
+                                                 class="alert alert-danger mt-1 mb-0">
+                                                Quantity is required.
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label>&nbsp;</label>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-danger btn-block" 
+                                                    *ngIf="getSources(i).length > 1"
+                                                    (click)="removeSource(i, j)">
+                                                <i class="fa fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-row" *ngIf="source.get('item_name')?.value">
+                                        <div class="col-md-12">
+                                            <small class="text-muted">
+                                                <strong>Source:</strong> {{source.get('item_name')?.value}} | 
+                                                <strong>Rate:</strong> Rs. {{source.get('rate')?.value}}/{{quantityUnitToLabelMapping[package.get('quantity.unit')?.value || 'KG']}}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" 
+                                    class="btn btn-sm btn-secondary mt-2" 
+                                    (click)="addSource(i)">
+                                <i class="fa fa-plus"></i> Add Source
+                            </button>
+                        </div>
+                        
+                        <!-- Output Item Selection (for mixed packages) -->
+                        <div class="form-group">
+                            <label><i class="fa fa-arrow-right"></i> Output Item</label>
                             <input type="text"
                                 class="form-control"
-                                [id]="'item_' + i"
-                                [name]="'item_' + i"
-                                [placeholder]="isInitialStockMode ? 'Search item...' : 'Search sub-item...'"
+                                [id]="'output_item_' + i"
+                                [name]="'output_item_' + i"
+                                placeholder="Search output sub-item..."
                                 [typeahead]="items"
-                                [typeaheadItemTemplate]="customItemTemplate"
+                                [typeaheadItemTemplate]="customItemTemplateMixed"
                                 typeaheadOptionField="name"
                                 [typeaheadScrollable]="true"
                                 [typeaheadMinLength]="0"
-                                (typeaheadOnSelect)="onSelectItem($event, i)"
-                                formControlName="selected_item">
-                            <ng-template #customItemTemplate let-item="item">
+                                (typeaheadOnSelect)="onSelectItem($event, i); package.patchValue({output_item_id: $event.item.item_id, output_item: $event.item.name + ' Grade: ' + $event.item.grade + ' Size: ' + $event.item.size})"
+                                formControlName="output_item">
+                            <ng-template #customItemTemplateMixed let-item="item">
                                {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
                             </ng-template>
-                            <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.required" 
+                            <small class="form-text text-muted">
+                                Select the output item that will be created from this mixed package.
+                            </small>
+                            <div *ngIf="package.get('output_item')?.touched && !package.get('output_item_id')?.value" 
                                  class="alert alert-danger mt-1 mb-0">
-                                Item is required.
+                                Output item is required for mixed packages.
                             </div>
                         </div>
                         
-                        <!-- Processing Type (per package, only for processing mode) -->
-                        <div *ngIf="!isInitialStockMode" class="form-group col-md-6">
-                            <label><i class="fa fa-cog"></i> Processing Type</label>
-                            <select class="form-control" 
-                                    formControlName="processing_type"
-                                    (change)="updatePackageRate(i)">
-                                <option value="">Select processing type...</option>
-                                <option *ngFor="let pt of processingTypes" [value]="pt.value">
-                                    {{pt.label}} (+Rs. {{pt.charge}}/{{quantityUnitToLabelMapping[availableQuantity?.unit || 'KG']}})
-                                </option>
-                            </select>
-                            <div *ngIf="package.get('processing_type')?.touched && package.get('processing_type')?.errors?.required" 
-                                 class="alert alert-danger mt-1 mb-0">
-                                Processing type is required.
-                            </div>
-                        </div>
                     </div>
                     
+                    <!-- Package Quantity and Weight (shown for both modes) -->
                     <div class="form-row">
                         <div class="form-group col-md-6" [formGroupName]="'quantity'">
                             <label><i class="fa fa-balance-scale"></i> Weight per Package</label>
@@ -90,8 +207,9 @@
                                        type="text"
                                        class="form-control"
                                        formControlName="value"
-                                       [max]="!isInitialStockMode ? availableQuantity?.value : null"
-                                       placeholder="Enter weight">
+                                       [max]="!isInitialStockMode && !isMixedMode[i] ? availableQuantity?.value : null"
+                                       placeholder="Enter weight"
+                                       (blur)="updatePackageRate(i)">
                                 <div class="input-group-append">
                                     <select class="custom-select" formControlName="unit">
                                         <option *ngFor="let unit of unitValues"
@@ -101,8 +219,11 @@
                                     </select>
                                 </div>
                             </div>
-                            <small *ngIf="!isInitialStockMode && availableQuantity" class="form-text text-muted">
+                            <small *ngIf="!isInitialStockMode && !isMixedMode[i] && availableQuantity" class="form-text text-muted">
                                 Max: {{availableQuantity.value}} {{quantityUnitToLabelMapping[availableQuantity.unit]}}
+                            </small>
+                            <small *ngIf="isMixedMode[i]" class="form-text text-muted">
+                                Total weight of all sources combined.
                             </small>
                             <div *ngIf="package.get('quantity.value')?.touched && package.get('quantity.value')?.errors?.required" 
                                  class="alert alert-danger mt-1 mb-0">

@@ -1,0 +1,120 @@
+<app-modal [modalRef]="modalRef" title="Process Further - Scan Packages">
+    <form [formGroup]="processFurtherForm">
+        <!-- Barcode Input -->
+        <div class="form-group">
+            <label><i class="fa fa-barcode"></i> Scan Package Barcode</label>
+            <div class="input-group">
+                <input type="text"
+                       #barcodeInputRef
+                       class="form-control"
+                       [(ngModel)]="barcodeInput"
+                       [ngModelOptions]="{standalone: true}"
+                       placeholder="Scan or enter barcode (auto-capture enabled)..."
+                       (keyup.enter)="scanBarcode()"
+                       (focus)="barcodeInputRef.select()">
+                <div class="input-group-append">
+                    <button type="button" 
+                            class="btn btn-primary" 
+                            (click)="scanBarcode()">
+                        <i class="fa fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+            <small class="form-text text-muted">
+                <i class="fa fa-info-circle"></i> Scan multiple packages to process them together. Weight is automatically read from QR code.
+                <br><strong>Tip:</strong> You can scan directly (auto-capture enabled) or type/paste barcodes and press Enter.
+            </small>
+        </div>
+        
+        <!-- Test Mode: Quick Add Barcode (for testing) -->
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       #testBarcodeInput
+                       placeholder="Quick test: Enter barcode and press Enter..."
+                       (keyup.enter)="quickTestBarcode(testBarcodeInput.value); testBarcodeInput.value = ''">
+                <div class="input-group-append">
+                    <button type="button" 
+                            class="btn btn-sm btn-outline-secondary" 
+                            (click)="quickTestBarcode(testBarcodeInput.value); testBarcodeInput.value = ''"
+                            title="Quick test barcode">
+                        <i class="fa fa-flask"></i> Test
+                    </button>
+                </div>
+            </div>
+            <small class="form-text text-muted text-muted">
+                <em>Testing mode: Enter barcode here for quick testing without external scanner</em>
+            </small>
+        </div>
+
+        <!-- Scanned Packages List -->
+        <div class="form-group" *ngIf="scannedPackages.length > 0">
+            <label><i class="fa fa-list"></i> Scanned Packages ({{scannedPackages.length}})</label>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Barcode</th>
+                            <th>Item</th>
+                            <th>Weight</th>
+                            <th>Rate</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let pkg of scannedPackages; let i = index">
+                            <td>{{pkg.barcode}}</td>
+                            <td>{{pkg.item.name}} Grade: {{pkg.item.grade}} Size: {{pkg.item.size}}</td>
+                            <td>{{pkg.net_quantity}} {{quantityUnitToLabelMapping[pkg.unit]}}</td>
+                            <td>Rs. {{pkg.rate}}/{{quantityUnitToLabelMapping[pkg.unit]}}</td>
+                            <td>
+                                <button type="button" 
+                                        class="btn btn-sm btn-danger" 
+                                        (click)="removePackage(i)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2">Total</th>
+                            <th>{{getTotalQuantity()}} {{quantityUnitToLabelMapping[getTotalUnit()]}}</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Processing Type Selection -->
+        <div class="form-group">
+            <label for="processing_type"><i class="fa fa-cog"></i> Processing Type</label>
+            <select class="form-control" formControlName="processing_type">
+                <option value="">Select processing type...</option>
+                <option *ngFor="let pt of processingTypes" [value]="pt.value">
+                    {{pt.label}} (+Rs. {{pt.charge}}/{{quantityUnitToLabelMapping[getTotalUnit()]}})
+                </option>
+            </select>
+            <div *ngIf="processingType.touched && processingType.errors?.required" class="alert alert-danger mt-1 mb-0">
+                Processing type is required.
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="button-group">
+            <div class="button-row">
+                <button class="btn btn-primary"
+                        [disabled]="!processFurtherForm.valid || scannedPackages.length === 0"
+                        (click)="submitProcessFurther()">
+                    <i class="fa fa-check"></i> Process All Packages
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="modalRef.hide()">
+                    <i class="fa fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </form>
+</app-modal>
+

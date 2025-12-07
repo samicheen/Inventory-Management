@@ -1,0 +1,150 @@
+<app-modal [modalRef]="modalRef" title="Sell Items - Scan Packages">
+    <form [formGroup]="scanSalesForm">
+        <!-- Barcode Input -->
+        <div class="form-group">
+            <label><i class="fa fa-barcode"></i> Scan Package Barcode</label>
+            <div class="input-group">
+                <input type="text"
+                       #barcodeInputRef
+                       class="form-control"
+                       [(ngModel)]="barcodeInput"
+                       [ngModelOptions]="{standalone: true}"
+                       placeholder="Scan or enter barcode (auto-capture enabled)..."
+                       (keyup.enter)="scanBarcode()"
+                       (focus)="barcodeInputRef.select()">
+                <div class="input-group-append">
+                    <button type="button" 
+                            class="btn btn-primary" 
+                            (click)="scanBarcode()">
+                        <i class="fa fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+            <small class="form-text text-muted">
+                <i class="fa fa-info-circle"></i> Scan multiple packages to sell them together. Weight is automatically read from QR code.
+                <br><strong>Tip:</strong> You can scan directly (auto-capture enabled) or type/paste barcodes and press Enter.
+            </small>
+        </div>
+        
+        <!-- Test Mode: Quick Add Barcode (for testing) -->
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text"
+                       class="form-control form-control-sm"
+                       #testBarcodeInput
+                       placeholder="Quick test: Enter barcode and press Enter..."
+                       (keyup.enter)="quickTestBarcode(testBarcodeInput.value); testBarcodeInput.value = ''">
+                <div class="input-group-append">
+                    <button type="button" 
+                            class="btn btn-sm btn-outline-secondary" 
+                            (click)="quickTestBarcode(testBarcodeInput.value); testBarcodeInput.value = ''"
+                            title="Quick test barcode">
+                        <i class="fa fa-flask"></i> Test
+                    </button>
+                </div>
+            </div>
+            <small class="form-text text-muted text-muted">
+                <em>Testing mode: Enter barcode here for quick testing without external scanner</em>
+            </small>
+        </div>
+
+        <!-- Customer Selection -->
+        <div class="form-group">
+            <label for="selected_customer"><i class="fa fa-user"></i> Customer</label>
+            <select class="form-control" formControlName="selected_customer">
+                <option value="">Select customer...</option>
+                <option *ngFor="let party of parties" [value]="party.party_id">
+                    {{party.name}}
+                </option>
+            </select>
+            <div *ngIf="selectedCustomer.touched && selectedCustomer.errors?.required" class="alert alert-danger mt-1 mb-0">
+                Customer is required.
+            </div>
+        </div>
+
+        <!-- Scanned Packages by Group -->
+        <div class="form-group" *ngIf="packageGroups.length > 0">
+            <label><i class="fa fa-list"></i> Scanned Packages ({{scannedPackages.length}} total)</label>
+            
+            <div *ngFor="let group of packageGroups; let groupIndex = index" class="package-group mb-4 p-3 border rounded">
+                <h6 class="mb-3">
+                    <i class="fa fa-box"></i> {{group.item.name}} 
+                    Grade: {{group.item.grade}} 
+                    Size: {{group.item.size}}
+                    <span class="badge badge-info ml-2">Rate: Rs. {{group.rate}}/{{quantityUnitToLabelMapping[group.unit]}}</span>
+                </h6>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-3">
+                        <thead>
+                            <tr>
+                                <th>Barcode</th>
+                                <th>Weight</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let pkg of group.packages; let pkgIndex = index">
+                                <td>{{pkg.barcode}}</td>
+                                <td>{{pkg.net_quantity}} {{quantityUnitToLabelMapping[pkg.unit]}}</td>
+                                <td>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-danger" 
+                                            (click)="removePackage(scannedPackages.indexOf(pkg))">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Total</th>
+                                <th>{{getGroupTotalQuantity(group)}} {{quantityUnitToLabelMapping[group.unit]}}</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <!-- Selling Price per Group -->
+                <div class="form-group">
+                    <label><i class="fa fa-rupee"></i> Selling Price (Rs./{{quantityUnitToLabelMapping[group.unit]}})</label>
+                    <input type="text"
+                           class="form-control"
+                           appDecimalNumber
+                           [formControl]="sellingPrices.at(groupIndex)"
+                           placeholder="Enter selling price">
+                    <div *ngIf="sellingPrices.at(groupIndex).touched && sellingPrices.at(groupIndex).errors?.required" 
+                         class="alert alert-danger mt-1 mb-0">
+                        Selling price is required.
+                    </div>
+                    <div *ngIf="sellingPrices.at(groupIndex).touched && sellingPrices.at(groupIndex).errors?.min" 
+                         class="alert alert-danger mt-1 mb-0">
+                        Selling price must be 0 or greater.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Summary -->
+        <div class="alert alert-info" *ngIf="scannedPackages.length > 0">
+            <strong>Total Packages:</strong> {{scannedPackages.length}} | 
+            <strong>Total Quantity:</strong> {{getTotalQuantity()}} {{quantityUnitToLabelMapping[packageGroups[0]?.unit || 'KG']}}
+        </div>
+
+        <!-- Submit Button -->
+        <div class="button-group">
+            <div class="button-row">
+                <button class="btn btn-primary"
+                        [disabled]="!scanSalesForm.valid || scannedPackages.length === 0"
+                        (click)="submitSell()">
+                    <i class="fa fa-check"></i> Sell All Packages
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="modalRef.hide()">
+                    <i class="fa fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </form>
+</app-modal>
+

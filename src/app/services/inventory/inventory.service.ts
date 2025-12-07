@@ -90,4 +90,13 @@ export class InventoryService {
        responseType: 'json'
      });
    }
+
+   /**
+    * Unpackage multiple packages and add to manufacturing for further processing
+    */
+   unpackageAndProcessFurther(data: {packages: any[], processing_type_id: number}): Observable<any> {
+     return this.http.post(`${this.apiUrl}/api/inventory/unpackageAndProcessFurther.php`, data, {
+       responseType: 'json'
+     });
+   }
 }

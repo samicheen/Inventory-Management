@@ -1,0 +1,16 @@
+.table-responsive {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
+}
+

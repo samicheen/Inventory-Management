@@ -9,6 +9,10 @@ import { SalesService } from '../sales/sales.service';
 import { ManufactureService } from '../manufacture/manufacture.service';
 import { ItemService } from '../item/item.service';
 import { PrintLabelsComponent } from '../../components/print-labels/print-labels.component';
+import { ChoiceDialogComponent } from '../../components/choice-dialog/choice-dialog.component';
+import { ProcessFurtherPackagesComponent } from '../../components/process-further-packages/process-further-packages.component';
+import { ScanSalesPackagesComponent } from '../../components/scan-sales-packages/scan-sales-packages.component';
+import { PartyService } from '../party/party.service';
 import { NotificationService } from '../notification/notification.service';
 import { RefreshService } from '../refresh/refresh.service';
 
@@ -23,6 +27,7 @@ export class BarcodeScannerService {
     private salesService: SalesService,
     private manufactureService: ManufactureService,
     private itemService: ItemService,
+    private partyService: PartyService,
     private notificationService: NotificationService,
     private router: Router,
     private refreshService: RefreshService
@@ -44,8 +49,11 @@ export class BarcodeScannerService {
         if (response.action === 'manufacture') {
           // Raw material (PUR-xxx) → Open manufacturing form to send to manufacturing
           this.openSendToManufacturingForm(response);
+        } else if (response.action === 'choice') {
+          // Sub-item that can be sold OR processed further → Show choice dialog
+          this.showChoiceDialog(response);
         } else if (response.action === 'sell') {
-          // Processed item (COND-xxx or SCUT that can't be processed further) → Open sales form
+          // Processed item (final product) → Open sales form
           this.openSalesForm(response);
         } else {
           console.error('Unknown action:', response.action, response); // Debug
@@ -197,41 +205,148 @@ export class BarcodeScannerService {
   }
 
   /**
-   * Open sales form with pre-filled data from barcode scan
+   * Show choice dialog for sub-items: Sell or Process Further
    */
-  private openSalesForm(barcodeData: any): void {
-    const item = {
-      item_id: barcodeData.item.item_id,
-      name: barcodeData.item.name,
-      size: barcodeData.item.size,
-      grade: barcodeData.item.grade
-    };
-
+  private showChoiceDialog(barcodeData: any): void {
     const initialState = {
-      item: item,
-      availableQuantity: barcodeData.available_quantity,
-      rate: barcodeData.rate,
-      barcode: barcodeData.barcode
+      title: 'Choose Action',
+      message: 'What would you like to do with this item?',
+      itemName: `${barcodeData.item.name} Grade: ${barcodeData.item.grade} Size: ${barcodeData.item.size}`
     };
 
-    const modalRef = this.modalService.show(SellItemComponent, { 
-      initialState, 
-      backdrop: 'static', 
-      keyboard: false 
+    const modalRef = this.modalService.show(ChoiceDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
     });
 
-    // Subscribe to sell event
     if (modalRef.content) {
-      modalRef.content.sell.subscribe((sale: any) => {
-        this.salesService.sellItem(sale).subscribe(
-          () => {
-            // Success - modal will close automatically
-            // Trigger refresh for sales and inventory pages
-            this.refreshService.triggerRefresh('sales');
+      modalRef.content.choice.subscribe((choice: boolean) => {
+        if (choice) {
+          // User chose to sell (first choice)
+          this.openSalesForm(barcodeData);
+        } else {
+          // User chose to process further (second choice)
+          this.openProcessFurtherModal(barcodeData);
+        }
+      });
+    }
+  }
+
+  /**
+   * Open process further modal to scan multiple packages
+   */
+  private openProcessFurtherModal(barcodeData: any): void {
+    const initialState = {
+      initialPackage: barcodeData // Pre-add the first scanned package
+    };
+
+    const modalRef = this.modalService.show(ProcessFurtherPackagesComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-lg'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.processFurther.subscribe((data: any) => {
+        // Call backend API to unpackage and add to manufacturing
+        this.inventoryService.unpackageAndProcessFurther(data).subscribe(
+          (response: any) => {
+            this.notificationService.showSuccess(
+              `Successfully unpackaged ${data.packages.length} package(s) and added to manufacturing. ` +
+              `You can now add sub-item from Manufacturing list.`
+            );
+            // Trigger refresh
+            this.refreshService.triggerRefresh('manufacturing');
             this.refreshService.triggerRefresh('inventory');
           },
           (error) => {
-            this.notificationService.showError('Error selling item: ' + (error.error?.message || error.message));
+            this.notificationService.showError('Error processing packages: ' + (error.error?.message || error.message));
+          }
+        );
+      });
+    }
+  }
+
+  /**
+   * Open sales form with pre-filled data from barcode scan
+   * Now uses ScanSalesPackagesComponent to allow multiple package scanning
+   */
+  private openSalesForm(barcodeData: any): void {
+    const initialState = {
+      initialPackage: barcodeData // Pre-add the first scanned package
+    };
+
+    const modalRef = this.modalService.show(ScanSalesPackagesComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-lg'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.sell.subscribe((salesData: any[]) => {
+        // Process all sales groups
+        let successCount = 0;
+        let errorCount = 0;
+        const totalPackages = salesData.reduce((total, group) => total + group.packages.length, 0);
+        
+        // Get customer details first
+        const customerId = salesData[0].customer_id;
+        this.partyService.getParties('customer').subscribe(
+          (partiesResponse: any) => {
+            const customer = partiesResponse.parties.find((p: any) => p.party_id === customerId);
+            if (!customer) {
+              this.notificationService.showError('Customer not found');
+              return;
+            }
+
+            salesData.forEach((salesGroup, index) => {
+              // Create sales entry for each package in the group
+              salesGroup.packages.forEach((pkg: any) => {
+                const sale: any = {
+                  invoice_id: '', // Optional
+                  customer: {
+                    name: customer.name
+                  },
+                  item: salesGroup.item,
+                  quantity: {
+                    value: pkg.quantity,
+                    unit: pkg.unit
+                  },
+                  selling_price: salesGroup.selling_price.toString(),
+                  amount: (pkg.quantity * salesGroup.selling_price).toFixed(2),
+                  barcode: pkg.barcode,
+                  timestamp: new Date().toISOString()
+                };
+
+            this.salesService.sellItem(sale).subscribe(
+              () => {
+                successCount++;
+                if (successCount + errorCount === totalPackages) {
+                  // All sales completed
+                  this.notificationService.showSuccess(`Successfully sold ${successCount} package(s).`);
+                  this.refreshService.triggerRefresh('sales');
+                  this.refreshService.triggerRefresh('inventory');
+                }
+              },
+              (error) => {
+                errorCount++;
+                this.notificationService.showError('Error selling package ' + pkg.barcode + ': ' + (error.error?.message || error.message));
+                if (successCount + errorCount === totalPackages) {
+                  // All sales completed (with errors)
+                  this.refreshService.triggerRefresh('sales');
+                  this.refreshService.triggerRefresh('inventory');
+                }
+              }
+            );
+          });
+        });
+          },
+          (error) => {
+            this.notificationService.showError('Error loading customer: ' + (error.error?.message || error.message));
           }
         );
       });
