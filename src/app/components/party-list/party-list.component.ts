@@ -8,6 +8,7 @@ import { Response } from '../../models/response.model'
 import { AddPartyComponent } from '../add-party/add-party.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-party-list',
@@ -25,7 +26,8 @@ export class PartyListComponent implements OnInit {
     private router: Router,
     private partyService: PartyService,
     private modalService: BsModalService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public authService: AuthService
     ) { }
 
   ngOnInit(): void {

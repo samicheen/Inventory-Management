@@ -3,19 +3,19 @@
     <div class="flex-container">
         <button type="button"
         class="btn btn-primary add-party-btn"
-                    (click)=addParty()>
+                    (click)=addParty() *ngIf="authService.isAdmin()">
             {{button_value}}
         </button>
     </div>
     <table class="table">
         <thead>
             <th scope="col">Name</th>
-            <th scope="col">Actions</th>
+            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
         </thead>
         <tbody>
             <tr *ngFor="let party of parties">
                 <td>{{party.name}}</td>
-                <td class="actions">
+                <td class="actions" *ngIf="authService.isAdmin()">
                     <div class="btn-group" dropdown>
                         <button id="button-split" type="button" dropdownToggle class="btn"
                                 aria-controls="dropdown-split">

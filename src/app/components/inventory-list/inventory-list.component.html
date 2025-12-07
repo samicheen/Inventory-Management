@@ -65,7 +65,7 @@
                   <li role="menuitem"><a class="dropdown-item" (click)="printLabels(inv_item)"><i class="fa fa-print"></i> Print Labels</a></li>
                   <li role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item)"><i class="fa fa-industry"></i> Move to Manufacturing</a></li>
                   <li role="menuitem"><a class="dropdown-item" (click)="sellItem(inv_item)"><i class="fa fa-shopping-bag"></i> Sell Item</a></li>
-                  <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeInventory(inv_item)"><i class="fa fa-trash"></i> Remove</a></li>
+                  <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item text-danger" (click)="removeInventory(inv_item)"><i class="fa fa-trash"></i> Remove</a></li>
                 </ul>
               </div>
             </td>

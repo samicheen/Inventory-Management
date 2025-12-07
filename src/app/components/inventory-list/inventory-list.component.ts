@@ -16,6 +16,7 @@ import { NotificationService } from '../../services/notification/notification.se
 import { PrintLabelsComponent } from '../print-labels/print-labels.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { RefreshService } from '../../services/refresh/refresh.service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-inventory-list',
@@ -38,7 +39,8 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     private manufactureService: ManufactureService,
     private modalService: BsModalService,
     public route: ActivatedRoute,
-    private refreshService: RefreshService
+    private refreshService: RefreshService,
+    public authService: AuthService
   ) { }
 
   ngOnInit(): void {

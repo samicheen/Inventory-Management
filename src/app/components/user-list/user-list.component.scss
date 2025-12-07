@@ -1,0 +1,38 @@
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-user-btn {
+  margin-left: auto;
+}
+
+.table {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.actions {
+  text-align: right;
+}
+
+.badge {
+  padding: 0.25em 0.6em;
+  font-size: 0.875em;
+  font-weight: 600;
+  border-radius: 0.25rem;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+

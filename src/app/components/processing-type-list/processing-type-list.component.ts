@@ -5,6 +5,7 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { AddProcessingTypeComponent } from '../add-processing-type/add-processing-type.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-processing-type-list',
@@ -19,7 +20,8 @@ export class ProcessingTypeListComponent implements OnInit {
   constructor(
     private processingTypeService: ProcessingTypeService,
     private modalService: BsModalService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public authService: AuthService
   ) { }
 
   ngOnInit(): void {

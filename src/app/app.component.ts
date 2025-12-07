@@ -23,14 +23,14 @@ export class AppComponent implements OnInit {
       this.router.navigate(['/login']);
     }
 
-    // Hide header on login and register pages
+    // Hide header on login page
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      this.showHeader = !['/login', '/register'].includes(event.url);
+      this.showHeader = event.url !== '/login';
     });
 
     // Check initial route
-    this.showHeader = !['/login', '/register'].includes(this.router.url);
+    this.showHeader = this.router.url !== '/login';
   }
 }

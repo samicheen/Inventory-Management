@@ -2,7 +2,7 @@
     <div class="flex-container">
         <button type="button"
                 class="btn btn-primary add-item-btn"
-                (click)="addProcessingType()">
+                (click)="addProcessingType()" *ngIf="authService.isAdmin()">
             Add Processing Type
         </button>
     </div>
@@ -11,7 +11,7 @@
             <th scope="col">Name</th>
             <th scope="col">Processing Charge (Rs./Kg)</th>
             <th scope="col">Description</th>
-            <th scope="col">Actions</th>
+            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
         </thead>
         <tbody>
             <tr *ngFor="let pt of processingTypes">
@@ -20,7 +20,7 @@
                 <td>
                 </td>
                 <td>{{pt.description || '-'}}</td>
-                <td class="actions">
+                <td class="actions" *ngIf="authService.isAdmin()">
                     <div class="btn-group" dropdown>
                         <button id="button-split" type="button" dropdownToggle class="btn"
                                 aria-controls="dropdown-split">

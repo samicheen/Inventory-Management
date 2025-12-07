@@ -7,6 +7,7 @@ import { Response } from '../../models/response.model'
 import { AddItemComponent } from '../add-item/add-item.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-item-list',
@@ -21,7 +22,8 @@ export class ItemListComponent implements OnInit {
   constructor(
     private itemService: ItemService,
     private modalService: BsModalService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public authService: AuthService
   ) { }
 
   ngOnInit(): void {

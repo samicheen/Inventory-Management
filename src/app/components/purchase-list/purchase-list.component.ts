@@ -12,6 +12,7 @@ import { PurchaseService } from '../../services/purchase/purchase.service';
 import { ItemService } from '../../services/item/item.service';
 import { Item } from 'src/app/models/item.model';
 import { NotificationService } from '../../services/notification/notification.service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-purchase-list',
@@ -29,7 +30,8 @@ export class PurchaseListComponent implements OnInit {
     private notificationService: NotificationService,
     private purchaseService: PurchaseService,
     private modalService: BsModalService,
-    private itemService: ItemService
+    private itemService: ItemService,
+    public authService: AuthService
   ) { }
 
   ngOnInit(): void {

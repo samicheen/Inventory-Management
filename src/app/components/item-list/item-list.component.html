@@ -3,7 +3,7 @@
     <div class="flex-container">
         <button type="button"
         class="btn btn-primary add-item-btn"
-                    (click)=addItem()>
+                    (click)=addItem() *ngIf="authService.isAdmin()">
             Add Item
         </button>
     </div>
@@ -13,7 +13,7 @@
             <th scope="col">Grade</th>
             <th scope="col">Size</th>
             <th scope="col">Type</th>
-            <th scope="col">Actions</th>
+            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
         </thead>
         <tbody>
             <tr *ngFor="let item of items">
@@ -21,7 +21,7 @@
                 <td>{{item.grade}}</td>
                 <td>{{item.size}}</td>
                 <td>{{item.is_sub_item ? 'Sub Item' : 'Main Item'}}</td>
-                <td class="actions">
+                <td class="actions" *ngIf="authService.isAdmin()">
                     <div class="btn-group" dropdown>
                         <button id="button-split" type="button" dropdownToggle class="btn"
                                 aria-controls="dropdown-split">

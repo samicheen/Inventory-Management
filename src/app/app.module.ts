@@ -38,8 +38,9 @@ import { AddPartyComponent } from './components/add-party/add-party.component';
 import { PartyListComponent } from './components/party-list/party-list.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
 import { PrintLabelsComponent } from './components/print-labels/print-labels.component';
+import { UserListComponent } from './components/user-list/user-list.component';
+import { AddUserComponent } from './components/add-user/add-user.component';
 import { ChoiceDialogComponent } from './components/choice-dialog/choice-dialog.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { ReceivePurchaseComponent } from './components/receive-purchase/receive-purchase.component';
@@ -78,8 +79,9 @@ export function initGapi(gapiSession: GapiSession) {
         PartyListComponent,
         LoadingComponent,
         LoginComponent,
-        RegisterComponent,
         PrintLabelsComponent,
+        UserListComponent,
+        AddUserComponent,
         ChoiceDialogComponent,
         ConfirmDialogComponent,
         ReceivePurchaseComponent,
