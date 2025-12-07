@@ -54,6 +54,9 @@
   
   @media (max-width: 768px) {
     padding: 1rem;
+    // Ensure content doesn't overlap with gesture navigation bar
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1rem + constant(safe-area-inset-bottom, 0px)); // iOS Safari fallback
   }
   
   .form-group {

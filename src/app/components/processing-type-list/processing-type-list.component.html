@@ -6,7 +6,8 @@
             Add Processing Type
         </button>
     </div>
-    <table class="table">
+    <div class="table-responsive">
+      <table class="table">
         <thead>
             <th scope="col">Name</th>
             <th scope="col">Processing Charge (Rs./Kg)</th>
@@ -17,8 +18,6 @@
             <tr *ngFor="let pt of processingTypes">
                 <td>{{pt.name}}</td>
                 <td>{{pt.processing_charge}}</td>
-                <td>
-                </td>
                 <td>{{pt.description || '-'}}</td>
                 <td class="actions" *ngIf="authService.isAdmin()">
                     <div class="btn-group" dropdown>
@@ -35,6 +34,7 @@
                 </td>
             </tr>
         </tbody>
-    </table>
+      </table>
+    </div>
 </div>
 

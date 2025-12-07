@@ -1,4 +1,123 @@
+.flex-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  
+  @media (max-width: 768px) {
+    justify-content: stretch;
+  }
+}
+
 .add-party-btn {
-    float: right;
-    margin: 1rem 0 1rem 0;
+  border-radius: 6px;
+  padding: 0.625rem 1.5rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  @media (max-width: 768px) {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+}
+
+.table {
+  margin-top: 1rem;
+  
+  tbody tr {
+    transition: background-color 0.15s ease;
+    
+    &:hover {
+      background-color: #f8fafc;
+    }
+  }
+}
+
+.actions {
+  position: relative;
+  white-space: nowrap;
+  
+  .btn-group {
+    position: static;
+  }
+  
+  .btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    
+    &:hover {
+      color: var(--primary-color);
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+    
+    &:focus {
+      box-shadow: none;
+    }
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    min-width: 180px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    background: var(--white);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    
+    .dropdown-item {
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      transition: all 0.15s;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      
+      &:hover {
+        background: #f1f5f9;
+        color: var(--text-primary);
+      }
+      
+      i {
+        width: 18px;
+        text-align: center;
+        color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+.fa-ellipsis-v {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  
+  &:hover {
+    color: var(--primary-color);
+  }
 }

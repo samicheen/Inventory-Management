@@ -6,8 +6,9 @@
                 (click)=addSales()>
           Add Sales
         </button>
-      </div> 
-    <table class="table">
+      </div>
+    <div class="table-responsive">
+      <table class="table">
         <thead>
             <th scope="col">Date</th>
             <th scope="col">Invoice Id</th>
@@ -32,5 +33,6 @@
               <td>Rs. {{sale.amount | number:'1.2-2'}}</td>
           </tr>
         </tbody>
-    </table>
+      </table>
+    </div>
   </div>

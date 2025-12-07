@@ -7,7 +7,8 @@
             {{button_value}}
         </button>
     </div>
-    <table class="table">
+    <div class="table-responsive">
+      <table class="table">
         <thead>
             <th scope="col">Name</th>
             <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
@@ -30,5 +31,6 @@
                 </td>
             </tr>
         </tbody>
-    </table>
+      </table>
+    </div>
 </div>
