@@ -2,6 +2,12 @@
   padding: 1.5rem;
   min-height: calc(100vh - 100px);
   background: var(--light-bg);
+  
+  // Add bottom safe area padding for mobile (gesture navigation bar)
+  @media (max-width: 991px) {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1.5rem + constant(safe-area-inset-bottom, 0px)); // iOS Safari fallback
+  }
 }
 
 .stat-card {
@@ -148,6 +154,9 @@
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
+    // Add bottom safe area padding for mobile (gesture navigation bar)
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1rem + constant(safe-area-inset-bottom, 0px)); // iOS Safari fallback
   }
 
   .stat-card .stat-icon {

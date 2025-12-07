@@ -50,4 +50,14 @@ export class HeaderComponent implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+
+  /**
+   * Collapse menu on mobile after navigation
+   */
+  collapseMenuOnMobile(): void {
+    // Only collapse on mobile (when screen width < 992px)
+    if (window.innerWidth < 992) {
+      this.isCollapsed = true;
+    }
+  }
 }

@@ -482,6 +482,12 @@
   padding: 1.5rem;
   background: var(--light-bg);
   min-height: calc(100vh - 100px);
+  
+  // Add bottom safe area padding for mobile (gesture navigation bar)
+  @media (max-width: 991px) {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1.5rem + constant(safe-area-inset-bottom, 0px)); // iOS Safari fallback
+  }
 }
 
 /* Empty State */
@@ -620,6 +626,9 @@
   
   .container-fluid {
     padding: 1rem;
+    // Add bottom safe area padding for mobile (gesture navigation bar)
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1rem + constant(safe-area-inset-bottom, 0px)); // iOS Safari fallback
   }
   
   .modal-body {

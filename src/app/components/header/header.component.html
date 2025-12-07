@@ -13,37 +13,37 @@
        id="navbarNav">
     <ul class="navbar-nav me-auto">
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="dashboard"><i class="fa fa-dashboard"></i> Dashboard</a>
+        <a class="nav-link" routerLink="dashboard" (click)="collapseMenuOnMobile()"><i class="fa fa-dashboard"></i> Dashboard</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="item"><i class="fa fa-tag"></i> Item</a>
+        <a class="nav-link" routerLink="item" (click)="collapseMenuOnMobile()"><i class="fa fa-tag"></i> Item</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="processing-type"><i class="fa fa-cog"></i> Processing Type</a>
+        <a class="nav-link" routerLink="processing-type" (click)="collapseMenuOnMobile()"><i class="fa fa-cog"></i> Processing Type</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']" *ngIf="authService.isAdmin()">
-        <a class="nav-link" routerLink="user"><i class="fa fa-users"></i> Users</a>
+        <a class="nav-link" routerLink="user" (click)="collapseMenuOnMobile()"><i class="fa fa-users"></i> Users</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="vendor"><i class="fa fa-building"></i> Vendor</a>
+        <a class="nav-link" routerLink="vendor" (click)="collapseMenuOnMobile()"><i class="fa fa-building"></i> Vendor</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="customer"><i class="fa fa-users"></i> Customer</a>
+        <a class="nav-link" routerLink="customer" (click)="collapseMenuOnMobile()"><i class="fa fa-users"></i> Customer</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="purchase"><i class="fa fa-shopping-cart"></i> Purchase</a>
+        <a class="nav-link" routerLink="purchase" (click)="collapseMenuOnMobile()"><i class="fa fa-shopping-cart"></i> Purchase</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="inventory"><i class="fa fa-cubes"></i> Inventory</a>
+        <a class="nav-link" routerLink="inventory" (click)="collapseMenuOnMobile()"><i class="fa fa-cubes"></i> Inventory</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="manufacture"><i class="fa fa-industry"></i> Manufacturing</a>
+        <a class="nav-link" routerLink="manufacture" (click)="collapseMenuOnMobile()"><i class="fa fa-industry"></i> Manufacturing</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="sales"><i class="fa fa-shopping-bag"></i> Sales</a>
+        <a class="nav-link" routerLink="sales" (click)="collapseMenuOnMobile()"><i class="fa fa-shopping-bag"></i> Sales</a>
       </li>
       <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="summary"><i class="fa fa-list-alt"></i> Summary</a>
+        <a class="nav-link" routerLink="summary" (click)="collapseMenuOnMobile()"><i class="fa fa-list-alt"></i> Summary</a>
       </li>
     </ul>
     <div class="navbar-nav" *ngIf="currentUser">
