@@ -11,8 +11,18 @@
                        [ngModelOptions]="{standalone: true}"
                        placeholder="Scan or enter barcode (auto-capture enabled)..."
                        (keyup.enter)="scanBarcode()"
-                       (focus)="barcodeInputRef.select()">
-                <div class="input-group-append">
+                       (focus)="barcodeInputRef.select()"
+                       *ngIf="!isMobile">
+                <!-- Mobile: Camera scan button -->
+                <button type="button" 
+                        class="btn btn-primary" 
+                        (click)="openBarcodeScanner()"
+                        *ngIf="isMobile"
+                        style="width: 100%;">
+                    <i class="fa fa-camera"></i> Scan Barcode
+                </button>
+                <!-- Web: Input field with Add button -->
+                <div class="input-group-append" *ngIf="!isMobile">
                     <button type="button" 
                             class="btn btn-primary" 
                             (click)="scanBarcode()">

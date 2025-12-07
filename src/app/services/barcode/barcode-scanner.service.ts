@@ -15,6 +15,8 @@ import { ScanSalesPackagesComponent } from '../../components/scan-sales-packages
 import { PartyService } from '../party/party.service';
 import { NotificationService } from '../notification/notification.service';
 import { RefreshService } from '../refresh/refresh.service';
+import { Capacitor } from '@capacitor/core';
+import { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } from '@capacitor/barcode-scanner';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +34,53 @@ export class BarcodeScannerService {
     private router: Router,
     private refreshService: RefreshService
   ) { }
+
+  /**
+   * Extract barcode from Capacitor scanner result
+   * Our QR codes are JSON strings with structure: {barcode, itemName, quantity, unit}
+   * @param result Result from CapacitorBarcodeScanner.scanBarcode()
+   * @returns Extracted barcode string or null if not found
+   */
+  extractBarcodeFromScanResult(result: any): string | null {
+    if (!result?.ScanResult) {
+      return null;
+    }
+
+    // Our QR codes are JSON: {barcode, itemName, quantity, unit}
+    try {
+      const parsed = JSON.parse(String(result.ScanResult).trim());
+      return parsed.barcode?.trim() || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Open native barcode scanner and return the scanned barcode
+   * @returns Promise<string | null> The scanned barcode or null if cancelled/error
+   */
+  async scanBarcodeWithCamera(): Promise<string | null> {
+    if (!Capacitor.isNativePlatform()) {
+      return null;
+    }
+
+    try {
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.ALL,
+        scanInstructions: 'Point your camera at a barcode',
+        scanButton: false // Auto-start scanning without button
+      });
+      
+      return this.extractBarcodeFromScanResult(result);
+    } catch (error: any) {
+      console.error('Error scanning barcode:', error);
+      // Don't show error for user cancellation
+      if (error.message && !error.message.includes('cancel') && !error.message.includes('Cancel')) {
+        this.notificationService.showError('Error scanning barcode: ' + (error.message || 'Unknown error'));
+      }
+      return null;
+    }
+  }
 
   /**
    * Scan barcode and open appropriate form

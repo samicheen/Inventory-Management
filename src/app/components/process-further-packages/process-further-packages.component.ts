@@ -7,6 +7,8 @@ import { ProcessingTypeService } from '../../services/processing-type/processing
 import { NotificationService } from '../../services/notification/notification.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from '../../models/quantity.model';
 import { FormsModule } from '@angular/forms';
+import { Capacitor } from '@capacitor/core';
+import { BarcodeScannerService } from '../../services/barcode/barcode-scanner.service';
 
 interface ScannedPackage {
   barcode: string;
@@ -34,6 +36,7 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
   barcodeInput: string = '';
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   processFurther: Subject<any>;
+  isMobile = false;
   
   // Barcode scanner detection
   private barcodeBuffer: string = '';
@@ -45,6 +48,7 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
     private inventoryService: InventoryService,
     private processingTypeService: ProcessingTypeService,
     private notificationService: NotificationService,
+    private barcodeScannerService: BarcodeScannerService,
     public modalRef: BsModalRef
   ) { }
 
@@ -54,6 +58,9 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.processFurther = new Subject();
+    
+    // Check if running on native platform (mobile app)
+    this.isMobile = Capacitor.isNativePlatform();
     
     this.processFurtherForm = this.formBuilder.group({
       processing_type: ['', Validators.required]
@@ -79,12 +86,14 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
       this.addPackageToList(this.initialPackage);
     }
     
-    // Auto-focus barcode input after modal is fully rendered
-    setTimeout(() => {
-      if (this.barcodeInputRef) {
-        this.barcodeInputRef.nativeElement.focus();
-      }
-    }, 300);
+    // Auto-focus barcode input after modal is fully rendered (only on web)
+    if (!this.isMobile) {
+      setTimeout(() => {
+        if (this.barcodeInputRef) {
+          this.barcodeInputRef.nativeElement.focus();
+        }
+      }, 300);
+    }
   }
   
   ngOnDestroy(): void {
@@ -248,6 +257,17 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
    */
   getTotalUnit(): string {
     return this.scannedPackages.length > 0 ? this.scannedPackages[0].unit : 'KG';
+  }
+
+  /**
+   * Open barcode scanner for mobile
+   */
+  async openBarcodeScanner(): Promise<void> {
+    const barcode = await this.barcodeScannerService.scanBarcodeWithCamera();
+    if (barcode) {
+      this.barcodeInput = barcode;
+      this.scanBarcode();
+    }
   }
 
   /**

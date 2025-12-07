@@ -2,11 +2,49 @@
   padding: 0.5rem 1rem;
   min-height: 50px;
   
+  // Add padding for mobile status bar (time, battery, wifi icons)
+  // Uses CSS safe-area-inset-top which is automatically provided by the browser/Capacitor
+  @media (max-width: 991px) {
+    padding-top: calc(0.5rem + env(safe-area-inset-top, 24px));
+    padding-top: calc(0.5rem + constant(safe-area-inset-top, 24px)); // iOS Safari fallback
+  }
+  
   .navbar-brand {
     font-weight: 600;
     font-size: 1.1rem;
     color: white !important;
     margin-right: 1.5rem;
+  }
+  
+  .navbar-toggler {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.25rem 0.5rem;
+    
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+  }
+  
+  // Bootstrap navbar-expand-lg automatically shows menu on desktop (≥992px)
+  // Ensure it's always visible on desktop regardless of collapse state
+  @media (min-width: 992px) {
+    .navbar-collapse {
+      display: flex !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+  }
+  
+  // Ensure scan button/input is always visible and properly positioned
+  .navbar-nav:last-child {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    
+    @media (max-width: 991px) {
+      margin-left: 0 !important;
+      margin-top: 0.5rem;
+    }
   }
   
   .navbar-nav {

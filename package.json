@@ -31,6 +31,7 @@
     "@capacitor/camera": "^7.0.2",
     "@capacitor/cli": "^7.4.4",
     "@capacitor/core": "^7.4.4",
+    "@capacitor/status-bar": "^7.0.3",
     "@ng-select/ng-select": "^13.7.0",
     "@types/gapi": "^0.0.47",
     "@types/gapi.auth2": "^0.0.60",

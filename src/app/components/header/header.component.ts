@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
-import { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } from '@capacitor/barcode-scanner';
 import { AuthService } from '../../services/auth/auth.service';
 import { User } from '../../models/auth.model';
 import { BarcodeScannerService } from '../../services/barcode/barcode-scanner.service';
@@ -13,6 +12,7 @@ import { BarcodeScannerService } from '../../services/barcode/barcode-scanner.se
 export class HeaderComponent implements OnInit {
   currentUser: User | null = null;
   isMobile = false; // Will be set in ngOnInit
+  isCollapsed = true; // Start collapsed, Bootstrap will expand on desktop automatically
 
   constructor(
     public authService: AuthService,
@@ -22,6 +22,12 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     // Check if running on native platform (mobile app)
     this.isMobile = Capacitor.isNativePlatform();
+    
+    // On desktop (≥992px), menu should be expanded
+    // Bootstrap's navbar-expand-lg handles this via CSS, but we need to set initial state
+    if (window.innerWidth >= 992) {
+      this.isCollapsed = false;
+    }
     
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
@@ -35,31 +41,9 @@ export class HeaderComponent implements OnInit {
   }
 
   async openBarcodeScanner(): Promise<void> {
-    if (!this.isMobile) {
-      return;
-    }
-
-    try {
-      const result = await CapacitorBarcodeScanner.scanBarcode({
-        hint: CapacitorBarcodeScannerTypeHint.ALL,
-        scanInstructions: 'Point your camera at a barcode',
-        scanButton: false // Auto-start scanning without button
-      });
-      
-      // Extract barcode string from result
-      // The result structure is: { ScanResult: string, format: number }
-      if (result && result.ScanResult) {
-        const barcode = result.ScanResult.toString().trim();
-        if (barcode) {
-          this.scanBarcode(barcode);
-        }
-      }
-    } catch (error: any) {
-      console.error('Error scanning barcode:', error);
-      // Don't show error for user cancellation
-      if (error.message && !error.message.includes('cancel') && !error.message.includes('Cancel')) {
-        alert('Error scanning barcode: ' + (error.message || 'Unknown error'));
-      }
+    const barcode = await this.barcodeScannerService.scanBarcodeWithCamera();
+    if (barcode) {
+      this.scanBarcode(barcode);
     }
   }
 
