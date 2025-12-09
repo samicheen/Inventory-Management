@@ -4,6 +4,7 @@ import { Customer } from './customer.model';
 
 export interface Sale {
     sale_id: string;
+    invoice_id: string;
     item: Item;
     customer: Customer;
     quantity: Quantity;
