@@ -2,9 +2,9 @@
 // This will be used when building for mobile (Ionic + Capacitor)
 export const environment = {
   production: true,
-  baseUrl: 'http://192.168.1.105:8000',
+  baseUrl: 'https://vinayakashot.net',
   baseUri: '',
-  apiUrl: 'http://192.168.1.105:8000', // For physical device - use your computer's IP
+  apiUrl: 'https://vinayakashot.net', // Production API URL
   mobile: true // Flag to identify mobile builds
 };
 
