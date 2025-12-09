@@ -38,4 +38,17 @@ export class SalesService {
   sellItem(sale: Sale): Observable<AddItemResponse> {
     return this.http.post<AddItemResponse>(`${this.apiUrl}/api/sales/sellItem.php`, sale);
   }
+
+  /**
+   * Remove sale
+   * @param invoiceId 
+   * @param itemId Optional - if provided, removes only that item from invoice
+   */
+  removeSale(invoiceId: string, itemId?: string): Observable<any> {
+    let url = `${this.apiUrl}/api/sales/removeSale.php?invoice_id=${invoiceId}`;
+    if (itemId) {
+      url += `&item_id=${itemId}`;
+    }
+    return this.http.delete<any>(url);
+  }
 }

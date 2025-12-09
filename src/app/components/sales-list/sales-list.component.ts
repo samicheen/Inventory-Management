@@ -8,6 +8,9 @@ import { Response } from '../../models/response.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { SellItemComponent } from '../sell-item/sell-item.component';
 import { BehaviorSubject } from 'rxjs';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { NotificationService } from '../../services/notification/notification.service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-sales-list',
@@ -24,7 +27,9 @@ export class SalesListComponent implements OnInit, OnDestroy {
   constructor(
     private salesService: SalesService,
     private modalService: BsModalService,
-    private refreshService: RefreshService
+    private refreshService: RefreshService,
+    private notificationService: NotificationService,
+    public authService: AuthService
     ) { }
 
   ngOnInit(): void {
@@ -62,6 +67,41 @@ export class SalesListComponent implements OnInit, OnDestroy {
           this.refreshItems.next(undefined);
         });
       });
+  }
+
+  removeSale(sale: Sale): void {
+    const initialState = {
+      title: 'Confirm Removal',
+      message: `Are you sure you want to remove this sale?\n\nInvoice ID: ${sale.invoice_id}\nItem: ${sale.item.name} Grade: ${sale.item.grade} Size: ${sale.item.size}\nCustomer: ${sale.customer.name}\nQuantity: ${sale.quantity.value} ${this.quantityUnitToLabelMapping[sale.quantity.unit]}\nAmount: Rs. ${sale.amount}\n\n⚠️ WARNING: This will NOT restore inventory automatically. You may need to manually add inventory back if needed.`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    };
+
+    const modalRef = this.modalService.show(ConfirmDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.result.subscribe((confirmed: boolean) => {
+        if (confirmed && sale.invoice_id && sale.item?.item_id) {
+          this.salesService.removeSale(sale.invoice_id, String(sale.item.item_id)).subscribe({
+            next: (response: any) => {
+              const message = response.message || 'Sale removed successfully.';
+              const warning = response.warning ? ` ${response.warning}` : '';
+              this.notificationService.showSuccess(message + warning);
+              this.refreshItems.next(undefined);
+            },
+            error: (error) => {
+              const errorMessage = error.error?.message || error.message || 'Error removing sale';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+        }
+      });
+    }
   }
 
 }

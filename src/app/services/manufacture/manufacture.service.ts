@@ -41,4 +41,12 @@ export class ManufactureService {
   addToManufacturing(manufacture: Manufacture): Observable<AddItemResponse> {
     return this.http.post<AddItemResponse>(`${this.apiUrl}/api/manufacture/addToManufacturing.php`, manufacture);
   }
+
+  /**
+   * Remove manufacturing entry
+   * @param manufactureId 
+   */
+  removeManufacture(manufactureId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/api/manufacture/removeManufacture.php?manufacture_id=${manufactureId}`);
+  }
 }

@@ -11,6 +11,9 @@ import { AddInventoryItemComponent } from '../add-inventory-item/add-inventory-i
 import { PrintLabelsComponent } from '../print-labels/print-labels.component';
 import { ItemService } from 'src/app/services/item/item.service';
 import { RefreshService } from '../../services/refresh/refresh.service';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { NotificationService } from '../../services/notification/notification.service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-manufacturing-list',
@@ -28,7 +31,9 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
     private inventoryService: InventoryService,
     private modalService: BsModalService,
     private itemService: ItemService,
-    private refreshService: RefreshService
+    private refreshService: RefreshService,
+    private notificationService: NotificationService,
+    public authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -144,6 +149,39 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
         // Show notification about other packages
         console.log(`Created ${packages.length} packages. Print labels for each package.`);
       }, 500);
+    }
+  }
+
+  removeManufacture(manufacture: Manufacture): void {
+    const initialState = {
+      title: 'Confirm Removal',
+      message: `Are you sure you want to remove this manufacturing entry?\n\nItem: ${manufacture.item.name} Grade: ${manufacture.item.grade} Size: ${manufacture.item.size}\nSource Barcode: ${manufacture.source_barcode || 'N/A'}\nQuantity: ${manufacture.quantity.value} ${this.quantityUnitToLabelMapping[manufacture.quantity.unit]}\n\nNote: This can only be done if no sub-items have been created from this manufacturing entry.`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel'
+    };
+
+    const modalRef = this.modalService.show(ConfirmDialogComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-md'
+    });
+
+    if (modalRef.content) {
+      modalRef.content.result.subscribe((confirmed: boolean) => {
+        if (confirmed && manufacture.manufacture_id) {
+          this.manufactureService.removeManufacture(String(manufacture.manufacture_id)).subscribe({
+            next: (response: any) => {
+              this.notificationService.showSuccess(response.message || 'Manufacturing entry removed successfully.');
+              this.refreshItems.next(undefined);
+            },
+            error: (error) => {
+              const errorMessage = error.error?.message || error.message || 'Error removing manufacturing entry';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+        }
+      });
     }
   }
 }
