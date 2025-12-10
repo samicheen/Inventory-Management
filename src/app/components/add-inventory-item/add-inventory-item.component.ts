@@ -118,9 +118,10 @@ export class AddInventoryItemComponent implements OnInit {
         }
       );
       
-      // Get source rate from source_barcode (for single source mode)
-      if (this.manufactureEntry?.source_barcode) {
-        this.inventoryService.getInventoryByBarcode(this.manufactureEntry.source_barcode).subscribe(
+      // Get source rate using item_id directly
+      // This ensures we get the weighted average rate even when multiple purchases exist
+      if (this.manufactureEntry?.item?.item_id) {
+        this.inventoryService.getInventoryRateByItemId(String(this.manufactureEntry.item.item_id)).subscribe(
           (response: any) => {
             this.sourceRate = typeof response.rate === 'string' ? parseFloat(response.rate) : (response.rate || 0);
             if (this.manufactureEntry?.quantity) {
@@ -132,7 +133,7 @@ export class AddInventoryItemComponent implements OnInit {
             }
           },
           (error) => {
-            console.error('Error fetching source rate:', error);
+            console.error('Error fetching source rate by item_id:', error);
             this.sourceRate = 0;
           }
         );
@@ -230,11 +231,14 @@ export class AddInventoryItemComponent implements OnInit {
       }
     }
     this.updatePackageRate(packageIndex);
+    this.updateMixedPackageWeight(packageIndex);
   }
 
   addSource(packageIndex: number): void {
     const sources = this.getSources(packageIndex);
     sources.push(this.createSourceFormGroup());
+    // Update package weight after adding source
+    setTimeout(() => this.updateMixedPackageWeight(packageIndex), 0);
   }
 
   removeSource(packageIndex: number, sourceIndex: number): void {
@@ -243,6 +247,7 @@ export class AddInventoryItemComponent implements OnInit {
       sources.removeAt(sourceIndex);
     }
     this.updatePackageRate(packageIndex);
+    this.updateMixedPackageWeight(packageIndex);
   }
 
   onSelectSource(event: any, packageIndex: number, sourceIndex: number): void {
@@ -254,26 +259,27 @@ export class AddInventoryItemComponent implements OnInit {
     
     const sourceGroup = this.getSources(packageIndex).at(sourceIndex);
     
-    // Get rate from inventory for this manufacturing entry
-    if (manufacture.source_barcode) {
-      this.inventoryService.getInventoryByBarcode(manufacture.source_barcode).subscribe(
+    // Get rate from inventory using item_id (more reliable than source_barcode)
+    if (manufacture.item?.item_id) {
+      this.inventoryService.getInventoryRateByItemId(String(manufacture.item.item_id)).subscribe(
         (response: any) => {
           const rate = typeof response.rate === 'string' ? parseFloat(response.rate) : (response.rate || 0);
           sourceGroup.patchValue({
             manufacture_id: manufacture.manufacture_id,
-            source_barcode: manufacture.source_barcode,
+            source_barcode: manufacture.source_barcode || '',
             item_id: manufacture.item.item_id,
             item_name: `${manufacture.item.name} Grade: ${manufacture.item.grade} Size: ${manufacture.item.size}`,
             available_quantity: manufacture.quantity.value,
             rate: rate
           });
           this.updatePackageRate(packageIndex);
+          this.updateMixedPackageWeight(packageIndex);
         },
         (error) => {
-          console.error('Error fetching source rate:', error);
+          console.error('Error fetching source rate by item_id:', error);
           sourceGroup.patchValue({
             manufacture_id: manufacture.manufacture_id,
-            source_barcode: manufacture.source_barcode,
+            source_barcode: manufacture.source_barcode || '',
             item_id: manufacture.item.item_id,
             item_name: `${manufacture.item.name} Grade: ${manufacture.item.grade} Size: ${manufacture.item.size}`,
             available_quantity: manufacture.quantity.value,
@@ -290,6 +296,8 @@ export class AddInventoryItemComponent implements OnInit {
         available_quantity: manufacture.quantity.value,
         rate: 0
       });
+      this.updatePackageRate(packageIndex);
+      this.updateMixedPackageWeight(packageIndex);
     }
   }
 
@@ -347,6 +355,9 @@ export class AddInventoryItemComponent implements OnInit {
       if (totalQuantity > 0) {
         sourceRateNum = totalAmount / totalQuantity; // Weighted average of source rates (no additional processing charge)
       }
+      
+      // Also update package weight from sum of source quantities
+      this.updateMixedPackageWeight(index);
     } else {
       // Single source mode: Add processing charge if processing type is selected
       if (!processingTypeId) return;
@@ -367,6 +378,59 @@ export class AddInventoryItemComponent implements OnInit {
       rateControl?.enable({ emitEvent: false });
       packageGroup.patchValue({ rate: sourceRateNum.toFixed(2) }, { emitEvent: false });
       rateControl?.disable({ emitEvent: false });
+    }
+  }
+
+  /**
+   * Update package weight from sum of source quantities in mixed mode
+   */
+  updateMixedPackageWeight(index: number): void {
+    if (this.isInitialStockMode) return;
+    
+    const packageGroup = this.packages.at(index);
+    const isMixed = this.isMixedMode[index];
+    
+    if (isMixed) {
+      const sources = this.getSources(index);
+      let totalSourceQuantity = 0;
+      
+      // Calculate total from all sources - use getRawValue to get actual values
+      sources.controls.forEach(sourceControl => {
+        const sourceValue = sourceControl.getRawValue();
+        const quantity = parseFloat(sourceValue.quantity) || 0;
+        if (quantity > 0) {
+          totalSourceQuantity += quantity;
+        }
+      });
+      
+      // Auto-update package weight field with sum of source quantities
+      const quantityGroup = packageGroup.get('quantity') as FormGroup;
+      if (quantityGroup) {
+        const quantityValueControl = quantityGroup.get('value');
+        if (quantityValueControl) {
+          // Enable if disabled, then set value
+          if (quantityValueControl.disabled) {
+            quantityValueControl.enable({ emitEvent: false });
+          }
+          const valueToSet = totalSourceQuantity > 0 ? totalSourceQuantity.toFixed(2) : '0.00';
+          quantityValueControl.setValue(valueToSet, { emitEvent: false });
+          // Keep enabled - readonly is handled in template via [readonly] attribute
+        }
+      }
+      
+      // Set packaging_weight to 0 for mixed mode
+      packageGroup.patchValue({ 
+        packaging_weight: 0
+      }, { emitEvent: false });
+    } else {
+      // Re-enable quantity input when not in mixed mode (already enabled, just ensure it's not disabled)
+      const quantityGroup = packageGroup.get('quantity') as FormGroup;
+      if (quantityGroup) {
+        const quantityValueControl = quantityGroup.get('value');
+        if (quantityValueControl && quantityValueControl.disabled) {
+          quantityValueControl.enable({ emitEvent: false });
+        }
+      }
     }
   }
   

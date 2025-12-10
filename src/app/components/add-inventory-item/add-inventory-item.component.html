@@ -133,7 +133,7 @@
                                                    class="form-control"
                                                    formControlName="quantity"
                                                    placeholder="0.00"
-                                                   (blur)="updatePackageRate(i)">
+                                                   (blur)="updatePackageRate(i); updateMixedPackageWeight(i)">
                                             <small class="form-text text-muted" *ngIf="source.get('available_quantity')?.value">
                                                 Available: {{source.get('available_quantity')?.value}} {{quantityUnitToLabelMapping[package.get('quantity.unit')?.value || 'KG']}}
                                             </small>
@@ -208,6 +208,8 @@
                                        class="form-control"
                                        formControlName="value"
                                        [max]="!isInitialStockMode && !isMixedMode[i] ? availableQuantity?.value : null"
+                                       [readonly]="isMixedMode[i]"
+                                       [style.background-color]="isMixedMode[i] ? '#e9ecef' : ''"
                                        placeholder="Enter weight"
                                        (blur)="updatePackageRate(i)">
                                 <div class="input-group-append">
@@ -256,8 +258,8 @@
                         </div>
                     </div>
                     
-                    <!-- Packaging Weight (only for processed items with KG unit) -->
-                    <div *ngIf="!isInitialStockMode && package.get('quantity.unit')?.value === 'KG'" class="form-group">
+                    <!-- Packaging Weight (only for processed items with KG unit, NOT for mixed mode) -->
+                    <div *ngIf="!isInitialStockMode && package.get('quantity.unit')?.value === 'KG' && !isMixedMode[i]" class="form-group">
                         <label><i class="fa fa-weight"></i> Packaging Weight (Kg)</label>
                         <input appDecimalNumber
                                type="text"

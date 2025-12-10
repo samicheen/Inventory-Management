@@ -264,17 +264,31 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   }
 
   moveToManufacturing(invItem: InventoryItem) {
+    // Get purchase barcode (source_barcode) - this links to the original purchase
+    // source_barcode might be comma-separated from GROUP_CONCAT, so take the first one
+    let purchaseBarcode = invItem.source_barcode;
+    if (purchaseBarcode && purchaseBarcode.includes(',')) {
+      purchaseBarcode = purchaseBarcode.split(',')[0].trim();
+    }
+    // Fallback to barcode if source_barcode is not available (for initial stock)
+    if (!purchaseBarcode) {
+      purchaseBarcode = invItem.barcode;
+      if (purchaseBarcode && purchaseBarcode.includes(',')) {
+        purchaseBarcode = purchaseBarcode.split(',')[0].trim();
+      }
+    }
+    
     // Pass the inventory item to manufacturing form (to send raw material to manufacturing)
     const initialState = {
       item: invItem.item,
-      barcode: invItem.barcode, // Pass barcode for tracking
+      barcode: purchaseBarcode, // Pass purchase barcode for tracking
       available_quantity: invItem.closing_stock, // Available quantity from inventory
       rate: typeof invItem.rate === 'string' ? parseFloat(invItem.rate) : (invItem.rate || 0) // Convert rate to number
     };
     let addManufacturingModalRef = this.modalService.show(AddManufacturingComponent, { initialState, backdrop: 'static', keyboard: false });
     addManufacturingModalRef.content.addToManufacturing.subscribe((manufacture: any) => {
-      // Add source_barcode to manufacture data
-      manufacture.source_barcode = invItem.barcode;
+      // Add source_barcode (purchase barcode) to manufacture data - this links it to the purchase
+      manufacture.source_barcode = purchaseBarcode;
       this.manufactureService.addToManufacturing(manufacture).subscribe(() => {
         this.refreshItems.next(undefined);
       });

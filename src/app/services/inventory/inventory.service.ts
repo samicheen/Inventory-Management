@@ -51,9 +51,17 @@ export class InventoryService {
    * Get inventory by barcode (for barcode scanning)
    * @param barcode Barcode to lookup
    */
-   getInventoryByBarcode(barcode: string): Observable<any> {
-     return this.http.get(`${this.apiUrl}/api/inventory/getInventoryByBarcode.php?barcode=${encodeURIComponent(barcode)}`);
-   }
+  getInventoryByBarcode(barcode: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/inventory/getInventoryByBarcode.php?barcode=${encodeURIComponent(barcode)}`);
+  }
+
+  /**
+   * Get weighted average inventory rate by item_id
+   * This ensures correct rate calculation when multiple purchases exist for the same item
+   */
+  getInventoryRateByItemId(itemId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/inventory/getInventoryRateByItemId.php?item_id=${encodeURIComponent(itemId)}`);
+  }
 
   /**
    * Get packages for an inventory item (for sub-items/processed items)
