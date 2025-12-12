@@ -19,7 +19,7 @@
             <td>{{manufacture.booked_quantity.value}} {{quantityUnitToLabelMapping[manufacture.booked_quantity.unit]}}</td>
             <td>{{manufacture.quantity.value}} {{quantityUnitToLabelMapping[manufacture.quantity.unit]}}</td>
             <td class="actions">
-              <div class="btn-group" dropdown>
+              <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
                 <button id="button-split" type="button" dropdownToggle class="btn"
                         aria-controls="dropdown-split">
                         <i class="fa fa-ellipsis-v"></i>

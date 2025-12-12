@@ -44,8 +44,10 @@
     border: 1px solid var(--border-color);
     padding: 0.5rem;
     background: var(--white);
-    z-index: 1000;
+    z-index: 1050; // Higher z-index to ensure it's above other elements
     margin-top: 0.25rem;
+    // Ensure dropdown can overflow container
+    transform: translateZ(0); // Force hardware acceleration
     
     .dropdown-item {
       padding: 0.75rem 1rem;
@@ -128,6 +130,7 @@
 
 .table-responsive {
   overflow-x: auto;
+  overflow-y: visible; // Allow dropdown to overflow vertically
   -webkit-overflow-scrolling: touch;
   
   @media (max-width: 768px) {
@@ -142,14 +145,21 @@
   thead th:last-child,
   tbody td:last-child {
     position: relative;
+    overflow: visible; // Allow dropdown to overflow
   }
   
   tbody tr {
     transition: background-color 0.15s ease;
     position: relative;
+    overflow: visible; // Allow dropdown to overflow
     
     &:hover {
       background-color: #f8fafc;
     }
+  }
+  
+  // Ensure table cells don't clip dropdowns
+  td {
+    overflow: visible;
   }
 }

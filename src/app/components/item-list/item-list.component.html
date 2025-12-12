@@ -23,7 +23,7 @@
                 <td>{{item.size}}</td>
                 <td>{{item.is_sub_item ? 'Sub Item' : 'Main Item'}}</td>
                 <td class="actions" *ngIf="authService.isAdmin()">
-                    <div class="btn-group" dropdown>
+                    <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
                         <button id="button-split" type="button" dropdownToggle class="btn"
                                 aria-controls="dropdown-split">
                                 <i class="fa fa-ellipsis-v"></i>
