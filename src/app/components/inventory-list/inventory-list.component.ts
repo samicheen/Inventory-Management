@@ -1,11 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { InventoryItem } from 'src/app/models/inventory-item.model';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { Response } from 'src/app/models/response.model';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from 'src/app/models/item.model';
 import { SellItemComponent } from '../sell-item/sell-item.component';
 import { SalesService } from 'src/app/services/sales/sales.service';
@@ -23,7 +24,8 @@ import { AuthService } from '../../services/auth/auth.service';
   templateUrl: './inventory-list.component.html',
   styleUrls: ['./inventory-list.component.scss']
 })
-export class InventoryListComponent implements OnInit, OnDestroy {
+export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('tabset') tabset: TabsetComponent;
   inventory: InventoryItem[];
   inventoryParameters: Map<string, any> = new Map();
   total: any;
@@ -39,16 +41,18 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     private manufactureService: ManufactureService,
     private modalService: BsModalService,
     public route: ActivatedRoute,
+    private router: Router,
     private refreshService: RefreshService,
     public authService: AuthService
   ) { }
 
   ngOnInit(): void {
     this.inventoryParameters.set('parent_item_id', this.route.snapshot.params.item_id);
-    // Initialize current tab based on route or default to Main Items
+    // Initialize current tab based on route query parameter or default to Main Items
     if (!this.route.snapshot.params.item_id) {
-      this.currentTab = 'Main Items';
-      this.inventoryParameters.set('retrieve_sub_items', 0);
+      const tabParam = this.route.snapshot.queryParams['tab'];
+      this.currentTab = (tabParam === 'sub-items') ? 'Sub Items' : 'Main Items';
+      this.inventoryParameters.set('retrieve_sub_items', this.currentTab === 'Sub Items' ? 1 : 0);
     }
     this.getInventory();
     this.refreshItems.subscribe(() => {
@@ -63,6 +67,20 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit(): void {
+    // Set the active tab after view initialization
+    if (this.tabset && !this.route.snapshot.params.item_id) {
+      const tabParam = this.route.snapshot.queryParams['tab'];
+      if (tabParam === 'sub-items') {
+        this.tabset.tabs[1].active = true;
+        this.tabset.tabs[0].active = false;
+      } else {
+        this.tabset.tabs[0].active = true;
+        this.tabset.tabs[1].active = false;
+      }
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.refreshSubscription) {
       this.refreshSubscription.unsubscribe();
@@ -70,6 +88,12 @@ export class InventoryListComponent implements OnInit, OnDestroy {
   }
 
   getInventory(){
+    // Ensure retrieve_sub_items parameter is set correctly based on current tab
+    // This ensures the correct tab data is loaded during refresh
+    if (!this.route.snapshot.params.item_id) {
+      this.inventoryParameters.set('retrieve_sub_items', this.currentTab === 'Sub Items' ? 1 : 0);
+    }
+    
     this.inventoryService.getInventory(this.inventoryParameters)
     .subscribe((response: Response<InventoryItem>) => {
       this.inventory = response.items;
@@ -334,6 +358,13 @@ export class InventoryListComponent implements OnInit, OnDestroy {
 
   onSelect(data) {
     this.currentTab = data.heading;
+    // Update route query parameter to persist tab selection
+    const tabParam = data.heading === 'Sub Items' ? 'sub-items' : 'main-items';
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tabParam },
+      queryParamsHandling: 'merge'
+    });
     this.inventoryParameters.set('retrieve_sub_items', data.heading === 'Sub Items' ? 1 : 0);
     this.getInventory();
   }

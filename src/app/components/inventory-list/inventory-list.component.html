@@ -1,5 +1,5 @@
 <div class="container-fluid">
-  <tabset *ngIf="!route.snapshot.params.item_id">
+  <tabset *ngIf="!route.snapshot.params.item_id" #tabset>
     <tab heading="Main Items" (selectTab)="onSelect($event)"></tab>
     <tab heading="Sub Items" (selectTab)="onSelect($event)"></tab>
   </tabset>
