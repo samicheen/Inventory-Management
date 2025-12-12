@@ -112,16 +112,16 @@
                                         <div class="form-group col-md-5">
                                             <label>Source Item</label>
                                             <select class="form-control" 
-                                                    formControlName="manufacture_id"
+                                                    formControlName="item_id"
                                                     (change)="onSelectSource($event, i, j)">
                                                 <option value="">Select source...</option>
-                                                <option *ngFor="let mfg of manufacturingEntries" 
-                                                        [value]="mfg.manufacture_id">
-                                                    {{mfg.item.name}} Grade: {{mfg.item.grade}} Size: {{mfg.item.size}} 
-                                                    (Available: {{mfg.quantity.value}} {{quantityUnitToLabelMapping[mfg.quantity.unit]}})
+                                                <option *ngFor="let invItem of availableInventoryItems" 
+                                                        [value]="invItem.item.item_id">
+                                                    {{invItem.item.name}} Grade: {{invItem.item.grade}} Size: {{invItem.item.size}} 
+                                                    (Available: {{invItem.closing_stock.value}} {{quantityUnitToLabelMapping[invItem.closing_stock.unit]}})
                                                 </option>
                                             </select>
-                                            <div *ngIf="source.get('manufacture_id')?.touched && source.get('manufacture_id')?.errors?.required" 
+                                            <div *ngIf="source.get('item_id')?.touched && source.get('item_id')?.errors?.required" 
                                                  class="alert alert-danger mt-1 mb-0">
                                                 Source is required.
                                             </div>

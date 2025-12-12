@@ -75,8 +75,9 @@ export class InventoryService {
    * Remove inventory item (only if not in use downstream)
    * @param inventoryId Inventory ID (optional)
    * @param barcode Barcode (optional, used if inventory_id is not available)
+   * @param itemId Item ID (optional, helps identify sub-items more accurately)
    */
-   removeInventory(inventoryId?: string, barcode?: string): Observable<any> {
+   removeInventory(inventoryId?: string, barcode?: string, itemId?: string): Observable<any> {
      const params: string[] = [];
      
      if (inventoryId && inventoryId.trim() !== '') {
@@ -87,9 +88,13 @@ export class InventoryService {
        params.push(`barcode=${encodeURIComponent(barcode.trim())}`);
      }
      
+     if (itemId && itemId.trim() !== '') {
+       params.push(`item_id=${encodeURIComponent(itemId.trim())}`);
+     }
+     
      if (params.length === 0) {
        return new Observable(observer => {
-         observer.error({ error: { message: 'Either inventory_id or barcode must be provided' } });
+         observer.error({ error: { message: 'Either inventory_id, barcode, or item_id must be provided' } });
        });
      }
      

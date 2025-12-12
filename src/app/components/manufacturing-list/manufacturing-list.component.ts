@@ -79,6 +79,20 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
         }
       }, (error) => {
         console.error('Error adding inventory:', error);
+        // Show user-friendly error message
+        if (error.status === 201) {
+          // 201 Created is actually success, but Angular might treat it as error if response parsing fails
+          // Try to parse the response body if available
+          if (error.error && error.error.packages) {
+            this.refreshItems.next(undefined);
+            if (error.error.packages.length > 0) {
+              this.printLabelsForPackages(error.error.packages);
+            }
+          }
+        } else {
+          // Handle actual errors
+          this.notificationService.showError(error.error?.message || 'Error adding inventory item');
+        }
       });
     });
   }

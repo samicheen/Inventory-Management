@@ -88,27 +88,46 @@ export class InventoryListComponent implements OnInit, OnDestroy {
           this.printLabelsForPackages(response.packages);
         }
       }, (error) => {
-        this.notificationService.showError('Error adding inventory: ' + (error.error?.message || error.message));
+        // Handle 201 Created status (Angular might treat it as error if response parsing fails)
+        if (error.status === 201 && error.error && error.error.packages) {
+          this.refreshItems.next(undefined);
+          if (error.error.packages.length > 0) {
+            this.printLabelsForPackages(error.error.packages);
+          }
+        } else {
+          // Handle actual errors
+          this.notificationService.showError('Error adding inventory: ' + (error.error?.message || error.message));
+        }
       });
     });
   }
 
   removeInventory(inventoryItem: InventoryItem): void {
-    // Get barcode for deletion (since inventory_id might not be available due to grouping)
-    // Barcode might be comma-separated (from GROUP_CONCAT), so take the first one
-    let barcode = inventoryItem.barcode || inventoryItem.source_barcode;
+    const isSubItem = inventoryItem.item?.is_sub_item;
+    const inventoryId = inventoryItem.inventory_id;
+    const itemId = inventoryItem.item?.item_id;
+    
+    // For sub-items: use package barcode (from barcode field) or item_id, NEVER source_barcode (purchase barcode)
+    // For regular items: use barcode or source_barcode
+    let barcode = inventoryItem.barcode; // For sub-items, this contains package barcodes (PROC-001, etc.)
     if (barcode) {
       // Handle comma-separated barcodes from GROUP_CONCAT
       if (barcode.includes(',')) {
         barcode = barcode.split(',')[0].trim();
       }
-      // Remove any extra whitespace
       barcode = barcode.trim();
     }
-    const inventoryId = inventoryItem.inventory_id;
     
-    if (!inventoryId && !barcode) {
-      this.notificationService.showError('Inventory ID or barcode is missing. Cannot remove inventory.');
+    // Only use source_barcode for regular items (NOT sub-items)
+    if (!barcode && !isSubItem) {
+      barcode = inventoryItem.source_barcode;
+      if (barcode) {
+        barcode = barcode.trim();
+      }
+    }
+    
+    if (!inventoryId && !barcode && !itemId) {
+      this.notificationService.showError('Inventory ID, barcode, or item ID is missing. Cannot remove inventory.');
       return;
     }
     
@@ -129,9 +148,12 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     if (modalRef.content) {
       modalRef.content.result.subscribe((confirmed: boolean) => {
         if (confirmed) {
+          // For sub-items, prioritize item_id for lookup (more reliable than barcode)
+          // Backend will use item_id to find the correct inventory entry
           this.inventoryService.removeInventory(
             inventoryId ? String(inventoryId) : '', 
-            barcode || undefined
+            barcode || undefined,
+            itemId ? String(itemId) : undefined
           ).subscribe({
             next: (response: any) => {
               this.notificationService.showSuccess(response.message || 'Inventory removed successfully.');
@@ -332,3 +354,4 @@ export class InventoryListComponent implements OnInit, OnDestroy {
     });
   }
 }
+

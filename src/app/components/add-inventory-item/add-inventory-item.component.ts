@@ -33,7 +33,8 @@ export class AddInventoryItemComponent implements OnInit {
   availableQuantity: any = null; // From manufacturing entry
   sourceRate: number = 0; // Source rate from purchase/inventory
   isInitialStockMode: boolean = false; // True when adding initial stock (no manufactureEntry)
-  manufacturingEntries: Manufacture[] = []; // All manufacturing entries for source selection
+  manufacturingEntries: Manufacture[] = []; // All manufacturing entries for source selection (legacy, kept for compatibility)
+  availableInventoryItems: InventoryItem[] = []; // All available inventory items for mixed mode source selection
   isMixedMode: boolean[] = []; // Track which packages are in mixed mode
 
   constructor(
@@ -107,7 +108,26 @@ export class AddInventoryItemComponent implements OnInit {
         this.items = [];
       });
       
-      // Load all manufacturing entries for source selection (mixed items)
+      // Load all available inventory items for mixed mode source selection
+      // Mixed mode should show all items with available stock, not just manufacturing entries
+      const inventoryParams = new Map<string, any>();
+      inventoryParams.set('retrieve_sub_items', '1'); // Get sub-items (processed items)
+      inventoryParams.set('parent_item_id', ''); // Get all sub-items
+      
+      this.inventoryService.getInventory(inventoryParams).subscribe(
+        (response) => {
+          // Filter to only items with available stock (closing_stock > 0)
+          this.availableInventoryItems = (response.items || []).filter(
+            (item: InventoryItem) => item.closing_stock && Number(item.closing_stock.value) > 0
+          );
+        },
+        (error) => {
+          console.error('Error loading inventory items for mixed mode:', error);
+          this.availableInventoryItems = [];
+        }
+      );
+      
+      // Also load manufacturing entries for backward compatibility (if needed elsewhere)
       this.manufactureService.getManufacturingItems().subscribe(
         (response) => {
           this.manufacturingEntries = response.items || [];
@@ -183,9 +203,9 @@ export class AddInventoryItemComponent implements OnInit {
 
   createSourceFormGroup(): FormGroup {
     return this.formBuilder.group({
-      manufacture_id: ['', Validators.required],
+      manufacture_id: [''], // Optional - for manufacturing entries
       source_barcode: [''],
-      item_id: [''],
+      item_id: ['', Validators.required], // Required - item_id from inventory
       item_name: [''],
       available_quantity: [0],
       quantity: ['', [Validators.required, Validators.min(0.01)]],
@@ -251,54 +271,32 @@ export class AddInventoryItemComponent implements OnInit {
   }
 
   onSelectSource(event: any, packageIndex: number, sourceIndex: number): void {
-    const selectedManufacture = event.target.value;
-    if (!selectedManufacture) return;
+    const selectedItemId = event.target.value;
+    if (!selectedItemId) return;
     
-    const manufacture = this.manufacturingEntries.find(m => m.manufacture_id?.toString() === selectedManufacture);
-    if (!manufacture) return;
+    // Find the inventory item by item_id
+    const inventoryItem = this.availableInventoryItems.find(
+      inv => inv.item?.item_id?.toString() === selectedItemId
+    );
+    if (!inventoryItem) return;
     
     const sourceGroup = this.getSources(packageIndex).at(sourceIndex);
     
-    // Get rate from inventory using item_id (more reliable than source_barcode)
-    if (manufacture.item?.item_id) {
-      this.inventoryService.getInventoryRateByItemId(String(manufacture.item.item_id)).subscribe(
-        (response: any) => {
-          const rate = typeof response.rate === 'string' ? parseFloat(response.rate) : (response.rate || 0);
-          sourceGroup.patchValue({
-            manufacture_id: manufacture.manufacture_id,
-            source_barcode: manufacture.source_barcode || '',
-            item_id: manufacture.item.item_id,
-            item_name: `${manufacture.item.name} Grade: ${manufacture.item.grade} Size: ${manufacture.item.size}`,
-            available_quantity: manufacture.quantity.value,
-            rate: rate
-          });
-          this.updatePackageRate(packageIndex);
-          this.updateMixedPackageWeight(packageIndex);
-        },
-        (error) => {
-          console.error('Error fetching source rate by item_id:', error);
-          sourceGroup.patchValue({
-            manufacture_id: manufacture.manufacture_id,
-            source_barcode: manufacture.source_barcode || '',
-            item_id: manufacture.item.item_id,
-            item_name: `${manufacture.item.name} Grade: ${manufacture.item.grade} Size: ${manufacture.item.size}`,
-            available_quantity: manufacture.quantity.value,
-            rate: 0
-          });
-        }
-      );
-    } else {
-      sourceGroup.patchValue({
-        manufacture_id: manufacture.manufacture_id,
-        source_barcode: manufacture.source_barcode || '',
-        item_id: manufacture.item.item_id,
-        item_name: `${manufacture.item.name} Grade: ${manufacture.item.grade} Size: ${manufacture.item.size}`,
-        available_quantity: manufacture.quantity.value,
-        rate: 0
-      });
-      this.updatePackageRate(packageIndex);
-      this.updateMixedPackageWeight(packageIndex);
-    }
+    // Use the inventory item's rate and available quantity
+    const rate = inventoryItem.rate ? parseFloat(inventoryItem.rate.toString()) : 0;
+    const availableQty = inventoryItem.closing_stock ? Number(inventoryItem.closing_stock.value) : 0;
+    
+    sourceGroup.patchValue({
+      manufacture_id: null, // Not using manufacture_id for inventory items
+      source_barcode: inventoryItem.source_barcode || '',
+      item_id: inventoryItem.item.item_id,
+      item_name: `${inventoryItem.item.name} Grade: ${inventoryItem.item.grade} Size: ${inventoryItem.item.size}`,
+      available_quantity: availableQty,
+      rate: rate
+    });
+    
+    this.updatePackageRate(packageIndex);
+    this.updateMixedPackageWeight(packageIndex);
   }
 
   addPackage(): void {
@@ -519,10 +517,11 @@ export class AddInventoryItemComponent implements OnInit {
         const itemId = isMixed ? pkg.output_item_id : pkg.selected_item_id;
         
         // Collect sources for mixed packages
+        // Support both manufacture_id (for manufacturing entries) and item_id (for inventory items)
         const sources = isMixed ? this.getSources(index).value.map((src: any) => ({
-          manufacture_id: src.manufacture_id,
-          source_barcode: src.source_barcode,
-          item_id: src.item_id,
+          manufacture_id: src.manufacture_id || null, // May be null if using inventory items
+          source_barcode: src.source_barcode || '',
+          item_id: src.item_id, // Required - either from manufacture or directly from inventory
           quantity: parseFloat(src.quantity) || 0
         })) : null;
         
