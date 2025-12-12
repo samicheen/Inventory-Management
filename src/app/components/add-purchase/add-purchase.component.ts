@@ -170,6 +170,13 @@ export class AddPurchaseComponent implements OnInit {
       }
     }
     
+    // Ensure item is selected
+    if (!this.selectedItemId) {
+      this.selectedItem.markAsTouched();
+      this.selectedItem.setErrors({ required: true });
+      return;
+    }
+    
     if(this.addPurchaseForm.valid) {
        // Get selected item details for print labels
        const selectedItem = this.items?.find(i => i.item_id === this.selectedItemId);
@@ -179,11 +186,11 @@ export class AddPurchaseComponent implements OnInit {
          purchase_id: this.purchase?.purchase_id, // Include purchase_id if editing
          vendor_id: this.selectedVendorId,
          item_id: this.selectedItemId,
-         item: selectedItem ? {
-           name: selectedItem.name || '',
-           grade: selectedItem.grade || '',
-           size: selectedItem.size || ''
-         } : null,
+         item: {
+           name: selectedItem?.name || '',
+           grade: selectedItem?.grade || '',
+           size: selectedItem?.size || ''
+         },
          amount: (this.addPurchaseForm.value.quantity.value * this.addPurchaseForm.value.rate).toFixed(2)
        }
        this.saveAndPrintPurchases.next(purchase);
