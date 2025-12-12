@@ -23,9 +23,9 @@
   <div class="labels-print-area">
     <div *ngFor="let label of getLabelArray(); let i = index" class="barcode-label">
       <div class="label-content">
-        <div class="item-info">{{itemName}}</div>
+        <div class="item-info">{{getPackageItemName(i)}}</div>
         <div class="quantity-info">
-          {{getPackageQuantity(i).toFixed(2)}} {{unit}}
+          {{getPackageQuantity(i).toFixed(2)}} {{getPackageUnit(i)}}
         </div>
         <!-- QR Code visual representation -->
         <canvas class="qrcode-canvas" [id]="'qrcode-' + i"></canvas>

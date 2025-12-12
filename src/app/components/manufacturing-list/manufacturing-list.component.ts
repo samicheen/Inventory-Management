@@ -98,71 +98,54 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
   }
 
   printLabelsForPackages(packages: any[]): void {
-    // Print labels for all packages
-    // Group by item and net_quantity to batch print packages with same weight
-    const groupedPackages = new Map<string, any[]>();
-    
-    packages.forEach(pkg => {
-      // Use net_quantity for grouping if available, otherwise use weight
-      const quantity = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
-        ? pkg.net_quantity 
-        : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0));
-      const key = `${pkg.item_name}_${pkg.item_grade}_${pkg.item_size}_${quantity}_${pkg.unit}`;
-      if (!groupedPackages.has(key)) {
-        groupedPackages.set(key, []);
-      }
-      groupedPackages.get(key)!.push(pkg);
+    if (!packages || packages.length === 0) {
+      this.notificationService.showError('No packages found to print labels for.');
+      return;
+    }
+
+    // Show all packages in a single modal (no grouping)
+    // Format all packages for print labels component
+    const formattedPackages = packages.map(pkg => ({
+      package_barcode: pkg.package_barcode || pkg.barcode,
+      item_name: pkg.item_name,
+      item_grade: pkg.item_grade,
+      item_size: pkg.item_size,
+      net_quantity: pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+        ? Number(pkg.net_quantity) 
+        : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)),
+      quantity: pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0),
+      unit: pkg.unit || 'KG'
+    }));
+
+    // Calculate total quantity across all packages
+    let totalQuantity = 0;
+    formattedPackages.forEach(pkg => {
+      totalQuantity += isNaN(pkg.net_quantity) ? 0 : pkg.net_quantity;
     });
+
+    // Use first package for basic info, but show all packages
+    const firstPkg = formattedPackages[0];
     
-    // Print labels for each group
-    let firstPackage = true;
-    groupedPackages.forEach((pkgGroup, key) => {
-      const firstPkg = pkgGroup[0];
-      
-      // Calculate total quantity (sum of all package net_quantities)
-      let totalQuantity = 0;
-      pkgGroup.forEach(pkg => {
-        const qty = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
-          ? Number(pkg.net_quantity) 
-          : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0));
-        totalQuantity += isNaN(qty) ? 0 : qty;
-      });
-      
-      // Format packages for print labels component
-      const formattedPackages = pkgGroup.map(pkg => ({
-        package_barcode: pkg.package_barcode || pkg.barcode,
-        net_quantity: pkg.net_quantity !== undefined && pkg.net_quantity !== null 
-          ? Number(pkg.net_quantity) 
-          : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)),
-        quantity: pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)
-      }));
-      
-      const initialState = {
-        barcode: firstPkg.package_barcode || firstPkg.barcode,
-        itemName: `${firstPkg.item_name} Grade: ${firstPkg.item_grade} Size: ${firstPkg.item_size}`,
-        quantity: totalQuantity, // Total quantity for all packages in this group
-        netQuantity: totalQuantity, // Net quantity (sum of all package net_quantities)
-        unit: firstPkg.unit || 'KG',
-        labelCount: pkgGroup.length, // Number of packages = number of labels
-        allPackages: formattedPackages // Pass all packages with correct structure
-      };
-      
-      if (firstPackage) {
-        this.modalService.show(PrintLabelsComponent, {
-          initialState,
-          backdrop: 'static',
-          keyboard: false,
-          class: 'modal-lg'
-        });
-        firstPackage = false;
-      }
+    const initialState = {
+      barcode: firstPkg.package_barcode,
+      itemName: `${firstPkg.item_name} Grade: ${firstPkg.item_grade} Size: ${firstPkg.item_size}`,
+      quantity: totalQuantity, // Total quantity for all packages
+      netQuantity: totalQuantity, // Net quantity (sum of all package net_quantities)
+      unit: firstPkg.unit || 'KG',
+      labelCount: packages.length, // Number of packages = number of labels
+      allPackages: formattedPackages // Pass all packages with correct structure
+    };
+    
+    // Open single modal with all packages
+    this.modalService.show(PrintLabelsComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-lg'
     });
     
     if (packages.length > 1) {
-      setTimeout(() => {
-        // Show notification about other packages
-        console.log(`Created ${packages.length} packages. Print labels for each package.`);
-      }, 500);
+      console.log(`Created ${packages.length} packages. Print labels for each package.`);
     }
   }
 
@@ -197,5 +180,31 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  printLabels(manufacture: Manufacture): void {
+    if (!manufacture.manufacture_id && !manufacture.source_barcode) {
+      this.notificationService.showError('Manufacturing entry is missing required information. Cannot print labels.');
+      return;
+    }
+
+    // Get packages for this manufacturing entry
+    const manufactureId = manufacture.manufacture_id ? String(manufacture.manufacture_id) : undefined;
+    const sourceBarcode = manufacture.source_barcode;
+    const itemId = manufacture.item?.item_id ? String(manufacture.item.item_id) : undefined;
+
+    this.manufactureService.getPackagesByManufacture(manufactureId, sourceBarcode, itemId).subscribe({
+      next: (response: any) => {
+        if (response && response.packages && response.packages.length > 0) {
+          this.printLabelsForPackages(response.packages);
+        } else {
+          this.notificationService.showError('No packages found for this manufacturing entry. Please add sub-items first.');
+        }
+      },
+      error: (error) => {
+        const errorMessage = error.error?.message || error.message || 'Error fetching packages';
+        this.notificationService.showError(errorMessage);
+      }
+    });
   }
 }

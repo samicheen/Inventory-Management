@@ -107,6 +107,10 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       qrData.quantity = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
         ? pkg.net_quantity 
         : (pkg.quantity || this.quantity);
+      // Use package-specific item name if available
+      if (pkg.item_name && pkg.item_grade !== undefined && pkg.item_size !== undefined) {
+        qrData.itemName = `${pkg.item_name} Grade: ${pkg.item_grade} Size: ${pkg.item_size}`;
+      }
     }
     
     // Create QR code data string (JSON format) - same structure as print output
@@ -164,6 +168,26 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       ? Number(this.netQuantity) 
       : ((this.quantity !== undefined && this.quantity !== null) ? Number(this.quantity) : 0);
     return isNaN(qty) ? 0 : qty;
+  }
+
+  getPackageItemName(index: number): string {
+    if (this.allPackages && this.allPackages[index]) {
+      const pkg = this.allPackages[index];
+      if (pkg.item_name && pkg.item_grade !== undefined && pkg.item_size !== undefined) {
+        return `${pkg.item_name} Grade: ${pkg.item_grade} Size: ${pkg.item_size}`;
+      }
+    }
+    return this.itemName;
+  }
+
+  getPackageUnit(index: number): string {
+    if (this.allPackages && this.allPackages[index]) {
+      const pkg = this.allPackages[index];
+      if (pkg.unit) {
+        return pkg.unit;
+      }
+    }
+    return this.unit;
   }
 
   onLabelCountChange(): void {

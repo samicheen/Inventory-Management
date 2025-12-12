@@ -27,6 +27,7 @@
                 <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
                     role="menu" aria-labelledby="button-split">
                   <li role="menuitem"><a class="dropdown-item" (click)="addSubItem(manufacture)">Add Sub Item</a></li>
+                  <li role="menuitem"><a class="dropdown-item" (click)="printLabels(manufacture)"><i class="fa fa-print"></i> Print Labels</a></li>
                   <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item text-danger" (click)="removeManufacture(manufacture)"><i class="fa fa-trash"></i> Remove</a></li>
                 </ul>
               </div>
