@@ -29,6 +29,11 @@
                 "glob": ".htaccess",
                 "input": "src",
                 "output": "/"
+              },
+              {
+                "glob": "privacy-policy.html",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": [
