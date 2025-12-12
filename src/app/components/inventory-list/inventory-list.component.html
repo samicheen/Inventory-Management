@@ -32,6 +32,7 @@
           <th scope="col">Item Name</th>
           <th scope="col">Grade</th>
           <th scope="col">Size</th>
+          <th scope="col">Initial Stock</th>
           <th scope="col">Opening Stock</th>
           <th scope="col">Opening Amount</th>
           <th scope="col">Closing Stock</th>
@@ -51,6 +52,7 @@
             <td *ngIf="route.snapshot.params.item_id">{{inv_item.item.name}}</td>
             <td>{{inv_item.item.grade}}</td>
             <td>{{inv_item.item.size}}</td>
+            <td>{{inv_item.initial_stock?.value | number:'1.2-2'}} {{inv_item.initial_stock ? quantityUnitToLabelMapping[inv_item.initial_stock.unit] : ''}}</td>
             <td>{{inv_item.opening_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.opening_stock.unit]}}</td>
             <td>Rs. {{inv_item.opening_amount | number:'1.2-2'}}</td>
             <td>{{inv_item.closing_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.closing_stock.unit]}}</td>
