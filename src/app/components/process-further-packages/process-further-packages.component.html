@@ -9,7 +9,7 @@
                        class="form-control"
                        [(ngModel)]="barcodeInput"
                        [ngModelOptions]="{standalone: true}"
-                       placeholder="Scan or enter barcode (auto-capture enabled)..."
+                       placeholder="Scan or enter barcode and press Enter..."
                        (keyup.enter)="scanBarcode()"
                        (focus)="barcodeInputRef.select()"
                        *ngIf="!isMobile">
@@ -32,29 +32,6 @@
             </div>
             <small class="form-text text-muted">
                 <i class="fa fa-info-circle"></i> Scan multiple packages to process them together. Weight is automatically read from QR code.
-                <br><strong>Tip:</strong> You can scan directly (auto-capture enabled) or type/paste barcodes and press Enter.
-            </small>
-        </div>
-        
-        <!-- Test Mode: Quick Add Barcode (for testing) -->
-        <div class="form-group">
-            <div class="input-group">
-                <input type="text"
-                       class="form-control form-control-sm"
-                       #testBarcodeInput
-                       placeholder="Quick test: Enter barcode and press Enter..."
-                       (keyup.enter)="quickTestBarcode(testBarcodeInput.value); testBarcodeInput.value = ''">
-                <div class="input-group-append">
-                    <button type="button" 
-                            class="btn btn-sm btn-outline-secondary" 
-                            (click)="quickTestBarcode(testBarcodeInput.value); testBarcodeInput.value = ''"
-                            title="Quick test barcode">
-                        <i class="fa fa-flask"></i> Test
-                    </button>
-                </div>
-            </div>
-            <small class="form-text text-muted text-muted">
-                <em>Testing mode: Enter barcode here for quick testing without external scanner</em>
             </small>
         </div>
 
@@ -98,27 +75,14 @@
             </div>
         </div>
 
-        <!-- Processing Type Selection -->
-        <div class="form-group">
-            <label for="processing_type"><i class="fa fa-cog"></i> Processing Type</label>
-            <select class="form-control" formControlName="processing_type">
-                <option value="">Select processing type...</option>
-                <option *ngFor="let pt of processingTypes" [value]="pt.value">
-                    {{pt.label}} (+Rs. {{pt.charge}}/{{quantityUnitToLabelMapping[getTotalUnit()]}})
-                </option>
-            </select>
-            <div *ngIf="processingType.touched && processingType.errors?.required" class="alert alert-danger mt-1 mb-0">
-                Processing type is required.
-            </div>
-        </div>
 
         <!-- Submit Button -->
         <div class="button-group">
             <div class="button-row">
                 <button class="btn btn-primary"
-                        [disabled]="!processFurtherForm.valid || scannedPackages.length === 0"
+                        [disabled]="scannedPackages.length === 0"
                         (click)="submitProcessFurther()">
-                    <i class="fa fa-check"></i> Process All Packages
+                    <i class="fa fa-check"></i> Unpackage All Packages
                 </button>
                 <button type="button" class="btn btn-secondary" (click)="modalRef.hide()">
                     <i class="fa fa-times"></i> Cancel

@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { InventoryService } from '../../services/inventory/inventory.service';
-import { ProcessingTypeService } from '../../services/processing-type/processing-type.service';
 import { NotificationService } from '../../services/notification/notification.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from '../../models/quantity.model';
 import { FormsModule } from '@angular/forms';
@@ -32,7 +31,6 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
   
   scannedPackages: ScannedPackage[] = [];
   processFurtherForm: FormGroup;
-  processingTypes: Array<{value: number, label: string, charge: number}> = [];
   barcodeInput: string = '';
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   processFurther: Subject<any>;
@@ -46,15 +44,10 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private inventoryService: InventoryService,
-    private processingTypeService: ProcessingTypeService,
     private notificationService: NotificationService,
     private barcodeScannerService: BarcodeScannerService,
     public modalRef: BsModalRef
   ) { }
-
-  get processingType(): FormControl {
-    return this.processFurtherForm.get('processing_type') as FormControl;
-  }
 
   ngOnInit(): void {
     this.processFurther = new Subject();
@@ -62,24 +55,8 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
     // Check if running on native platform (mobile app)
     this.isMobile = Capacitor.isNativePlatform();
     
-    this.processFurtherForm = this.formBuilder.group({
-      processing_type: ['', Validators.required]
-    });
-
-    // Load processing types
-    this.processingTypeService.getProcessingTypes().subscribe(
-      (response) => {
-        this.processingTypes = response.processing_types.map(pt => ({
-          value: pt.processing_type_id!,
-          label: pt.name,
-          charge: pt.processing_charge
-        }));
-      },
-      (error) => {
-        console.error('Error loading processing types:', error);
-        this.notificationService.showError('Error loading processing types.');
-      }
-    );
+    // No form validation needed - just need packages
+    this.processFurtherForm = this.formBuilder.group({});
 
     // Add initial package if provided
     if (this.initialPackage) {
@@ -170,17 +147,6 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Quick test barcode (for testing without external scanner)
-   */
-  quickTestBarcode(barcode: string): void {
-    if (!barcode || barcode.trim() === '') {
-      return;
-    }
-    this.barcodeInput = barcode.trim();
-    this.scanBarcode();
-  }
-
-  /**
    * Scan barcode and add to list
    */
   scanBarcode(): void {
@@ -195,21 +161,46 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
     if (this.scannedPackages.some(pkg => pkg.barcode === barcode)) {
       this.notificationService.showError(`Package ${barcode} is already in the list`);
       this.barcodeInput = '';
+      // Refocus input after clearing
+      setTimeout(() => {
+        if (this.barcodeInputRef && !this.isMobile) {
+          this.barcodeInputRef.nativeElement.focus();
+        }
+      }, 100);
       return;
     }
 
     // Lookup barcode
     this.inventoryService.getInventoryByBarcode(barcode).subscribe(
       (response: any) => {
-        // Validate it's a package barcode (sub-item)
-        if (!response.is_package || !response.item.is_sub_item) {
-          this.notificationService.showError('This barcode is not a packaged sub-item. Only packaged sub-items can be processed further.');
+        // Validate it's a sub-item that can be processed further
+        // Sub-items can be processed further regardless of whether they're:
+        // 1. From packages table (is_package = true) - processed packages
+        // 2. From inventory directly (is_sub_item = true) - sub-items in inventory
+        const isPackage = response.is_package === true;
+        const isSubItem = response.item && response.item.is_sub_item === true;
+        
+        if (!isPackage && !isSubItem) {
+          this.notificationService.showError('This barcode is not a sub-item. Only sub-items can be processed further.');
           this.barcodeInput = '';
+          // Refocus input after clearing
+          setTimeout(() => {
+            if (this.barcodeInputRef && !this.isMobile) {
+              this.barcodeInputRef.nativeElement.focus();
+            }
+          }, 100);
           return;
         }
 
         this.addPackageToList(response);
         this.barcodeInput = '';
+        
+        // Refocus input after adding package to allow continuous scanning
+        setTimeout(() => {
+          if (this.barcodeInputRef && !this.isMobile) {
+            this.barcodeInputRef.nativeElement.focus();
+          }
+        }, 100);
       },
       (error) => {
         if (error.status === 404) {
@@ -218,6 +209,12 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
           this.notificationService.showError('Error looking up barcode: ' + (error.error?.message || error.message));
         }
         this.barcodeInput = '';
+        // Refocus input after error
+        setTimeout(() => {
+          if (this.barcodeInputRef && !this.isMobile) {
+            this.barcodeInputRef.nativeElement.focus();
+          }
+        }, 100);
       }
     );
   }
@@ -267,26 +264,23 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
     if (barcode) {
       this.barcodeInput = barcode;
       this.scanBarcode();
+      // scanBarcode() will clear the input after processing
     }
   }
 
   /**
    * Submit to process further
+   * This just unpackages the items and moves them to manufacturing.
+   * The actual processing type will be selected when adding the sub-item from Manufacturing list.
    */
   submitProcessFurther(): void {
-    if (this.processFurtherForm.invalid) {
-      this.processFurtherForm.markAllAsTouched();
-      return;
-    }
-
     if (this.scannedPackages.length === 0) {
       this.notificationService.showError('Please scan at least one package');
       return;
     }
-
-    const formValue = this.processFurtherForm.getRawValue();
     
     // Prepare data for backend
+    // No processing_type_id needed - just unpackage and move to manufacturing
     const processData = {
       packages: this.scannedPackages.map(pkg => ({
         package_barcode: pkg.barcode,
@@ -294,8 +288,7 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
         net_quantity: pkg.net_quantity,
         unit: pkg.unit,
         rate: pkg.rate
-      })),
-      processing_type_id: formValue.processing_type
+      }))
     };
 
     this.processFurther.next(processData);
