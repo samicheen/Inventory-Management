@@ -47,7 +47,7 @@ npx cap init
 
 When prompted:
 - **App name**: Inventory Management
-- **App ID**: com.inventorymanagement.app (or your preferred package name)
+- **App ID**: com.vinayakainventory.app (or your preferred package name)
 - **Web dir**: dist/inventory-management
 
 **Note**: The `capacitor.config.json` file is already created, so you can skip this step if the file exists.

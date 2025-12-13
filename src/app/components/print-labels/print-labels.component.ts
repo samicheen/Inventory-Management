@@ -224,17 +224,28 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
         <title>Print Labels</title>
         <style>
           @page {
-            size: 4in 6in;
+            size: 4in 3in;
             margin: 0;
           }
           @media print {
             @page {
-              size: 4in 6in;
+              size: 4in 3in;
               margin: 0;
             }
             /* Hide browser headers and footers */
             @page {
               margin: 0;
+            }
+            /* Force page size for label printers */
+            html {
+              width: 4in;
+              height: 3in;
+            }
+            body {
+              width: 4in;
+              height: 3in;
+              margin: 0;
+              padding: 0;
             }
             body {
               margin: 0;
@@ -248,9 +259,9 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
           }
           .barcode-label {
             width: 4in;
-            height: 6in;
-            border: 1px solid #000;
-            padding: 0.15in;
+            height: 3in;
+            border: none;
+            padding: 0.08in 0.1in 0.12in 0.1in;
             margin: 0;
             page-break-after: always;
             page-break-inside: avoid;
@@ -262,45 +273,57 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            padding: 0.05in;
+            padding: 0.05in 0.05in 0.08in 0.05in;
+            box-sizing: border-box;
           }
           .item-info {
-            font-size: 16px;
-            margin-bottom: 10px;
-            line-height: 1.3;
+            font-size: 11px;
+            margin-bottom: 3px;
+            line-height: 1.2;
             font-weight: bold;
+            flex-shrink: 0;
+            word-wrap: break-word;
+            max-width: 100%;
           }
           .quantity-info {
-            font-size: 14px;
+            font-size: 10px;
             color: #000;
-            margin-bottom: 15px;
-            line-height: 1.3;
+            margin-bottom: 4px;
+            line-height: 1.2;
+            flex-shrink: 0;
           }
           .qrcode-canvas,
           .qrcode-image {
-            width: 200px;
-            height: 200px;
-            max-width: 3.8in;
-            margin: 10px 0;
+            width: 180px;
+            height: 180px;
+            max-width: 2.2in;
+            margin: 3px 0;
             display: block;
+            flex-shrink: 0;
           }
           .qrcode-placeholder {
-            width: 200px;
-            height: 200px;
-            max-width: 3.8in;
-            margin: 10px 0;
+            width: 180px;
+            height: 180px;
+            max-width: 2.2in;
+            margin: 3px 0;
             display: block;
             background: #f0f0f0;
             border: 1px solid #ccc;
+            flex-shrink: 0;
           }
           .barcode-text {
-            font-size: 16px;
+            font-size: 11px;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 4px;
+            margin-bottom: 0;
             font-family: 'Courier New', monospace;
-            line-height: 1.3;
+            line-height: 1.2;
+            flex-shrink: 0;
+            text-align: center;
+            width: 100%;
+            padding-bottom: 0.02in;
           }
         </style>
       </head>
@@ -340,7 +363,22 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
     
     for (let i = 0; i < packagesToPrint.length; i++) {
       const pkg = packagesToPrint[i];
-      const packageBarcode = pkg.package_barcode || defaultBarcode;
+      // Get package-specific barcode (check both package_barcode and barcode fields)
+      const packageBarcode = pkg.package_barcode || pkg.barcode || defaultBarcode;
+      
+      // Get package-specific item name
+      let packageItemName = itemName;
+      if (pkg.item_name) {
+        if (pkg.item_grade !== undefined && pkg.item_size !== undefined) {
+          packageItemName = `${pkg.item_name} Grade: ${pkg.item_grade} Size: ${pkg.item_size}`;
+        } else {
+          packageItemName = pkg.item_name;
+        }
+      }
+      
+      // Get package-specific unit
+      const packageUnit = pkg.unit || unit;
+      
       // Safely convert to number
       const rawQuantity = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
         ? pkg.net_quantity 
@@ -351,9 +389,9 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       // Create QR code data (quantity is already the net quantity)
       const qrData: QRCodeData = {
         barcode: packageBarcode,
-        itemName: itemName,
+        itemName: packageItemName,
         quantity: safeQuantity, // This is already the net quantity
-        unit: unit
+        unit: packageUnit
       };
       
       const qrDataString = JSON.stringify(qrData);
@@ -397,7 +435,22 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
         }));
     
     packagesToPrint.forEach((pkg: any, i: number) => {
-      const packageBarcode = pkg.package_barcode || defaultBarcode;
+      // Get package-specific barcode (check both package_barcode and barcode fields)
+      const packageBarcode = pkg.package_barcode || pkg.barcode || defaultBarcode;
+      
+      // Get package-specific item name
+      let packageItemName = itemName;
+      if (pkg.item_name) {
+        if (pkg.item_grade !== undefined && pkg.item_size !== undefined) {
+          packageItemName = `${pkg.item_name} Grade: ${pkg.item_grade} Size: ${pkg.item_size}`;
+        } else {
+          packageItemName = pkg.item_name;
+        }
+      }
+      
+      // Get package-specific unit
+      const packageUnit = pkg.unit || unit;
+      
       // Safely convert to number
       const rawQuantity = (pkg.net_quantity !== undefined && pkg.net_quantity !== null) 
         ? pkg.net_quantity 
@@ -407,12 +460,15 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       
       const qrCodeImage = qrCodeImages[i] || '';
       
+      // Escape HTML in packageItemName to prevent XSS
+      const escapedItemName = packageItemName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      
       html += `
         <div class="barcode-label">
           <div class="label-content">
-            <div class="item-info">${itemName}</div>
-            <div class="quantity-info">${safeQuantity.toFixed(2)} ${unit}</div>
-            ${qrCodeImage ? `<img src="${qrCodeImage}" alt="QR Code" class="qrcode-image" style="width: 200px; height: 200px; margin: 10px 0; display: block;" />` : '<div class="qrcode-placeholder" style="width: 200px; height: 200px; margin: 10px 0; display: block; background: #f0f0f0; border: 1px solid #ccc;"></div>'}
+            <div class="item-info">${escapedItemName}</div>
+            <div class="quantity-info">${safeQuantity.toFixed(2)} ${packageUnit}</div>
+            ${qrCodeImage ? `<img src="${qrCodeImage}" alt="QR Code" class="qrcode-image" style="width: 180px; height: 180px; max-width: 2.2in; margin: 3px 0; display: block;" />` : '<div class="qrcode-placeholder" style="width: 180px; height: 180px; max-width: 2.2in; margin: 3px 0; display: block; background: #f0f0f0; border: 1px solid #ccc;"></div>'}
             <div class="barcode-text">${packageBarcode}</div>
           </div>
         </div>

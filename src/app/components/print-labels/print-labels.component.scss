@@ -144,13 +144,13 @@
 
   // Page setup for label printer
   @page {
-    size: 4in 2in; // Standard 4x2 inch label
+    size: 4in 3in; // 4x3 inch label
     margin: 0;
   }
 
   html, body {
     width: 4in;
-    height: 2in;
+    height: 3in;
     margin: 0;
     padding: 0;
   }
@@ -160,12 +160,12 @@
     padding: 0;
   }
 
-  // Label size: 4x2 inches
+  // Label size: 4x3 inches
   .barcode-label {
     width: 4in !important;
-    height: 2in !important;
-    border: 1px solid #000;
-    padding: 0.1in !important;
+    height: 3in !important;
+    border: none;
+    padding: 0.08in 0.1in 0.12in 0.1in !important;
     margin: 0 !important;
     page-break-after: always;
     page-break-inside: avoid;
@@ -185,39 +185,50 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: 0.05in;
+    padding: 0.05in 0.05in 0.08in 0.05in;
+    box-sizing: border-box;
   }
 
   .item-info {
-    font-size: 12px;
-    margin-bottom: 5px;
+    font-size: 11px;
+    margin-bottom: 3px;
     line-height: 1.2;
     font-weight: bold;
+    flex-shrink: 0;
+    word-wrap: break-word;
+    max-width: 100%;
   }
 
   .quantity-info {
     font-size: 10px;
     color: #000;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     line-height: 1.2;
+    flex-shrink: 0;
   }
 
   .qrcode-canvas {
-    width: 200px !important;
-    height: 200px !important;
-    max-width: 3.5in !important;
-    margin: 5px 0 !important;
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 2.2in !important;
+    margin: 3px 0 !important;
     display: block !important;
+    flex-shrink: 0;
   }
 
   .barcode-text {
-    font-size: 14px;
+    font-size: 11px;
     font-weight: bold;
-    margin-top: 5px;
+    margin-top: 4px;
+    margin-bottom: 0;
     font-family: 'Courier New', monospace;
     line-height: 1.2;
+    flex-shrink: 0;
+    text-align: center;
+    width: 100%;
+    padding-bottom: 0.02in;
   }
 }
 
