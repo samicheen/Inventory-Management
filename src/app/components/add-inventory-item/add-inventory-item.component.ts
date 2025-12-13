@@ -531,6 +531,7 @@ export class AddInventoryItemComponent implements OnInit {
             parent_item_id: this.parentItem?.item_id || null
           },
           source_barcode: isMixed ? null : (this.manufactureEntry?.source_barcode || null), // For mixed, source_barcode is in sources array
+          manufacture_id: isMixed ? null : (this.manufactureEntry?.manufacture_id || null), // Use manufacture_id to identify specific manufacturing entry
           sources: sources, // Array of sources for mixed packages
           processing_type: this.isInitialStockMode ? null : (pkg.processing_type || null),
           closing_stock: {
