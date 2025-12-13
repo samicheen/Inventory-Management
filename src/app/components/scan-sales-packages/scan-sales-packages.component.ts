@@ -180,17 +180,6 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Quick test barcode (for testing without external scanner)
-   */
-  quickTestBarcode(barcode: string): void {
-    if (!barcode || barcode.trim() === '') {
-      return;
-    }
-    this.barcodeInput = barcode.trim();
-    this.scanBarcode();
-  }
-
-  /**
    * Scan barcode and add to list
    */
   scanBarcode(): void {
@@ -205,6 +194,12 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
     if (this.scannedPackages.some(pkg => pkg.barcode === barcode)) {
       this.notificationService.showError(`Package ${barcode} is already in the list`);
       this.barcodeInput = '';
+      // Refocus input after clearing
+      setTimeout(() => {
+        if (this.barcodeInputRef && !this.isMobile) {
+          this.barcodeInputRef.nativeElement.focus();
+        }
+      }, 100);
       return;
     }
 
@@ -215,11 +210,24 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
         if (!response.is_package) {
           this.notificationService.showError('This barcode is not a packaged item. Only packaged items can be sold.');
           this.barcodeInput = '';
+          // Refocus input after clearing
+          setTimeout(() => {
+            if (this.barcodeInputRef && !this.isMobile) {
+              this.barcodeInputRef.nativeElement.focus();
+            }
+          }, 100);
           return;
         }
 
         this.addPackageToList(response);
         this.barcodeInput = '';
+        
+        // Refocus input after adding package to allow continuous scanning
+        setTimeout(() => {
+          if (this.barcodeInputRef && !this.isMobile) {
+            this.barcodeInputRef.nativeElement.focus();
+          }
+        }, 100);
       },
       (error) => {
         if (error.status === 404) {
@@ -228,6 +236,13 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
           this.notificationService.showError('Error looking up barcode: ' + (error.error?.message || error.message));
         }
         this.barcodeInput = '';
+        
+        // Refocus input after error
+        setTimeout(() => {
+          if (this.barcodeInputRef && !this.isMobile) {
+            this.barcodeInputRef.nativeElement.focus();
+          }
+        }, 100);
       }
     );
   }
