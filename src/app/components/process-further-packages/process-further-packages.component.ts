@@ -192,6 +192,22 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
           return;
         }
 
+        // Check if this is a mixed mode package and warn the user
+        if (response.is_mixed_mode === true) {
+          this.notificationService.showWarning(
+            'Warning: This package is from mixed mode processing (contains multiple source items). ' +
+            'Unpackaging mixed mode packages is not supported. Please contact support if you need to unpackage this item.'
+          );
+          this.barcodeInput = '';
+          // Refocus input after clearing
+          setTimeout(() => {
+            if (this.barcodeInputRef && !this.isMobile) {
+              this.barcodeInputRef.nativeElement.focus();
+            }
+          }, 100);
+          return;
+        }
+
         this.addPackageToList(response);
         this.barcodeInput = '';
         
