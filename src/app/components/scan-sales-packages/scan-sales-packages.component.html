@@ -35,6 +35,20 @@
             </small>
         </div>
 
+        <!-- Invoice ID -->
+        <div class="form-group">
+            <label for="invoice_id"><i class="fa fa-file-invoice"></i> Invoice No. *</label>
+            <input type="text"
+                   class="form-control"
+                   id="invoice_id"
+                   formControlName="invoice_id"
+                   placeholder="Enter invoice number"
+                   required>
+            <div *ngIf="invoiceId.touched && invoiceId.errors?.required" class="alert alert-danger mt-1 mb-0">
+                Invoice number is required.
+            </div>
+        </div>
+
         <!-- Customer Selection -->
         <div class="form-group">
             <label for="selected_customer"><i class="fa fa-user"></i> Customer</label>

@@ -337,29 +337,25 @@ export class BarcodeScannerService {
 
     if (modalRef.content) {
       modalRef.content.sell.subscribe((salesData: any[]) => {
-        // Process all sales groups
-        let successCount = 0;
-        let errorCount = 0;
-        const totalPackages = salesData.reduce((total, group) => total + group.packages.length, 0);
-        
         // Get customer details first
         const customerId = salesData[0].customer_id;
+        const invoiceId = salesData[0].invoice_id; // Common invoice ID for all packages
         this.partyService.getParties('customer').subscribe(
           (partiesResponse: any) => {
-            const customer = partiesResponse.parties.find((p: any) => p.party_id === customerId);
+            // Service always transforms parties to items - use items only
+            const parties = partiesResponse.items || [];
+            // Convert both to strings for comparison (form values are strings, party_id might be number)
+            const customer = parties.find((p: any) => String(p.party_id) === String(customerId));
             if (!customer) {
-              this.notificationService.showError('Customer not found');
+              this.notificationService.showError('Customer not found. Customer ID: ' + customerId);
               return;
             }
 
-            salesData.forEach((salesGroup, index) => {
-              // Create sales entry for each package in the group
+            // Prepare all sales in a single array
+            const allSales: any[] = [];
+            salesData.forEach((salesGroup) => {
               salesGroup.packages.forEach((pkg: any) => {
-                const sale: any = {
-                  invoice_id: '', // Optional
-                  customer: {
-                    name: customer.name
-                  },
+                allSales.push({
                   item: salesGroup.item,
                   quantity: {
                     value: pkg.quantity,
@@ -369,30 +365,34 @@ export class BarcodeScannerService {
                   amount: (pkg.quantity * salesGroup.selling_price).toFixed(2),
                   barcode: pkg.barcode,
                   timestamp: new Date().toISOString()
-                };
+                });
+              });
+            });
 
-            this.salesService.sellItem(sale).subscribe(
-              () => {
-                successCount++;
-                if (successCount + errorCount === totalPackages) {
-                  // All sales completed
-                  this.notificationService.showSuccess(`Successfully sold ${successCount} package(s).`);
+            // Send all sales in a single API call
+            this.salesService.sellItems(invoiceId, { name: customer.name }, allSales).subscribe(
+              (response: any) => {
+                if (response.success) {
+                  this.notificationService.showSuccess(response.message);
+                  this.refreshService.triggerRefresh('sales');
+                  this.refreshService.triggerRefresh('inventory');
+                } else {
+                  // Some errors occurred
+                  const errorMessages = response.results
+                    .filter((r: any) => !r.success)
+                    .map((r: any) => `Package ${r.barcode || 'N/A'}: ${r.error || 'Unknown error'}`)
+                    .join('; ');
+                  this.notificationService.showError(response.message + (errorMessages ? ' Details: ' + errorMessages : ''));
                   this.refreshService.triggerRefresh('sales');
                   this.refreshService.triggerRefresh('inventory');
                 }
               },
               (error) => {
-                errorCount++;
-                this.notificationService.showError('Error selling package ' + pkg.barcode + ': ' + (error.error?.message || error.message));
-                if (successCount + errorCount === totalPackages) {
-                  // All sales completed (with errors)
-                  this.refreshService.triggerRefresh('sales');
-                  this.refreshService.triggerRefresh('inventory');
-                }
+                this.notificationService.showError('Error selling packages: ' + (error.error?.message || error.message));
+                this.refreshService.triggerRefresh('sales');
+                this.refreshService.triggerRefresh('inventory');
               }
             );
-          });
-        });
           },
           (error) => {
             this.notificationService.showError('Error loading customer: ' + (error.error?.message || error.message));

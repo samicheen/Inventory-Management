@@ -7,7 +7,6 @@ import { SalesService } from 'src/app/services/sales/sales.service';
 import { Response } from '../../models/response.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { SellItemComponent } from '../sell-item/sell-item.component';
-import { BehaviorSubject } from 'rxjs';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
@@ -21,7 +20,6 @@ export class SalesListComponent implements OnInit, OnDestroy {
   sales : Sale[];
   total_amount: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping
-  private readonly refreshItems = new BehaviorSubject(undefined);
   private refreshSubscription: Subscription;
 
   constructor(
@@ -34,9 +32,6 @@ export class SalesListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.getSales();
-    this.refreshItems.subscribe(() => {
-      this.getSales();
-    });
     
     // Subscribe to refresh service for auto-refresh after barcode scans
     this.refreshSubscription = this.refreshService.refresh$.subscribe((page: string) => {
@@ -64,7 +59,7 @@ export class SalesListComponent implements OnInit, OnDestroy {
       let sellItemModalRef = this.modalService.show(SellItemComponent, { backdrop: 'static', keyboard: false });
       sellItemModalRef.content.sell.subscribe(sale => {
         this.salesService.sellItem(sale).subscribe(() => {
-          this.refreshItems.next(undefined);
+          this.refreshService.triggerRefresh('sales');
         });
       });
   }
@@ -92,7 +87,7 @@ export class SalesListComponent implements OnInit, OnDestroy {
               const message = response.message || 'Sale removed successfully.';
               const warning = response.warning ? ` ${response.warning}` : '';
               this.notificationService.showSuccess(message + warning);
-              this.refreshItems.next(undefined);
+              this.refreshService.triggerRefresh('sales');
             },
             error: (error) => {
               const errorMessage = error.error?.message || error.message || 'Error removing sale';

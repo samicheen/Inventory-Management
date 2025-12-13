@@ -40,6 +40,21 @@ export class SalesService {
   }
 
   /**
+   * Sell multiple items in a single transaction
+   * @param invoiceId Common invoice ID for all sales
+   * @param customer Customer object with name
+   * @param sales Array of sale objects
+   */
+  sellItems(invoiceId: string, customer: { name: string }, sales: Sale[]): Observable<any> {
+    const payload = {
+      invoice_id: invoiceId,
+      customer: customer,
+      sales: sales
+    };
+    return this.http.post<any>(`${this.apiUrl}/api/sales/sellItems.php`, payload);
+  }
+
+  /**
    * Remove sale
    * @param invoiceId 
    * @param itemId Optional - if provided, removes only that item from invoice
