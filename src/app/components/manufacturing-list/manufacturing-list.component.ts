@@ -75,24 +75,15 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
         
         // Handle multiple packages and print labels
         if (response && response.packages && response.packages.length > 0) {
+          console.log('Received packages from backend:', response.packages);
           this.printLabelsForPackages(response.packages);
+        } else {
+          console.warn('No packages in response:', response);
         }
       }, (error) => {
+        // Handle actual errors
         console.error('Error adding inventory:', error);
-        // Show user-friendly error message
-        if (error.status === 201) {
-          // 201 Created is actually success, but Angular might treat it as error if response parsing fails
-          // Try to parse the response body if available
-          if (error.error && error.error.packages) {
-            this.refreshItems.next(undefined);
-            if (error.error.packages.length > 0) {
-              this.printLabelsForPackages(error.error.packages);
-            }
-          }
-        } else {
-          // Handle actual errors
-          this.notificationService.showError(error.error?.message || 'Error adding inventory item');
-        }
+        this.notificationService.showError(error.error?.message || 'Error adding inventory item');
       });
     });
   }

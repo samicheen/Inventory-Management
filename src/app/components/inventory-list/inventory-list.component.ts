@@ -69,16 +69,20 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
 
   ngAfterViewInit(): void {
     // Set the active tab after view initialization
-    if (this.tabset && !this.route.snapshot.params.item_id) {
-      const tabParam = this.route.snapshot.queryParams['tab'];
-      if (tabParam === 'sub-items') {
-        this.tabset.tabs[1].active = true;
-        this.tabset.tabs[0].active = false;
-      } else {
-        this.tabset.tabs[0].active = true;
-        this.tabset.tabs[1].active = false;
+    // Use setTimeout to defer the change until after the current change detection cycle
+    // This prevents ExpressionChangedAfterItHasBeenCheckedError
+    setTimeout(() => {
+      if (this.tabset && !this.route.snapshot.params.item_id) {
+        const tabParam = this.route.snapshot.queryParams['tab'];
+        if (tabParam === 'sub-items') {
+          this.tabset.tabs[1].active = true;
+          this.tabset.tabs[0].active = false;
+        } else {
+          this.tabset.tabs[0].active = true;
+          this.tabset.tabs[1].active = false;
+        }
       }
-    }
+    }, 0);
   }
 
   ngOnDestroy(): void {
@@ -109,19 +113,15 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
         
         // Handle multiple packages and print labels
         if (response && response.packages && response.packages.length > 0) {
+          console.log('Received packages from backend:', response.packages);
           this.printLabelsForPackages(response.packages);
+        } else {
+          console.warn('No packages in response:', response);
         }
       }, (error) => {
-        // Handle 201 Created status (Angular might treat it as error if response parsing fails)
-        if (error.status === 201 && error.error && error.error.packages) {
-          this.refreshItems.next(undefined);
-          if (error.error.packages.length > 0) {
-            this.printLabelsForPackages(error.error.packages);
-          }
-        } else {
-          // Handle actual errors
-          this.notificationService.showError('Error adding inventory: ' + (error.error?.message || error.message));
-        }
+        // Handle actual errors
+        console.error('Error adding inventory:', error);
+        this.notificationService.showError('Error adding inventory: ' + (error.error?.message || error.message || 'Unknown error'));
       });
     });
   }
@@ -194,16 +194,13 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   printLabels(invItem: InventoryItem): void {
-    // Check if this is a sub-item (processed item) by checking if barcode contains processed item prefixes
-    const barcode = invItem.barcode || '';
-    const isProcessedItem = barcode.includes('COND-') || barcode.includes('SCUT-') || 
-                           (invItem.item && invItem.item.name && 
-                            (invItem.item.name.toUpperCase().includes('COND') || 
-                             invItem.item.name.toUpperCase().includes('SCUT')));
+    const itemId = typeof invItem.item.item_id === 'string' ? parseInt(invItem.item.item_id, 10) : invItem.item.item_id;
     
-    if (isProcessedItem) {
-      // For processed items, fetch packages from API
-      const itemId = typeof invItem.item.item_id === 'string' ? parseInt(invItem.item.item_id, 10) : invItem.item.item_id;
+    // Check if this is a sub-item (processed item)
+    const isSubItem = invItem.item && invItem.item.is_sub_item === true;
+    
+    if (isSubItem) {
+      // For processed items (sub-items), fetch packages from API (same as manufacturing list)
       this.inventoryService.getInventoryPackages(itemId).subscribe(
         (response: any) => {
           if (response && response.packages && response.packages.length > 0) {
@@ -217,28 +214,19 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
         }
       );
     } else {
-      // For regular items, use the barcode directly
-      // Parse comma-separated barcodes if present
-      const barcodes = barcode.split(',').map(b => b.trim()).filter(b => b);
-      if (barcodes.length === 0) {
-        this.notificationService.showError('No barcode found for this item.');
-        return;
-      }
-      
-      // Create a single package entry for regular items
-      const packages = barcodes.map((b, index) => ({
-        package_barcode: b,
-        barcode: b,
-        net_quantity: invItem.closing_stock.value / barcodes.length, // Distribute quantity evenly
-        quantity: invItem.closing_stock.value / barcodes.length,
-        weight: invItem.closing_stock.value / barcodes.length,
-        unit: invItem.closing_stock.unit,
-        item_name: invItem.item.name,
-        item_grade: invItem.item.grade,
-        item_size: invItem.item.size
-      }));
-      
-      this.printLabelsForPackages(packages);
+      // For all other items (initial stock, purchases), fetch individual inventory entries
+      this.inventoryService.getInventoryEntriesByItem(itemId).subscribe(
+        (response: any) => {
+          if (response && response.packages && response.packages.length > 0) {
+            this.printLabelsForPackages(response.packages);
+          } else {
+            this.notificationService.showError('No packages found for this item.');
+          }
+        },
+        (error) => {
+          this.notificationService.showError('Error fetching inventory entries: ' + (error.error?.message || error.message));
+        }
+      );
     }
   }
 
@@ -248,64 +236,53 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
       return;
     }
     
-    // Print labels for all packages
-    // Group by item and net_quantity to batch print packages with same weight
-    const groupedPackages = new Map<string, any[]>();
+    console.log('printLabelsForPackages called with packages:', packages);
     
-    packages.forEach(pkg => {
-      // Use net_quantity for grouping if available, otherwise use weight
-      const quantity = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
-        ? pkg.net_quantity 
-        : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0));
-      const key = `${pkg.item_name}_${pkg.item_grade}_${pkg.item_size}_${quantity}_${pkg.unit}`;
-      if (!groupedPackages.has(key)) {
-        groupedPackages.set(key, []);
-      }
-      groupedPackages.get(key)!.push(pkg);
+    // When adding new packages (from "Done and Print Labels"), show ALL packages in a single modal
+    // regardless of item or quantity differences - each package gets its own label
+    // Format all packages for print labels component
+    const formattedPackages = packages.map(pkg => ({
+      package_barcode: pkg.package_barcode || pkg.barcode,
+      item_name: pkg.item_name,
+      item_grade: pkg.item_grade,
+      item_size: pkg.item_size,
+      net_quantity: pkg.net_quantity !== undefined && pkg.net_quantity !== null 
+        ? Number(pkg.net_quantity) 
+        : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)),
+      quantity: pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0),
+      unit: pkg.unit || 'KG'
+    }));
+
+    // Calculate total quantity across all packages
+    let totalQuantity = 0;
+    formattedPackages.forEach(pkg => {
+      totalQuantity += isNaN(pkg.net_quantity) ? 0 : pkg.net_quantity;
+    });
+
+    // Use first package for basic info display
+    const firstPkg = formattedPackages[0];
+
+    console.log('Opening print labels modal with all packages:', {
+      packageCount: packages.length,
+      labelCount: packages.length,
+      formattedPackages: formattedPackages
     });
     
-    // Print labels for each group
-    let firstPackage = true;
-    groupedPackages.forEach((pkgGroup, key) => {
-      const firstPkg = pkgGroup[0];
-      
-      // Calculate total quantity (sum of all package net_quantities)
-      let totalQuantity = 0;
-      pkgGroup.forEach(pkg => {
-        const qty = pkg.net_quantity !== undefined && pkg.net_quantity !== null 
-          ? Number(pkg.net_quantity) 
-          : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0));
-        totalQuantity += isNaN(qty) ? 0 : qty;
-      });
-      
-      // Format packages for print labels component
-      const formattedPackages = pkgGroup.map(pkg => ({
-        package_barcode: pkg.package_barcode || pkg.barcode,
-        net_quantity: pkg.net_quantity !== undefined && pkg.net_quantity !== null 
-          ? Number(pkg.net_quantity) 
-          : (pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)),
-        quantity: pkg.weight !== undefined ? Number(pkg.weight) : (pkg.quantity !== undefined ? Number(pkg.quantity) : 0)
-      }));
-      
-      const initialState = {
-        barcode: firstPkg.package_barcode || firstPkg.barcode,
-        itemName: `${firstPkg.item_name} Grade: ${firstPkg.item_grade} Size: ${firstPkg.item_size}`,
-        quantity: totalQuantity, // Total quantity for all packages in this group
-        netQuantity: totalQuantity, // Net quantity (sum of all package net_quantities)
-        unit: firstPkg.unit || 'KG',
-        labelCount: pkgGroup.length, // Number of packages = number of labels
-        allPackages: formattedPackages // Pass all packages with correct structure
-      };
-      
-      if (firstPackage) {
-        this.modalService.show(PrintLabelsComponent, {
-          initialState,
-          backdrop: 'static',
-          keyboard: false,
-          class: 'modal-lg'
-        });
-        firstPackage = false;
-      }
+    const initialState = {
+      barcode: firstPkg.package_barcode,
+      itemName: `${firstPkg.item_name} Grade: ${firstPkg.item_grade} Size: ${firstPkg.item_size}`,
+      quantity: totalQuantity, // Total quantity for all packages
+      netQuantity: totalQuantity, // Net quantity (sum of all package net_quantities)
+      unit: firstPkg.unit || 'KG',
+      labelCount: packages.length, // Number of packages = number of labels
+      allPackages: formattedPackages // Pass all packages with correct structure
+    };
+    
+    this.modalService.show(PrintLabelsComponent, {
+      initialState,
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-lg'
     });
   }
 

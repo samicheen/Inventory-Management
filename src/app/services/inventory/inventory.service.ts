@@ -43,8 +43,19 @@ export class InventoryService {
    * Add inventory item
    * @param item Item to add
    */
-   addInventoryItem(item: InventoryItem): Observable<AddItemResponse> {
-     return this.http.post<AddItemResponse>(`${this.apiUrl}/api/inventory/addInventoryItem.php`, item);
+   addInventoryItem(item: InventoryItem): Observable<any> {
+     // Use observe: 'response' to properly handle 201 status codes
+     return this.http.post<any>(`${this.apiUrl}/api/inventory/addInventoryItem.php`, item, {
+       observe: 'response'
+     }).pipe(
+       map(response => {
+         // Handle both 200 and 201 status codes
+         if (response.status === 200 || response.status === 201) {
+           return response.body;
+         }
+         throw response;
+       })
+     );
    }
 
   /**
@@ -69,6 +80,14 @@ export class InventoryService {
    */
   getInventoryPackages(itemId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/api/inventory/getInventoryPackages.php?item_id=${itemId}`);
+  }
+
+  /**
+   * Get all individual inventory entries for an item (useful for initial stock items)
+   * @param itemId Item ID to get entries for
+   */
+  getInventoryEntriesByItem(itemId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/api/inventory/getInventoryEntriesByItem.php?item_id=${itemId}`);
   }
 
   /**
