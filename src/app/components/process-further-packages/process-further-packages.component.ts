@@ -173,15 +173,17 @@ export class ProcessFurtherPackagesComponent implements OnInit, OnDestroy {
     // Lookup barcode
     this.inventoryService.getInventoryByBarcode(barcode).subscribe(
       (response: any) => {
-        // Validate it's a sub-item that can be processed further
-        // Sub-items can be processed further regardless of whether they're:
-        // 1. From packages table (is_package = true) - processed packages
-        // 2. From inventory directly (is_sub_item = true) - sub-items in inventory
+        // Validate it's an item that can be processed further
+        // Items that can be processed further:
+        // 1. Sub-items (is_sub_item = true) - can be processed further
+        // 2. Packages (is_package = true) - processed packages
+        // 3. Initial stock items (barcode starts with INIT-) - main items from initial stock
         const isPackage = response.is_package === true;
         const isSubItem = response.item && response.item.is_sub_item === true;
+        const isInitialStock = response.barcode && response.barcode.startsWith('INIT-');
         
-        if (!isPackage && !isSubItem) {
-          this.notificationService.showError('This barcode is not a sub-item. Only sub-items can be processed further.');
+        if (!isPackage && !isSubItem && !isInitialStock) {
+          this.notificationService.showError('This barcode cannot be processed further. Only sub-items, processed packages, or initial stock items can be processed further.');
           this.barcodeInput = '';
           // Refocus input after clearing
           setTimeout(() => {
