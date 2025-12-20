@@ -235,6 +235,10 @@
                                  class="alert alert-danger mt-1 mb-0">
                                 Weight cannot exceed {{availableQuantity?.value}} {{quantityUnitToLabelMapping[availableQuantity?.unit]}}.
                             </div>
+                            <div *ngIf="package.get('quantity.value')?.touched && package.get('quantity.value')?.errors?.maxTotal" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Total weight ({{package.get('quantity.value')?.value || 0}} × {{package.get('package_quantity')?.value || 1}} = {{(package.get('quantity.value')?.value || 0) * (package.get('package_quantity')?.value || 1)}}) exceeds available {{availableQuantity?.value}} {{quantityUnitToLabelMapping[availableQuantity?.unit]}}.
+                            </div>
                         </div>
                         
                         <div class="form-group col-md-6">

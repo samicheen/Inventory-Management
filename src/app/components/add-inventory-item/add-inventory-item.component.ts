@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
-import { FormGroup, FormBuilder, FormControl, Validators, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, FormControl, Validators, FormArray, AbstractControl } from '@angular/forms';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { Subject, forkJoin } from 'rxjs';
 import { Item } from 'src/app/models/item.model';
@@ -198,7 +198,45 @@ export class AddInventoryItemComponent implements OnInit {
       formGroupConfig.processing_type = ['', processingTypeValidators]; // Processing type per package
     }
     
-    return this.formBuilder.group(formGroupConfig);
+    const formGroup = this.formBuilder.group(formGroupConfig);
+    
+    // Add custom validator to check total weight (weight * package_quantity) against available quantity
+    if (!this.isInitialStockMode && this.availableQuantity?.value) {
+      const totalWeightValidator = (control: AbstractControl): {[key: string]: any} | null => {
+        const packageGroup = control.parent;
+        if (!packageGroup) return null;
+        
+        const weightValue = parseFloat(packageGroup.get('quantity.value')?.value) || 0;
+        const packageQuantity = parseInt(packageGroup.get('package_quantity')?.value) || 1;
+        const totalWeight = weightValue * packageQuantity;
+        const availableQty = this.availableQuantity?.value || 0;
+        
+        if (totalWeight > availableQty && weightValue > 0) {
+          return { maxTotal: { total: totalWeight, available: availableQty } };
+        }
+        return null;
+      };
+      
+      // Add validator to both quantity.value and package_quantity so it triggers when either changes
+      formGroup.get('quantity.value')?.setValidators([...quantityValidators, totalWeightValidator]);
+      formGroup.get('package_quantity')?.setValidators([
+        Validators.required, 
+        Validators.min(1),
+        totalWeightValidator
+      ]);
+      
+      // Add listener to re-validate quantity.value when package_quantity changes
+      formGroup.get('package_quantity')?.valueChanges.subscribe(() => {
+        formGroup.get('quantity.value')?.updateValueAndValidity();
+      });
+      
+      // Add listener to re-validate package_quantity when quantity.value changes
+      formGroup.get('quantity.value')?.valueChanges.subscribe(() => {
+        formGroup.get('package_quantity')?.updateValueAndValidity();
+      });
+    }
+    
+    return formGroup;
   }
 
   createSourceFormGroup(): FormGroup {
