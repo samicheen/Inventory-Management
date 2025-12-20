@@ -1,84 +1,126 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <span class="navbar-brand mb-0 h1">Inventory Management</span>
-  <button class="navbar-toggler" 
-          type="button" 
-          [attr.aria-expanded]="!isCollapsed"
-          (click)="isCollapsed = !isCollapsed"
-          aria-controls="navbarNav" 
-          aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" 
-       [collapse]="isCollapsed"
-       id="navbarNav">
-    <ul class="navbar-nav me-auto">
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="dashboard" (click)="collapseMenuOnMobile()"><i class="fa fa-dashboard"></i> Dashboard</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="item" (click)="collapseMenuOnMobile()"><i class="fa fa-tag"></i> Item</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="processing-type" (click)="collapseMenuOnMobile()"><i class="fa fa-cog"></i> Processing Type</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']" *ngIf="authService.isAdmin()">
-        <a class="nav-link" routerLink="user" (click)="collapseMenuOnMobile()"><i class="fa fa-users"></i> Users</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="vendor" (click)="collapseMenuOnMobile()"><i class="fa fa-building"></i> Vendor</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="customer" (click)="collapseMenuOnMobile()"><i class="fa fa-users"></i> Customer</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="purchase" (click)="collapseMenuOnMobile()"><i class="fa fa-shopping-cart"></i> Purchase</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="inventory" (click)="collapseMenuOnMobile()"><i class="fa fa-cubes"></i> Inventory</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="manufacture" (click)="collapseMenuOnMobile()"><i class="fa fa-industry"></i> Manufacturing</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="sales" (click)="collapseMenuOnMobile()"><i class="fa fa-shopping-bag"></i> Sales</a>
-      </li>
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" routerLink="summary" (click)="collapseMenuOnMobile()"><i class="fa fa-list-alt"></i> Summary</a>
-      </li>
-    </ul>
-    <div class="navbar-nav" *ngIf="currentUser">
-      <li class="nav-item dropdown" dropdown>
-        <a class="nav-link dropdown-toggle" dropdownToggle id="userDropdown" role="button">
-          <i class="fa fa-user"></i> {{ currentUser.username }}
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" *dropdownMenu aria-labelledby="userDropdown">
-          <li><a class="dropdown-item" href="javascript:void(0)" (click)="$event.preventDefault()"><i class="fa fa-user-circle"></i> Profile</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" (click)="logout(); $event.preventDefault()"><i class="fa fa-sign-out"></i> Logout</a></li>
-        </ul>
-      </li>
-    </div>
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" 
+     *ngIf="sidebarOpen"
+     (click)="closeSidebar()"></div>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" [class.sidebar-open]="sidebarOpen">
+  <div class="sidebar-header">
+    <h3>Inventory Management</h3>
+    <button class="sidebar-close-btn" (click)="closeSidebar()">
+      <i class="fa fa-times"></i>
+    </button>
   </div>
-  <!-- Barcode Scanner - Always visible outside collapsible menu -->
-  <div class="navbar-nav" *ngIf="currentUser" style="margin-left: auto;">
+  <nav class="sidebar-nav">
+    <a class="sidebar-item" 
+       routerLink="dashboard" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="item" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-tag"></i>
+      <span>Item</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="processing-type" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-cog"></i>
+      <span>Processing Type</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="user" 
+       [routerLinkActive]="['active']"
+       *ngIf="authService.isAdmin()"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-users"></i>
+      <span>Users</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="vendor" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-building"></i>
+      <span>Vendor</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="customer" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-users"></i>
+      <span>Customer</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="purchase" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-shopping-cart"></i>
+      <span>Purchase</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="inventory" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-cubes"></i>
+      <span>Inventory</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="manufacture" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-industry"></i>
+      <span>Manufacturing</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="sales" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-shopping-bag"></i>
+      <span>Sales</span>
+    </a>
+    <a class="sidebar-item" 
+       routerLink="summary" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-list-alt"></i>
+      <span>Summary</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- Top Header Bar -->
+<nav class="navbar navbar-dark bg-primary top-header">
+  <button class="sidebar-toggle-btn" 
+          type="button" 
+          (click)="toggleSidebar()"
+          aria-label="Toggle sidebar">
+    <i class="fa fa-bars"></i>
+  </button>
+  
+  <span class="navbar-brand">Inventory Management</span>
+  
+  <div class="header-actions" *ngIf="currentUser">
     <!-- Mobile: Only show camera button -->
     <button class="btn btn-sm btn-primary" 
             type="button"
             (click)="openBarcodeScanner()"
             title="Scan Barcode with Camera"
-            *ngIf="isMobile"
-            style="margin-right: 0.5rem;">
+            *ngIf="isMobile">
       <i class="fa fa-camera"></i> Scan
     </button>
     
     <!-- Web: Show input field with barcode button -->
-    <div class="input-group" style="width: 250px; margin-right: 10px;" *ngIf="!isMobile">
+    <div class="input-group barcode-input-group" *ngIf="!isMobile">
       <input type="text" 
              class="form-control form-control-sm" 
              placeholder="Scan barcode..."
              #barcodeInput
-             (keyup.enter)="scanBarcode(barcodeInput.value); barcodeInput.value = ''"
-             style="font-size: 0.875rem;">
+             (keyup.enter)="scanBarcode(barcodeInput.value); barcodeInput.value = ''">
       <div class="input-group-append">
         <button class="btn btn-sm btn-light" 
                 type="button"
@@ -87,6 +129,18 @@
           <i class="fa fa-barcode"></i>
         </button>
       </div>
+    </div>
+    
+    <!-- User Profile Dropdown -->
+    <div class="user-dropdown" dropdown>
+      <a class="user-link" dropdownToggle id="userDropdown" role="button">
+        <i class="fa fa-user"></i> {{ currentUser.username }}
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" *dropdownMenu aria-labelledby="userDropdown">
+        <li><a class="dropdown-item" href="javascript:void(0)" (click)="$event.preventDefault()"><i class="fa fa-user-circle"></i> Profile</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="javascript:void(0)" (click)="logout(); $event.preventDefault()"><i class="fa fa-sign-out"></i> Logout</a></li>
+      </ul>
     </div>
   </div>
 </nav>

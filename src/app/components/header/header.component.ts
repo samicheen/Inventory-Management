@@ -12,7 +12,7 @@ import { BarcodeScannerService } from '../../services/barcode/barcode-scanner.se
 export class HeaderComponent implements OnInit {
   currentUser: User | null = null;
   isMobile = false; // Will be set in ngOnInit
-  isCollapsed = true; // Start collapsed, Bootstrap will expand on desktop automatically
+  sidebarOpen = false; // Sidebar is closed by default
 
   constructor(
     public authService: AuthService,
@@ -23,15 +23,17 @@ export class HeaderComponent implements OnInit {
     // Check if running on native platform (mobile app)
     this.isMobile = Capacitor.isNativePlatform();
     
-    // On desktop (≥992px), menu should be expanded
-    // Bootstrap's navbar-expand-lg handles this via CSS, but we need to set initial state
-    if (window.innerWidth >= 992) {
-      this.isCollapsed = false;
-    }
-    
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
+  }
+  
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+  
+  closeSidebar(): void {
+    this.sidebarOpen = false;
   }
 
   scanBarcode(barcode: string): void {
@@ -52,12 +54,11 @@ export class HeaderComponent implements OnInit {
   }
 
   /**
-   * Collapse menu on mobile after navigation
+   * Close sidebar after navigation (especially on mobile)
    */
-  collapseMenuOnMobile(): void {
-    // Only collapse on mobile (when screen width < 992px)
+  closeSidebarOnNavigation(): void {
     if (window.innerWidth < 992) {
-      this.isCollapsed = true;
+      this.sidebarOpen = false;
     }
   }
 }
