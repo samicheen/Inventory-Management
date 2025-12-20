@@ -158,12 +158,32 @@
     }
   }
   
+  .navbar-brand-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  
   .navbar-brand {
     font-weight: 600;
     font-size: 1.25rem;
     color: white !important;
     margin: 0;
-    flex: 1;
+  }
+  
+  .current-page-indicator {
+    font-size: 1.25rem;
+    color: white;
+    font-weight: 600;
+    white-space: nowrap;
+    
+    &::before {
+      content: '-';
+      margin-right: 0.5rem;
+      opacity: 0.7;
+      font-weight: 400;
+    }
   }
   
   .header-actions {
