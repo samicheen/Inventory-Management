@@ -54,11 +54,9 @@ export class HeaderComponent implements OnInit {
   }
 
   /**
-   * Close sidebar after navigation (especially on mobile)
+   * Close sidebar after navigation (on all screen sizes)
    */
   closeSidebarOnNavigation(): void {
-    if (window.innerWidth < 992) {
-      this.sidebarOpen = false;
-    }
+    this.sidebarOpen = false;
   }
 }

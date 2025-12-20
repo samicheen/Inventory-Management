@@ -574,7 +574,8 @@
 }
 
 /* Snackbar/Notification Improvements - Centered and Modern */
-::ng-deep .mat-snack-bar-container {
+::ng-deep .mat-snack-bar-container,
+::ng-deep .mat-mdc-snack-bar-container {
   min-width: 400px !important;
   max-width: 600px !important;
   border-radius: 8px !important;
@@ -582,7 +583,9 @@
   padding: 16px 24px !important;
   font-size: 14px !important;
   font-weight: 500 !important;
-  margin-top: 20px !important;
+  margin-top: 80px !important; // Add margin to account for header height (60px + padding)
+  z-index: 10000 !important; // Very high z-index to appear above header (1030) and sidebar (1050)
+  position: relative !important;
 }
 
 ::ng-deep .success-snackbar {
@@ -648,10 +651,14 @@
 /* Responsive */
 @media (max-width: 768px) {
   /* Snackbar responsive */
-  ::ng-deep .mat-snack-bar-container {
+  ::ng-deep .mat-snack-bar-container,
+  ::ng-deep .mat-mdc-snack-bar-container {
     min-width: 90% !important;
     max-width: 95% !important;
-    margin: 10px auto !important;
+    margin-top: 70px !important; // Account for header on mobile
+    margin-left: auto !important;
+    margin-right: auto !important;
+    z-index: 10000 !important; // Ensure it's above header and sidebar on mobile too
   }
   
   .table {
@@ -694,7 +701,30 @@
   }
 }
 
-/* Material Snackbar Styles */
+/* Material Snackbar Styles - Ensure overlay appears above header and sidebar */
+::ng-deep .cdk-overlay-container {
+  z-index: 9999 !important; // Very high z-index to appear above everything
+  position: fixed !important;
+  pointer-events: none !important; // Allow clicks to pass through except on snackbar
+}
+
+::ng-deep .cdk-overlay-pane {
+  z-index: 9999 !important;
+  pointer-events: auto !important; // Re-enable pointer events on snackbar
+}
+
+::ng-deep .cdk-overlay-backdrop {
+  z-index: 9998 !important;
+}
+
+/* Ensure snackbar container appears above everything */
+::ng-deep .mat-snack-bar-container,
+::ng-deep .mat-mdc-snack-bar-container {
+  z-index: 10000 !important;
+  position: relative !important;
+  pointer-events: auto !important;
+}
+
 ::ng-deep .mat-mdc-snack-bar-container {
   &.success-snackbar {
     --mdc-snackbar-container-color: var(--success-color);

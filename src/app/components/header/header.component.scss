@@ -6,7 +6,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
+  z-index: 1001; // Below snackbars (9999) but above header (1000)
   animation: fadeIn 0.2s ease;
   
   @media (min-width: 992px) {
@@ -29,7 +29,7 @@
   height: 100vh;
   background: var(--white);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
-  z-index: 1050;
+  z-index: 1002; // Below snackbars (9999) but above overlay (1001) and header (1000)
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   overflow-y: auto;
@@ -135,7 +135,7 @@
   justify-content: space-between;
   position: sticky;
   top: 0;
-  z-index: 1030;
+  z-index: 1000; // Lowered to allow snackbars (9999) to appear above
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   
   .sidebar-toggle-btn {

@@ -113,7 +113,9 @@ export class BarcodeScannerService {
         if (error.status === 404) {
           this.notificationService.showError('Barcode not found: ' + barcode);
         } else {
-          this.notificationService.showError('Error looking up barcode: ' + error.message);
+          // Show actual API error message if available, otherwise show generic error
+          const errorMessage = error.error?.message || error.message || 'Unknown error';
+          this.notificationService.showError(errorMessage);
         }
       }
     );
