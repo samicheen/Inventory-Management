@@ -100,7 +100,7 @@ export class AddInventoryItemComponent implements OnInit {
         this.items = [];
       });
     } else {
-      // For processing, load sub-items only
+      // For processing, load sub-items only (main_item_id is provided by backend)
       this.itemService.getItems(true).subscribe((response) => {
         this.items = response.items;
       }, (error) => {
@@ -138,10 +138,15 @@ export class AddInventoryItemComponent implements OnInit {
         }
       );
       
-      // Get source rate using item_id directly
-      // This ensures we get the weighted average rate even when multiple purchases exist
+      // Get source rate - always use main item rate for consistency
+      // Backend provides main_item_id (already traversed up hierarchy)
       if (this.manufactureEntry?.item?.item_id) {
-        this.inventoryService.getInventoryRateByItemId(String(this.manufactureEntry.item.item_id)).subscribe(
+        // Use main_item_id from backend (no traversal needed in frontend)
+        const itemIdToUse = this.manufactureEntry.item.main_item_id 
+          ? String(this.manufactureEntry.item.main_item_id) 
+          : String(this.manufactureEntry.item.item_id); // Fallback if main_item_id not provided
+        
+        this.inventoryService.getInventoryRateByItemId(itemIdToUse).subscribe(
           (response: any) => {
             this.sourceRate = typeof response.rate === 'string' ? parseFloat(response.rate) : (response.rate || 0);
             if (this.manufactureEntry?.quantity) {
@@ -217,23 +222,15 @@ export class AddInventoryItemComponent implements OnInit {
         return null;
       };
       
-      // Add validator to both quantity.value and package_quantity so it triggers when either changes
+      // Add validator to both quantity.value and package_quantity
+      // The validator checks both fields, so when either changes, Angular will re-validate that field
+      // No need for cross-validation listeners which can cause infinite loops
       formGroup.get('quantity.value')?.setValidators([...quantityValidators, totalWeightValidator]);
       formGroup.get('package_quantity')?.setValidators([
         Validators.required, 
         Validators.min(1),
         totalWeightValidator
       ]);
-      
-      // Add listener to re-validate quantity.value when package_quantity changes
-      formGroup.get('package_quantity')?.valueChanges.subscribe(() => {
-        formGroup.get('quantity.value')?.updateValueAndValidity();
-      });
-      
-      // Add listener to re-validate package_quantity when quantity.value changes
-      formGroup.get('quantity.value')?.valueChanges.subscribe(() => {
-        formGroup.get('package_quantity')?.updateValueAndValidity();
-      });
     }
     
     return formGroup;
@@ -396,15 +393,17 @@ export class AddInventoryItemComponent implements OnInit {
       this.updateMixedPackageWeight(index);
     } else {
       // Single source mode: Add processing charge if processing type is selected
+      // Always use main item rate + full processing charge for consistency
       if (!processingTypeId) return;
       
       const processingType = this.processingTypes.find(pt => pt.value === Number(processingTypeId));
       const processingCharge = processingType ? processingType.charge : 0;
       
+      // sourceRate is already the main item rate (backend/frontend handles getting parent rate if needed)
       sourceRateNum = typeof this.sourceRate === 'string' ? parseFloat(this.sourceRate) : (this.sourceRate || 0);
       
       if (sourceRateNum > 0) {
-        // Add processing charge for the current processing step (e.g., S-Cut to Conditioned)
+        // Always add full processing charge (consistent calculation regardless of source)
         sourceRateNum = sourceRateNum + processingCharge;
       }
     }
