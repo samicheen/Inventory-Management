@@ -35,17 +35,28 @@
             </small>
         </div>
 
-        <!-- Invoice ID -->
-        <div class="form-group">
-            <label for="invoice_id"><i class="fa fa-file-invoice"></i> Invoice No. *</label>
-            <input type="text"
-                   class="form-control"
-                   id="invoice_id"
-                   formControlName="invoice_id"
-                   placeholder="Enter invoice number"
-                   required>
-            <div *ngIf="invoiceId.touched && invoiceId.errors?.required" class="alert alert-danger mt-1 mb-0">
-                Invoice number is required.
+        <!-- Invoice ID and Date -->
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="invoice_id"><i class="fa fa-file-invoice"></i> Invoice No. *</label>
+                <input type="text"
+                       class="form-control"
+                       id="invoice_id"
+                       formControlName="invoice_id"
+                       placeholder="Enter invoice number"
+                       required>
+                <div *ngIf="invoiceId.touched && invoiceId.errors?.required" class="alert alert-danger mt-1 mb-0">
+                    Invoice number is required.
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="timestamp"><i class="fa fa-calendar"></i> Date</label>
+                <input type="text"
+                       class="form-control"
+                       id="timestamp"
+                       bsDatepicker
+                       formControlName="timestamp"
+                       [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY', containerClass: 'theme-dark-blue' }" />
             </div>
         </div>
 

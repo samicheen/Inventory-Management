@@ -38,6 +38,9 @@
             <div *ngIf="selectedCustomer.touched && selectedCustomer.errors?.required" class="alert alert-danger">
                 <div>Customer name is required.</div>
             </div>
+            <div *ngIf="selectedCustomer.touched && selectedCustomer.errors?.customerNotSelected" class="alert alert-danger">
+                <div>Please select a customer from the dropdown suggestions.</div>
+            </div>
         </div>
         <div class="form-group">
             <label for="item"><i class="fa fa-box"></i> Item</label>
@@ -57,6 +60,9 @@
                 </ng-template>
             <div *ngIf="selectedItem.touched && selectedItem.errors?.required" class="alert alert-danger">
                 <div>Item is required.</div>
+            </div>
+            <div *ngIf="selectedItem.touched && selectedItem.errors?.itemNotSelected" class="alert alert-danger">
+                <div>Please select an item from the dropdown suggestions.</div>
             </div>
         </div>
         <div class="form-group" formGroupName="quantity">

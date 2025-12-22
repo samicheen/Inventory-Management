@@ -354,9 +354,36 @@ export class AddInventoryItemComponent implements OnInit {
       selected_item_id: item.item_id
     });
     
+    // Store the selected item object in the form control for validation
+    packageGroup.patchValue({ _selectedItemObj: item }, { emitEvent: false });
+    
     // For initial stock, if item has a rate, pre-fill it (but keep it editable)
     if (this.isInitialStockMode && item.rate) {
       packageGroup.patchValue({ rate: item.rate }, { emitEvent: false });
+    }
+    
+    // Clear any previous errors
+    const selectedItemControl = packageGroup.get('selected_item');
+    if (selectedItemControl?.errors) {
+      selectedItemControl.setErrors(null);
+    }
+  }
+
+  onSelectOutputItem(event: TypeaheadMatch, index: number): void {
+    const item = event.item;
+    const packageGroup = this.packages.at(index);
+    packageGroup.patchValue({
+      output_item_id: item.item_id,
+      output_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size
+    });
+    
+    // Store the selected output item object in the form control for validation
+    packageGroup.patchValue({ _outputItemObj: item }, { emitEvent: false });
+    
+    // Clear any previous errors
+    const outputItemControl = packageGroup.get('output_item');
+    if (outputItemControl?.errors) {
+      outputItemControl.setErrors(null);
     }
   }
 
@@ -536,6 +563,84 @@ export class AddInventoryItemComponent implements OnInit {
             quantityControl?.markAsTouched();
           });
           return;
+        }
+      }
+      
+      // Validate items are selected from autofill
+      for (let i = 0; i < this.packages.length; i++) {
+        const packageGroup = this.packages.at(i);
+        const isMixed = this.isMixedMode[i];
+        
+        if (isMixed) {
+          // For mixed mode, validate output_item
+          const outputItemFormValue = packageGroup.get('output_item')?.value;
+          const outputItemId = packageGroup.get('output_item_id')?.value;
+          const storedOutputItemObj = packageGroup.get('_outputItemObj')?.value;
+          
+          let selectedOutputItem: Item | undefined;
+          // Prioritize stored output item object if it matches form value
+          if (storedOutputItemObj) {
+            const expectedFormat = `${storedOutputItemObj.name} Grade: ${storedOutputItemObj.grade} Size: ${storedOutputItemObj.size}`;
+            if (outputItemFormValue === expectedFormat) {
+              selectedOutputItem = storedOutputItemObj;
+            }
+          }
+          
+          // If not found, try to find by parsing the form value
+          if (!selectedOutputItem && this.items && outputItemFormValue) {
+            selectedOutputItem = this.items.find(i => {
+              const expectedFormat = `${i.name} Grade: ${i.grade} Size: ${i.size}`;
+              return expectedFormat === outputItemFormValue;
+            });
+          }
+          
+          // If still not found, try by stored item_id
+          if (!selectedOutputItem && outputItemId && this.items) {
+            selectedOutputItem = this.items.find(i => i.item_id === outputItemId);
+          }
+          
+          if (!selectedOutputItem) {
+            const outputItemControl = packageGroup.get('output_item');
+            outputItemControl?.setErrors({ itemNotSelected: true });
+            outputItemControl?.markAsTouched();
+            this.notificationService.showError(`Package #${i + 1}: Please select an output item from the dropdown suggestions.`);
+            return;
+          }
+        } else {
+          // For single source mode, validate selected_item
+          const itemFormValue = packageGroup.get('selected_item')?.value;
+          const selectedItemId = packageGroup.get('selected_item_id')?.value;
+          const storedItemObj = packageGroup.get('_selectedItemObj')?.value;
+          
+          let selectedItem: Item | undefined;
+          // Prioritize stored item object if it matches form value
+          if (storedItemObj) {
+            const expectedFormat = `${storedItemObj.name} Grade: ${storedItemObj.grade} Size: ${storedItemObj.size}`;
+            if (itemFormValue === expectedFormat) {
+              selectedItem = storedItemObj;
+            }
+          }
+          
+          // If not found, try to find by parsing the form value
+          if (!selectedItem && this.items && itemFormValue) {
+            selectedItem = this.items.find(i => {
+              const expectedFormat = `${i.name} Grade: ${i.grade} Size: ${i.size}`;
+              return expectedFormat === itemFormValue;
+            });
+          }
+          
+          // If still not found, try by stored item_id
+          if (!selectedItem && selectedItemId && this.items) {
+            selectedItem = this.items.find(i => i.item_id === selectedItemId);
+          }
+          
+          if (!selectedItem) {
+            const selectedItemControl = packageGroup.get('selected_item');
+            selectedItemControl?.setErrors({ itemNotSelected: true });
+            selectedItemControl?.markAsTouched();
+            this.notificationService.showError(`Package #${i + 1}: Please select an item from the dropdown suggestions.`);
+            return;
+          }
         }
       }
       

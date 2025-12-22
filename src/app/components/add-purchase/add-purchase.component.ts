@@ -24,7 +24,9 @@ export class AddPurchaseComponent implements OnInit {
   items: Item[];
   addPurchaseForm: FormGroup;
   selectedItemId: string;
+  selectedItemObj: Item; // Store the selected item object
   selectedVendorId: string;
+  selectedVendorObj: Party; // Store the selected vendor object
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
   unitValues = Object.values(QuantityUnit);
   savePurchase: Subject<InventoryItem>;
@@ -102,6 +104,7 @@ export class AddPurchaseComponent implements OnInit {
     const vendorName = this.purchase.vendor?.name || '';
     const vendor = this.parties?.find(v => v.name === vendorName);
     this.selectedVendorId = vendor?.party_id || null;
+    this.selectedVendorObj = vendor || null; // Store vendor object
 
     // Get item display string (fix [object Object] issue)
     let itemDisplay = '';
@@ -113,6 +116,7 @@ export class AddPurchaseComponent implements OnInit {
         i.size === this.purchase.item.size
       );
       this.selectedItemId = item?.item_id || null;
+      this.selectedItemObj = item || null; // Store item object
     }
 
     // Parse timestamp
@@ -142,13 +146,23 @@ export class AddPurchaseComponent implements OnInit {
   onSelectItem(event: TypeaheadMatch): void {
     const item = event.item;
     this.selectedItemId = item.item_id;
+    this.selectedItemObj = item; // Store the selected item object
     this.addPurchaseForm.patchValue({
       selected_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size
-    })
+    });
+    // Clear any previous errors
+    if (this.selectedItem.errors) {
+      this.selectedItem.setErrors(null);
+    }
   }
 
   onSelectVendor(event: TypeaheadMatch): void {
     this.selectedVendorId = event.item.party_id;
+    this.selectedVendorObj = event.item; // Store the selected vendor object
+    // Clear any previous errors
+    if (this.selectedVendor.errors) {
+      this.selectedVendor.setErrors(null);
+    }
   }
 
   nextItem() {
@@ -170,26 +184,62 @@ export class AddPurchaseComponent implements OnInit {
       }
     }
     
-    // Ensure item is selected
-    if (!this.selectedItemId) {
+    // Validate vendor - must be selected from autofill
+    const vendorName = this.addPurchaseForm.value.selected_vendor;
+    let selectedVendor: Party;
+    if (this.selectedVendorObj && this.selectedVendorObj.name === vendorName) {
+      selectedVendor = this.selectedVendorObj;
+    } else {
+      selectedVendor = this.parties?.find(p => p.name === vendorName);
+    }
+    
+    if (!selectedVendor) {
+      this.selectedVendor.setErrors({ vendorNotSelected: true });
+      this.selectedVendor.markAsTouched();
+      return;
+    }
+    
+    // Validate item - must be selected from autofill
+    const itemFormValue = this.addPurchaseForm.value.selected_item;
+    let selectedItem: Item;
+    if (this.selectedItemObj) {
+      const expectedFormat = `${this.selectedItemObj.name} Grade: ${this.selectedItemObj.grade} Size: ${this.selectedItemObj.size}`;
+      if (itemFormValue === expectedFormat) {
+        selectedItem = this.selectedItemObj;
+      }
+    }
+    
+    // If not found, try to find by parsing the form value
+    if (!selectedItem && this.items) {
+      if (itemFormValue) {
+        selectedItem = this.items.find(i => {
+          const expectedFormat = `${i.name} Grade: ${i.grade} Size: ${i.size}`;
+          return expectedFormat === itemFormValue;
+        });
+      }
+    }
+    
+    // If still not found, try by stored item_id
+    if (!selectedItem && this.selectedItemId && this.items) {
+      selectedItem = this.items.find(i => i.item_id === this.selectedItemId);
+    }
+    
+    if (!selectedItem) {
+      this.selectedItem.setErrors({ itemNotSelected: true });
       this.selectedItem.markAsTouched();
-      this.selectedItem.setErrors({ required: true });
       return;
     }
     
     if(this.addPurchaseForm.valid) {
-       // Get selected item details for print labels
-       const selectedItem = this.items?.find(i => i.item_id === this.selectedItemId);
-       
        const purchase = {
          ...this.addPurchaseForm.value,
          purchase_id: this.purchase?.purchase_id, // Include purchase_id if editing
-         vendor_id: this.selectedVendorId,
-         item_id: this.selectedItemId,
+         vendor_id: selectedVendor.party_id,
+         item_id: selectedItem.item_id,
          item: {
-           name: selectedItem?.name || '',
-           grade: selectedItem?.grade || '',
-           size: selectedItem?.size || ''
+           name: selectedItem.name,
+           grade: selectedItem.grade,
+           size: selectedItem.size
          },
          amount: (this.addPurchaseForm.value.quantity.value * this.addPurchaseForm.value.rate).toFixed(2)
        }

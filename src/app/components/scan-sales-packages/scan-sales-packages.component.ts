@@ -69,6 +69,10 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
     return this.scanSalesForm.get('invoice_id') as FormControl;
   }
 
+  get timestamp(): FormControl {
+    return this.scanSalesForm.get('timestamp') as FormControl;
+  }
+
   get sellingPrices(): FormArray {
     return this.scanSalesForm.get('selling_prices') as FormArray;
   }
@@ -79,8 +83,13 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
     // Check if running on native platform (mobile app)
     this.isMobile = Capacitor.isNativePlatform();
     
+    // Set default date to today
+    const today = new Date();
+    const defaultDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
     this.scanSalesForm = this.formBuilder.group({
       invoice_id: ['', Validators.required], // Required invoice ID - common for all packages
+      timestamp: [today, Validators.required], // Date field with default to today
       selected_customer: ['', Validators.required],
       selling_prices: this.formBuilder.array([])
     });
@@ -351,12 +360,14 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
 
     const formValue = this.scanSalesForm.getRawValue();
     const invoiceId = formValue.invoice_id; // Required - common for all packages
+    const timestamp = formValue.timestamp; // Date for all packages
     const customerId = formValue.selected_customer;
     const sellingPrices = formValue.selling_prices;
     
     // Prepare sales data
     const salesData = this.packageGroups.map((group, index) => ({
       invoice_id: invoiceId, // Common invoice ID for all packages
+      timestamp: timestamp, // Common timestamp for all packages
       customer_id: customerId,
       item: group.item,
       packages: group.packages.map(pkg => ({

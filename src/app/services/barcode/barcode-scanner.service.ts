@@ -355,6 +355,7 @@ export class BarcodeScannerService {
 
             // Prepare all sales in a single array
             const allSales: any[] = [];
+            const timestamp = salesData[0].timestamp || new Date(); // Use timestamp from form or default to now
             salesData.forEach((salesGroup) => {
               salesGroup.packages.forEach((pkg: any) => {
                 allSales.push({
@@ -366,7 +367,7 @@ export class BarcodeScannerService {
                   selling_price: salesGroup.selling_price.toString(),
                   amount: (pkg.quantity * salesGroup.selling_price).toFixed(2),
                   barcode: pkg.barcode,
-                  timestamp: new Date().toISOString()
+                  timestamp: timestamp instanceof Date ? timestamp.toISOString() : timestamp
                 });
               });
             });

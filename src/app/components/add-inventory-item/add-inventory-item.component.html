@@ -70,6 +70,10 @@
                                 <ng-template #customItemTemplate let-item="item">
                                    {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
                                 </ng-template>
+                                <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.itemNotSelected" 
+                                     class="alert alert-danger mt-1 mb-0">
+                                    Please select an item from the dropdown suggestions.
+                                </div>
                                 <div *ngIf="package.get('selected_item')?.touched && package.get('selected_item')?.errors?.required" 
                                      class="alert alert-danger mt-1 mb-0">
                                     Item is required.
@@ -182,7 +186,7 @@
                                 typeaheadOptionField="name"
                                 [typeaheadScrollable]="true"
                                 [typeaheadMinLength]="0"
-                                (typeaheadOnSelect)="onSelectItem($event, i); package.patchValue({output_item_id: $event.item.item_id, output_item: $event.item.name + ' Grade: ' + $event.item.grade + ' Size: ' + $event.item.size})"
+                                (typeaheadOnSelect)="onSelectOutputItem($event, i)"
                                 formControlName="output_item">
                             <ng-template #customItemTemplateMixed let-item="item">
                                {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
@@ -193,6 +197,10 @@
                             <div *ngIf="package.get('output_item')?.touched && !package.get('output_item_id')?.value" 
                                  class="alert alert-danger mt-1 mb-0">
                                 Output item is required for mixed packages.
+                            </div>
+                            <div *ngIf="package.get('output_item')?.touched && package.get('output_item')?.errors?.itemNotSelected" 
+                                 class="alert alert-danger mt-1 mb-0">
+                                Please select an output item from the dropdown suggestions.
                             </div>
                         </div>
                         
