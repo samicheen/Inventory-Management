@@ -1,44 +1,42 @@
 <div class="container-fluid">
-    <div class="flex-container">
-        <button type="button"
-                class="btn btn-primary add-user-btn"
-                (click)="addUser()">
-            Add User
-        </button>
-    </div>
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-            <th scope="col">Username</th>
-            <th scope="col">Email</th>
-            <th scope="col">Role</th>
-            <th scope="col">Actions</th>
-        </thead>
-        <tbody>
-            <tr *ngFor="let user of users">
-                <td>{{user.username}}</td>
-                <td>{{user.email}}</td>
-                <td>
-                    <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
-                        {{user.role === 'admin' ? 'Admin' : (user.role === 'user' ? 'User' : 'N/A')}}
-                    </span>
-                </td>
-                <td class="actions">
-                    <div class="btn-group" dropdown>
-                        <button id="button-split" type="button" dropdownToggle class="btn"
-                                aria-controls="dropdown-split">
-                                <i class="fa fa-ellipsis-v"></i>
-                        </button>
-                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                            role="menu" aria-labelledby="button-split">
-                            <li role="menuitem"><a class="dropdown-item" (click)="editUser(user)"><i class="fa fa-edit"></i> Edit</a></li>
-                            <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeUser(user)"><i class="fa fa-trash"></i> Remove</a></li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-data-grid
+        [columns]="columns"
+        [data]="users"
+        [showSearch]="true"
+        [showActions]="true"
+        [headerActions]="true"
+        [actionsTemplate]="actionsTemplate"
+        [trackByFn]="trackByUserId"
+        searchPlaceholder="Search users...">
+        <div headerActions>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="addUser()">
+                <i class="fa fa-plus"></i> Add User
+            </button>
+        </div>
+    </app-data-grid>
+
+    <!-- Role Template -->
+    <ng-template #roleTemplate let-row let-value="value">
+        <span class="badge" [ngClass]="getRoleBadgeClass(value)">
+            {{value === 'admin' ? 'Admin' : (value === 'user' ? 'User' : 'N/A')}}
+        </span>
+    </ng-template>
+
+    <!-- Actions Template -->
+    <ng-template #actionsTemplate let-user>
+        <div class="btn-group" dropdown>
+            <button id="button-split" type="button" dropdownToggle class="btn"
+                    aria-controls="dropdown-split">
+                    <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                role="menu" aria-labelledby="button-split">
+                <li role="menuitem"><a class="dropdown-item" (click)="editUser(user)"><i class="fa fa-edit"></i> Edit</a></li>
+                <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeUser(user)"><i class="fa fa-trash"></i> Remove</a></li>
+            </ul>
+        </div>
+    </ng-template>
 </div>
 

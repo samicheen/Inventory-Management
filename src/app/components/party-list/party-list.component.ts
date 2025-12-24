@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
@@ -9,17 +9,20 @@ import { AddPartyComponent } from '../add-party/add-party.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-party-list',
   templateUrl: './party-list.component.html',
   styleUrls: ['./party-list.component.scss']
 })
-export class PartyListComponent implements OnInit {
+export class PartyListComponent implements OnInit, AfterViewInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   party_type: string;
   button_value: string;
   parties: Party[];
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
 
   constructor(
@@ -37,6 +40,20 @@ export class PartyListComponent implements OnInit {
     this.refreshItems.subscribe(() => {
       this.getParties();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeColumns();
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { key: 'name', label: 'Name', sortable: true, searchable: true }
+    ];
+  }
+
+  trackByPartyId(index: number, party: Party): string {
+    return party.party_id ? String(party.party_id) : index.toString();
   }
 
   getParties() {

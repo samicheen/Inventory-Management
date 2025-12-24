@@ -1,40 +1,35 @@
 <div class="container-fluid">
-    <div class="flex-container">
-        <button type="button"
-                class="btn btn-primary add-item-btn"
-                (click)="addProcessingType()" *ngIf="authService.isAdmin()">
-            Add Processing Type
-        </button>
-    </div>
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-            <th scope="col">Name</th>
-            <th scope="col">Processing Charge (Rs./Kg)</th>
-            <th scope="col">Description</th>
-            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
-        </thead>
-        <tbody>
-            <tr *ngFor="let pt of processingTypes">
-                <td>{{pt.name}}</td>
-                <td>{{pt.processing_charge}}</td>
-                <td>{{pt.description || '-'}}</td>
-                <td class="actions" *ngIf="authService.isAdmin()">
-                    <div class="btn-group" dropdown>
-                        <button id="button-split" type="button" dropdownToggle class="btn"
-                                aria-controls="dropdown-split">
-                                <i class="fa fa-ellipsis-v"></i>
-                        </button>
-                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                            role="menu" aria-labelledby="button-split">
-                            <li role="menuitem"><a class="dropdown-item" (click)="editProcessingType(pt)"><i class="fa fa-edit"></i> Edit</a></li>
-                            <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeProcessingType(pt)"><i class="fa fa-trash"></i> Remove</a></li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-data-grid
+        [columns]="columns"
+        [data]="processingTypes"
+        [showSearch]="true"
+        [showActions]="authService.isAdmin()"
+        [headerActions]="authService.isAdmin()"
+        [actionsTemplate]="actionsTemplate"
+        [trackByFn]="trackByProcessingTypeId"
+        searchPlaceholder="Search processing types...">
+        <div headerActions *ngIf="authService.isAdmin()">
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="addProcessingType()">
+                <i class="fa fa-plus"></i> Add Processing Type
+            </button>
+        </div>
+    </app-data-grid>
+
+    <!-- Actions Template -->
+    <ng-template #actionsTemplate let-pt>
+        <div class="btn-group" dropdown>
+            <button id="button-split" type="button" dropdownToggle class="btn"
+                    aria-controls="dropdown-split">
+                    <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                role="menu" aria-labelledby="button-split">
+                <li role="menuitem"><a class="dropdown-item" (click)="editProcessingType(pt)"><i class="fa fa-edit"></i> Edit</a></li>
+                <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeProcessingType(pt)"><i class="fa fa-trash"></i> Remove</a></li>
+            </ul>
+        </div>
+    </ng-template>
 </div>
 

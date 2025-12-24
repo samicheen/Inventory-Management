@@ -1,0 +1,203 @@
+.data-grid-container {
+  .grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+    
+    // Force all children to same height
+    .search-container,
+    .header-center,
+    .header-actions {
+      height: 38px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-center {
+      flex: 1;
+      justify-content: center;
+      min-width: 0;
+    }
+    
+    .search-container {
+      flex: 0 0 auto;
+      width: 280px;
+      
+      .search-input-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        
+        .search-input {
+          width: 100%;
+          height: 100%;
+          padding: 0 0.5rem;
+          padding-left: 2.25rem;
+          font-size: 0.875rem;
+          line-height: 1.5;
+          border: 1px solid #ced4da;
+          border-radius: 0.2rem;
+          box-sizing: border-box;
+          margin: 0;
+          
+          &:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+          }
+        }
+        
+        .search-icon {
+          position: absolute;
+          left: 0.5rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #6c757d;
+          font-size: 0.875rem;
+          pointer-events: none;
+          z-index: 1;
+        }
+      }
+    }
+    
+    .header-actions {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      height: 38px;
+      flex-wrap: nowrap;
+      
+      // Ensure all direct children are flex items
+      > * {
+        flex-shrink: 0;
+      }
+      
+      .btn,
+      .btn-sm,
+      .btn-primary,
+      button {
+        height: 100%;
+        margin: 0;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+    }
+  }
+  
+  // Fallback for when only search is shown (no header actions)
+  .search-container {
+    width: 280px;
+    
+    .search-input-wrapper {
+      position: relative;
+      
+      .search-input {
+        font-size: 0.9375rem;
+        padding: 0.375rem 0.75rem;
+        padding-left: 2.5rem;
+        width: 100%;
+        
+        &:focus {
+          border-color: #80bdff;
+          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+      }
+      
+      .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 0.875rem;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
+
+  .table-responsive {
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .table {
+    margin-bottom: 0;
+    table-layout: auto;
+    width: 100%;
+    
+    thead {
+      background-color: #f8f9fa;
+      
+      th {
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        white-space: nowrap;
+        vertical-align: middle;
+        
+        // Ensure width is respected
+        &[style*="width"] {
+          min-width: inherit;
+        }
+        
+        &.sortable {
+          cursor: pointer;
+          user-select: none;
+          transition: background-color 0.2s;
+          
+          &:hover {
+            background-color: #e9ecef;
+          }
+          
+          i {
+            opacity: 0.5;
+            transition: opacity 0.2s;
+          }
+          
+          &:hover i {
+            opacity: 1;
+          }
+        }
+        
+        &.actions-column {
+          width: 80px;
+          text-align: center;
+        }
+      }
+    }
+    
+    tbody {
+      tr {
+        transition: background-color 0.15s;
+        
+        &.clickable {
+          cursor: pointer;
+        }
+        
+        &:hover {
+          background-color: #f8f9fa;
+        }
+        
+        td {
+          vertical-align: middle;
+          
+          &.actions {
+            text-align: center;
+            white-space: nowrap;
+          }
+        }
+      }
+    }
+  }
+}
+
+

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, TemplateRef } from '@angular/core';
 import { TabsetComponent } from 'ngx-bootstrap/tabs';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { InventoryItem } from 'src/app/models/inventory-item.model';
@@ -18,6 +18,7 @@ import { PrintLabelsComponent } from '../print-labels/print-labels.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { RefreshService } from '../../services/refresh/refresh.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-inventory-list',
@@ -26,10 +27,15 @@ import { AuthService } from '../../services/auth/auth.service';
 })
 export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('tabset') tabset: TabsetComponent;
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
+  @ViewChild('barcodeTemplate') barcodeTemplate: TemplateRef<any>;
+  @ViewChild('itemNameTemplate') itemNameTemplate: TemplateRef<any>;
+
   inventory: InventoryItem[];
   inventoryParameters: Map<string, any> = new Map();
   total: any;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
   currentTab: string = 'Main Items'; // Track current tab
   private refreshSubscription: Subscription;
@@ -82,7 +88,84 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
           this.tabset.tabs[1].active = false;
         }
       }
+      this.initializeColumns();
     }, 0);
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { 
+        key: 'timestamp', 
+        label: 'Date', 
+        sortable: true, 
+        searchable: true,
+        valueFormatter: (value: string) => {
+          if (!value) return '-';
+          const date = new Date(value);
+          return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+      },
+      { 
+        key: 'barcode', 
+        label: 'Barcode', 
+        sortable: true, 
+        searchable: true,
+        width: '220px',
+        cellTemplate: this.barcodeTemplate
+      },
+      { 
+        key: 'item.name', 
+        label: 'Item Name', 
+        sortable: true, 
+        searchable: true,
+        cellTemplate: this.itemNameTemplate
+      },
+      { key: 'item.grade', label: 'Grade', sortable: true, searchable: true },
+      { key: 'item.size', label: 'Size', sortable: true, searchable: true },
+      { 
+        key: 'initial_stock', 
+        label: 'Initial Stock', 
+        sortable: true,
+        valueFormatter: (value: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      },
+      { 
+        key: 'opening_stock', 
+        label: 'Opening Stock', 
+        sortable: true,
+        valueFormatter: (value: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      },
+      { 
+        key: 'opening_amount', 
+        label: 'Opening Amount', 
+        sortable: true,
+        valueFormatter: (value: string) => value ? `Rs. ${parseFloat(value).toFixed(2)}` : '-'
+      },
+      { 
+        key: 'closing_stock', 
+        label: 'Closing Stock', 
+        sortable: true,
+        valueFormatter: (value: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      },
+      { 
+        key: 'closing_amount', 
+        label: 'Closing Amount', 
+        sortable: true,
+        valueFormatter: (value: string) => value ? `Rs. ${parseFloat(value).toFixed(2)}` : '-'
+      }
+    ];
+  }
+
+  trackByInventoryId(index: number, item: InventoryItem): string {
+    return item.inventory_id ? String(item.inventory_id) : index.toString();
   }
 
   ngOnDestroy(): void {

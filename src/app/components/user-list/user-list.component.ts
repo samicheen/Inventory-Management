@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BehaviorSubject } from 'rxjs';
 import { User } from '../../models/user.model';
@@ -7,14 +7,19 @@ import { NotificationService } from '../../services/notification/notification.se
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { AddUserComponent } from '../add-user/add-user.component';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss']
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, AfterViewInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
+  @ViewChild('roleTemplate') roleTemplate: TemplateRef<any>;
+
   users: User[] = [];
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
 
   constructor(
@@ -29,6 +34,27 @@ export class UserListComponent implements OnInit {
     this.refreshItems.subscribe(() => {
       this.getUsers();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeColumns();
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { key: 'username', label: 'Username', sortable: true, searchable: true },
+      { key: 'email', label: 'Email', sortable: true, searchable: true },
+      { 
+        key: 'role', 
+        label: 'Role', 
+        sortable: true,
+        cellTemplate: this.roleTemplate
+      }
+    ];
+  }
+
+  trackByUserId(index: number, user: User): string {
+    return user.user_id ? String(user.user_id) : index.toString();
   }
 
   getUsers() {

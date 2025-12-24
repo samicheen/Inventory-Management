@@ -1,36 +1,34 @@
-
 <div class="container-fluid">
-    <div class="flex-container">
-        <button type="button"
-        class="btn btn-primary add-party-btn"
-                    (click)=addParty() *ngIf="authService.isAdmin()">
-            {{button_value}}
-        </button>
-    </div>
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-            <th scope="col">Name</th>
-            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
-        </thead>
-        <tbody>
-            <tr *ngFor="let party of parties">
-                <td>{{party.name}}</td>
-                <td class="actions" *ngIf="authService.isAdmin()">
-                    <div class="btn-group" dropdown>
-                        <button id="button-split" type="button" dropdownToggle class="btn"
-                                aria-controls="dropdown-split">
-                                <i class="fa fa-ellipsis-v"></i>
-                        </button>
-                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                            role="menu" aria-labelledby="button-split">
-                            <li role="menuitem"><a class="dropdown-item" (click)="editParty(party)"><i class="fa fa-edit"></i> Edit</a></li>
-                            <li role="menuitem"><a class="dropdown-item" (click)="removeParty(party)"><i class="fa fa-trash"></i> Remove</a></li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-data-grid
+        [columns]="columns"
+        [data]="parties"
+        [showSearch]="true"
+        [showActions]="authService.isAdmin()"
+        [headerActions]="authService.isAdmin()"
+        [actionsTemplate]="actionsTemplate"
+        [trackByFn]="trackByPartyId"
+        [searchPlaceholder]="'Search ' + (party_type === 'customer' ? 'customers' : 'vendors') + '...'">
+        <div headerActions *ngIf="authService.isAdmin()">
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)=addParty()>
+                <i class="fa fa-plus"></i> {{button_value}}
+            </button>
+        </div>
+    </app-data-grid>
+
+    <!-- Actions Template -->
+    <ng-template #actionsTemplate let-party>
+        <div class="btn-group" dropdown>
+            <button id="button-split" type="button" dropdownToggle class="btn"
+                    aria-controls="dropdown-split">
+                    <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                role="menu" aria-labelledby="button-split">
+                <li role="menuitem"><a class="dropdown-item" (click)="editParty(party)"><i class="fa fa-edit"></i> Edit</a></li>
+                <li role="menuitem"><a class="dropdown-item" (click)="removeParty(party)"><i class="fa fa-trash"></i> Remove</a></li>
+            </ul>
+        </div>
+    </ng-template>
 </div>

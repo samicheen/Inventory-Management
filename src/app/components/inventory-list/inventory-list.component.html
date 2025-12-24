@@ -1,79 +1,77 @@
 <div class="container-fluid">
-  <tabset *ngIf="!route.snapshot.params.item_id" #tabset>
-    <tab heading="Main Items" (selectTab)="onSelect($event)"></tab>
-    <tab heading="Sub Items" (selectTab)="onSelect($event)"></tab>
-  </tabset>
-  <div class="flex-container">
-    <div>
-    <div class="total" *ngIf="!route.snapshot.params.item_id">
-      <div *ngIf="currentTab === 'Main Items'">
-        Opening: Rs. {{total?.main_items?.opening_amount | number:'1.2-2'}} | Closing: Rs. {{total?.main_items?.closing_amount | number:'1.2-2'}}
-      </div>
-      <div *ngIf="currentTab === 'Sub Items'">
-        Opening: Rs. {{total?.sub_items?.opening_amount | number:'1.2-2'}} | Closing: Rs. {{total?.sub_items?.closing_amount | number:'1.2-2'}}
-      </div>
-    </div>
-    <div class="total" *ngIf="route.snapshot.params.item_id">
-      <div>Opening amount: Rs. {{total?.sub_items?.opening_amount | number:'1.2-2'}}</div>
-      <div>Closing amount: Rs. {{total?.sub_items?.closing_amount | number:'1.2-2'}}</div>
-    </div>
+  <div class="tabs-wrapper">
+    <tabset *ngIf="!route.snapshot.params.item_id" #tabset>
+      <tab heading="Main Items" (selectTab)="onSelect($event)"></tab>
+      <tab heading="Sub Items" (selectTab)="onSelect($event)"></tab>
+    </tabset>
   </div>
-    <button type="button"
-            class="btn btn-primary add-item-btn"
-            (click)=addItem()>
-      <i class="fa fa-plus"></i> Add Item
-    </button>
-  </div> 
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-          <th scope="col">Date</th>
-          <th scope="col">Barcode</th>
-          <th scope="col">Item Name</th>
-          <th scope="col">Grade</th>
-          <th scope="col">Size</th>
-          <th scope="col">Initial Stock</th>
-          <th scope="col">Opening Stock</th>
-          <th scope="col">Opening Amount</th>
-          <th scope="col">Closing Stock</th>
-          <th scope="col">Closing Amount</th>
-          <th scope="col">Actions</th> 
-      </thead>
-      <tbody>
-        <tr *ngFor="let inv_item of inventory">
-            <td>{{inv_item.timestamp | date: 'dd/MM/yyyy'}}</td>
-            <td>
-              <span *ngIf="inv_item.barcode || inv_item.source_barcode">
-                <i class="fa fa-barcode"></i> {{inv_item.barcode || inv_item.source_barcode}}
-              </span>
-              <span *ngIf="!inv_item.barcode && !inv_item.source_barcode" class="text-muted">-</span>
-            </td>
-            <td *ngIf="!route.snapshot.params.item_id"><a [routerLink]="['/inventory', inv_item.item.item_id]">{{inv_item.item.name}}</a></td>
-            <td *ngIf="route.snapshot.params.item_id">{{inv_item.item.name}}</td>
-            <td>{{inv_item.item.grade}}</td>
-            <td>{{inv_item.item.size}}</td>
-            <td>{{inv_item.initial_stock?.value | number:'1.2-2'}} {{inv_item.initial_stock ? quantityUnitToLabelMapping[inv_item.initial_stock.unit] : ''}}</td>
-            <td>{{inv_item.opening_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.opening_stock.unit]}}</td>
-            <td>Rs. {{inv_item.opening_amount | number:'1.2-2'}}</td>
-            <td>{{inv_item.closing_stock.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[inv_item.closing_stock.unit]}}</td>
-            <td>Rs. {{inv_item.closing_amount | number:'1.2-2'}}</td>
-            <td class="actions">
-              <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
-                <button id="button-split" type="button" dropdownToggle class="btn"
-                        aria-controls="dropdown-split">
-                        <i class="fa fa-ellipsis-v"></i>
-                </button>
-                <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                    role="menu" aria-labelledby="button-split">
-                  <li role="menuitem"><a class="dropdown-item" (click)="printLabels(inv_item)"><i class="fa fa-print"></i> Print Labels</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item)"><i class="fa fa-industry"></i> Move to Manufacturing</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="sellItem(inv_item)"><i class="fa fa-shopping-bag"></i> Sell Item</a></li>
-                  <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item text-danger" (click)="removeInventory(inv_item)"><i class="fa fa-trash"></i> Remove</a></li>
-                </ul>
-              </div>
-            </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <app-data-grid
+      [columns]="columns"
+      [data]="inventory"
+      [showSearch]="true"
+      [showActions]="true"
+      [headerActions]="true"
+      [actionsTemplate]="actionsTemplate"
+      [trackByFn]="trackByInventoryId"
+      searchPlaceholder="Search inventory...">
+      <div headerCenter>
+        <div class="summary-inline" *ngIf="total">
+          <span class="summary-inline-label" *ngIf="!route.snapshot.params.item_id && currentTab === 'Main Items'">Opening:</span>
+          <span class="summary-inline-value" *ngIf="!route.snapshot.params.item_id && currentTab === 'Main Items'">Rs. {{total?.main_items?.opening_amount | number:'1.2-2'}}</span>
+          <span class="summary-inline-separator" *ngIf="!route.snapshot.params.item_id && currentTab === 'Main Items'">|</span>
+          <span class="summary-inline-label" *ngIf="!route.snapshot.params.item_id && currentTab === 'Main Items'">Closing:</span>
+          <span class="summary-inline-value" *ngIf="!route.snapshot.params.item_id && currentTab === 'Main Items'">Rs. {{total?.main_items?.closing_amount | number:'1.2-2'}}</span>
+          
+          <span class="summary-inline-label" *ngIf="!route.snapshot.params.item_id && currentTab === 'Sub Items'">Opening:</span>
+          <span class="summary-inline-value" *ngIf="!route.snapshot.params.item_id && currentTab === 'Sub Items'">Rs. {{total?.sub_items?.opening_amount | number:'1.2-2'}}</span>
+          <span class="summary-inline-separator" *ngIf="!route.snapshot.params.item_id && currentTab === 'Sub Items'">|</span>
+          <span class="summary-inline-label" *ngIf="!route.snapshot.params.item_id && currentTab === 'Sub Items'">Closing:</span>
+          <span class="summary-inline-value" *ngIf="!route.snapshot.params.item_id && currentTab === 'Sub Items'">Rs. {{total?.sub_items?.closing_amount | number:'1.2-2'}}</span>
+          
+          <span class="summary-inline-label" *ngIf="route.snapshot.params.item_id">Opening:</span>
+          <span class="summary-inline-value" *ngIf="route.snapshot.params.item_id">Rs. {{total?.sub_items?.opening_amount | number:'1.2-2'}}</span>
+          <span class="summary-inline-separator" *ngIf="route.snapshot.params.item_id">|</span>
+          <span class="summary-inline-label" *ngIf="route.snapshot.params.item_id">Closing:</span>
+          <span class="summary-inline-value" *ngIf="route.snapshot.params.item_id">Rs. {{total?.sub_items?.closing_amount | number:'1.2-2'}}</span>
+        </div>
+      </div>
+      <div headerActions>
+        <button type="button"
+                class="btn btn-primary btn-sm"
+                (click)=addItem()>
+          <i class="fa fa-plus"></i> Add Item
+        </button>
+      </div>
+  </app-data-grid>
+
+  <!-- Barcode Template -->
+  <ng-template #barcodeTemplate let-row let-value="value">
+    <span *ngIf="row.barcode || row.source_barcode">
+      <i class="fa fa-barcode"></i> {{row.barcode || row.source_barcode}}
+    </span>
+    <span *ngIf="!row.barcode && !row.source_barcode" class="text-muted">-</span>
+  </ng-template>
+
+  <!-- Item Name Template -->
+  <ng-template #itemNameTemplate let-row let-value="value">
+    <a *ngIf="!route.snapshot.params.item_id" [routerLink]="['/inventory', row.item.item_id]">{{value}}</a>
+    <span *ngIf="route.snapshot.params.item_id">{{value}}</span>
+  </ng-template>
+
+  <!-- Actions Template -->
+  <ng-template #actionsTemplate let-inv_item>
+    <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
+      <button id="button-split" type="button" dropdownToggle class="btn"
+              aria-controls="dropdown-split">
+              <i class="fa fa-ellipsis-v"></i>
+      </button>
+      <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+          role="menu" aria-labelledby="button-split">
+        <li role="menuitem"><a class="dropdown-item" (click)="printLabels(inv_item)"><i class="fa fa-print"></i> Print Labels</a></li>
+        <li role="menuitem"><a class="dropdown-item" (click)="moveToManufacturing(inv_item)"><i class="fa fa-industry"></i> Move to Manufacturing</a></li>
+        <li role="menuitem"><a class="dropdown-item" (click)="sellItem(inv_item)"><i class="fa fa-shopping-bag"></i> Sell Item</a></li>
+        <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item text-danger" (click)="removeInventory(inv_item)"><i class="fa fa-trash"></i> Remove</a></li>
+      </ul>
+    </div>
+  </ng-template>
 </div>

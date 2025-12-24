@@ -1,61 +1,50 @@
 <div class="container-fluid">
-  <div class="flex-container">
-    <div class="total">Total purchase amount: Rs. {{total_amount | number:'1.2-2'}}</div>
-    <button type="button"
-            class="btn btn-primary add-purchase-btn"
-            (click)=addPurchase()>
-      <i class="fa fa-plus"></i> Add Purchase
-    </button>
-  </div>
-  <div class="table-responsive">
-    <table class="table">
-      <thead>
-          <th scope="col">Date</th>
-          <th scope="col">Barcode</th>
-          <th scope="col">Invoice Id</th>
-          <th scope="col">Vendor</th>
-          <th scope="col">Item Name</th>
-          <th scope="col">Grade</th>
-          <th scope="col">Size</th>
-          <th scope="col">Quantity</th>
-          <th scope="col">Rate</th>
-          <th scope="col">Amount</th>
-          <th scope="col">Actions</th> 
-      </thead>
-      <tbody>
-        <tr *ngFor="let purchase of purchases; trackBy: trackByPurchaseId">
-            <td>{{purchase.timestamp | date: 'dd/MM/yyyy'}}</td>
-            <td>
-              <span *ngIf="purchase?.barcode">
-                <i class="fa fa-barcode" style="margin-right: 4px;"></i><span>{{purchase.barcode}}</span>
-              </span>
-              <span *ngIf="!purchase?.barcode" class="text-muted">-</span>
-            </td>
-            <td>{{purchase.invoice_id}}</td>
-            <td>{{purchase.vendor.name}}</td>
-            <td>{{purchase.item.name}}</td>
-            <td>{{purchase.item.grade}}</td>
-            <td>{{purchase.item.size}}</td>
-            <td>{{purchase.quantity.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[purchase.quantity.unit]}}</td>
-            <td>{{purchase.rate | number:'1.2-2'}}</td> 
-            <td>Rs. {{purchase.amount | number:'1.2-2'}}</td>
-            <td class="actions">
-              <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
-                <button id="button-split" type="button" dropdownToggle class="btn"
-                        aria-controls="dropdown-split">
-                        <i class="fa fa-ellipsis-v"></i>
-                </button>
-                <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                    role="menu" aria-labelledby="button-split">
-                  <li role="menuitem"><a class="dropdown-item" (click)="receivePurchase(purchase)"><i class="fa fa-inbox"></i> Receive Purchase</a></li>
-                  <li role="menuitem"><a class="dropdown-item" (click)="printLabels(purchase)"><i class="fa fa-print"></i> Print Labels</a></li>
-                  <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item" (click)="editPurchase(purchase)"><i class="fa fa-edit"></i> Edit Item</a></li>
-                  <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item" (click)="removeItem(purchase.purchase_id)"><i class="fa fa-trash"></i> Remove Item</a></li>
-                </ul>
-              </div>
-            </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <app-data-grid
+      [columns]="columns"
+      [data]="purchases"
+      [showSearch]="true"
+      [showActions]="true"
+      [headerActions]="true"
+      [actionsTemplate]="actionsTemplate"
+      [trackByFn]="trackByPurchaseId"
+      searchPlaceholder="Search purchases...">
+      <div headerCenter>
+        <div class="summary-inline" *ngIf="total_amount">
+          <span class="summary-inline-label">Total:</span>
+          <span class="summary-inline-value">Rs. {{total_amount | number:'1.2-2'}}</span>
+        </div>
+      </div>
+      <div headerActions>
+        <button type="button"
+                class="btn btn-primary btn-sm"
+                (click)=addPurchase()>
+          <i class="fa fa-plus"></i> Add Purchase
+        </button>
+      </div>
+  </app-data-grid>
+
+  <!-- Barcode Cell Template -->
+  <ng-template #barcodeTemplate let-row let-value="value">
+    <span *ngIf="value">
+      <i class="fa fa-barcode" style="margin-right: 4px;"></i><span>{{value}}</span>
+    </span>
+    <span *ngIf="!value" class="text-muted">-</span>
+  </ng-template>
+
+  <!-- Actions Template -->
+  <ng-template #actionsTemplate let-purchase>
+    <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
+      <button id="button-split" type="button" dropdownToggle class="btn"
+              aria-controls="dropdown-split">
+              <i class="fa fa-ellipsis-v"></i>
+      </button>
+      <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+          role="menu" aria-labelledby="button-split">
+        <li role="menuitem"><a class="dropdown-item" (click)="receivePurchase(purchase)"><i class="fa fa-inbox"></i> Receive Purchase</a></li>
+        <li role="menuitem"><a class="dropdown-item" (click)="printLabels(purchase)"><i class="fa fa-print"></i> Print Labels</a></li>
+        <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item" (click)="editPurchase(purchase)"><i class="fa fa-edit"></i> Edit Item</a></li>
+        <li role="menuitem" *ngIf="authService.isAdmin()"><a class="dropdown-item" (click)="removeItem(purchase.purchase_id)"><i class="fa fa-trash"></i> Remove Item</a></li>
+      </ul>
+    </div>
+  </ng-template>
 </div>

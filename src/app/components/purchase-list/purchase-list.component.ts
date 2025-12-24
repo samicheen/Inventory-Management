@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, TemplateRef, ViewChild } from '@angular/core';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
@@ -13,17 +13,22 @@ import { ItemService } from '../../services/item/item.service';
 import { Item } from 'src/app/models/item.model';
 import { NotificationService } from '../../services/notification/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-purchase-list',
   templateUrl: './purchase-list.component.html',
   styleUrls: ['./purchase-list.component.scss']
 })
-export class PurchaseListComponent implements OnInit {
+export class PurchaseListComponent implements OnInit, AfterViewInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
+  @ViewChild('barcodeTemplate') barcodeTemplate: TemplateRef<any>;
+
   items: Item[];
   purchases: Purchase[] = []; // Initialize as empty array
   total_amount: string;
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
   
   constructor(
@@ -39,6 +44,59 @@ export class PurchaseListComponent implements OnInit {
     this.refreshItems.subscribe(() => {
       this.getPurchases();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeColumns();
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { 
+        key: 'timestamp', 
+        label: 'Date', 
+        sortable: true, 
+        searchable: true,
+        valueFormatter: (value: string) => {
+          if (!value) return '-';
+          const date = new Date(value);
+          return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+      },
+      { 
+        key: 'barcode', 
+        label: 'Barcode', 
+        sortable: true, 
+        searchable: true,
+        cellTemplate: this.barcodeTemplate
+      },
+      { key: 'invoice_id', label: 'Invoice Id', sortable: true, searchable: true },
+      { key: 'vendor.name', label: 'Vendor', sortable: true, searchable: true },
+      { key: 'item.name', label: 'Item Name', sortable: true, searchable: true },
+      { key: 'item.grade', label: 'Grade', sortable: true, searchable: true },
+      { key: 'item.size', label: 'Size', sortable: true, searchable: true },
+      { 
+        key: 'quantity', 
+        label: 'Quantity', 
+        sortable: true,
+        valueFormatter: (value: any, row: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      },
+      { 
+        key: 'rate', 
+        label: 'Rate', 
+        sortable: true,
+        valueFormatter: (value: number) => value ? parseFloat(String(value)).toFixed(2) : '-'
+      },
+      { 
+        key: 'amount', 
+        label: 'Amount', 
+        sortable: true,
+        valueFormatter: (value: string) => value ? `Rs. ${parseFloat(value).toFixed(2)}` : '-'
+      }
+    ];
   }
 
   addPurchase() {
@@ -291,7 +349,7 @@ export class PurchaseListComponent implements OnInit {
     });
   }
 
-  trackByPurchaseId(index: number, purchase: Purchase): any {
-    return purchase ? purchase.purchase_id : index;
+  trackByPurchaseId(index: number, purchase: Purchase): string {
+    return purchase?.purchase_id ? String(purchase.purchase_id) : index.toString();
   }
 }

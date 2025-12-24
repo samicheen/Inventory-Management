@@ -1,0 +1,71 @@
+<div class="data-grid-container">
+  <!-- Header with Search and Actions -->
+  <div class="grid-header" *ngIf="showSearch || headerActions">
+    <div class="search-container" *ngIf="showSearch">
+      <div class="search-input-wrapper">
+        <i class="fa fa-search search-icon"></i>
+        <input 
+          type="text" 
+          class="form-control search-input" 
+          [placeholder]="searchPlaceholder"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch($event)">
+      </div>
+    </div>
+    <div class="header-center">
+      <ng-content select="[headerCenter]"></ng-content>
+    </div>
+    <div class="header-actions">
+      <ng-content select="[headerActions]"></ng-content>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th 
+            *ngFor="let column of columns" 
+            [style.width]="column.width"
+            [style.min-width]="column.width"
+            [class.sortable]="column.sortable"
+            (click)="column.sortable && onSort(column)"
+            [title]="column.sortable ? 'Click to sort' : ''">
+            {{ column.label }}
+            <i *ngIf="column.sortable" 
+               class="fa ml-1" 
+               [ngClass]="getSortIcon(column)"></i>
+          </th>
+          <th *ngIf="showActions" class="actions-column">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let row of filteredData; trackBy: trackByIndex"
+          (click)="onRowClick(row)"
+          [class.clickable]="rowClick.observers.length > 0">
+          <td *ngFor="let column of columns" [style.width]="column.width" [style.min-width]="column.width">
+            <ng-container *ngIf="column.cellTemplate; else defaultCell">
+              <ng-container *ngTemplateOutlet="column.cellTemplate; context: { $implicit: row, column: column, value: getCellValue(row, column) }"></ng-container>
+            </ng-container>
+            <ng-template #defaultCell>
+              {{ getCellValue(row, column) }}
+            </ng-template>
+          </td>
+          <td *ngIf="showActions" class="actions" (click)="$event.stopPropagation()">
+            <ng-container *ngIf="actionsTemplate">
+              <ng-container *ngTemplateOutlet="actionsTemplate; context: { $implicit: row }"></ng-container>
+            </ng-container>
+          </td>
+        </tr>
+        <tr *ngIf="filteredData.length === 0">
+          <td [attr.colspan]="columns.length + (showActions ? 1 : 0)" class="text-center text-muted py-4">
+            {{ emptyMessage }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

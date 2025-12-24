@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -14,15 +14,19 @@ import { RefreshService } from '../../services/refresh/refresh.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-manufacturing-list',
   templateUrl: './manufacturing-list.component.html',
   styleUrls: ['./manufacturing-list.component.scss']
 })
-export class ManufacturingListComponent implements OnInit, OnDestroy {
-  manufactures : Manufacture[];
+export class ManufacturingListComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
+
+  manufactures: Manufacture[];
   quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
   private refreshSubscription: Subscription;
   
@@ -48,6 +52,52 @@ export class ManufacturingListComponent implements OnInit, OnDestroy {
         this.getManufacturingItems();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeColumns();
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { 
+        key: 'timestamp', 
+        label: 'Date', 
+        sortable: true, 
+        searchable: true,
+        valueFormatter: (value: string) => {
+          if (!value) return '-';
+          const date = new Date(value);
+          return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + 
+                 date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+      },
+      { key: 'item.name', label: 'Item Name', sortable: true, searchable: true },
+      { key: 'item.grade', label: 'Grade', sortable: true, searchable: true },
+      { key: 'item.size', label: 'Size', sortable: true, searchable: true },
+      { 
+        key: 'booked_quantity', 
+        label: 'Booked Quantity', 
+        sortable: true,
+        valueFormatter: (value: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      },
+      { 
+        key: 'quantity', 
+        label: 'Quantity', 
+        sortable: true,
+        valueFormatter: (value: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      }
+    ];
+  }
+
+  trackByManufactureId(index: number, manufacture: Manufacture): string {
+    return manufacture.manufacture_id ? String(manufacture.manufacture_id) : index.toString();
   }
 
   ngOnDestroy(): void {

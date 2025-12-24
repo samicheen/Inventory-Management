@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Item } from '../../models/item.model';
 import { ItemService } from 'src/app/services/item/item.service';
 import { BehaviorSubject } from 'rxjs';
@@ -8,6 +8,7 @@ import { AddItemComponent } from '../add-item/add-item.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-item-list',
@@ -15,8 +16,10 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrls: ['./item-list.component.scss']
 })
 export class ItemListComponent implements OnInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
-  items : Item[];
+  items: Item[];
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
   
   constructor(
@@ -27,10 +30,26 @@ export class ItemListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.initializeColumns();
     this.getItems();
     this.refreshItems.subscribe(() => {
       this.getItems();
     });
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { key: 'name', label: 'Name', sortable: true, searchable: true },
+      { key: 'grade', label: 'Grade', sortable: true, searchable: true },
+      { key: 'size', label: 'Size', sortable: true, searchable: true },
+      { 
+        key: 'is_sub_item', 
+        label: 'Type', 
+        sortable: true, 
+        searchable: true,
+        valueFormatter: (value: boolean) => value ? 'Sub Item' : 'Main Item'
+      }
+    ];
   }
 
   getItems() {
@@ -59,6 +78,10 @@ export class ItemListComponent implements OnInit {
         this.refreshItems.next(undefined);
       });
     });
+  }
+
+  trackByItemId(index: number, item: Item): string {
+    return item.item_id ? String(item.item_id) : index.toString();
   }
 
   removeItem(item_id: string) {

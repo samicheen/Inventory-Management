@@ -1,51 +1,39 @@
 <div class="container-fluid">
-    <div class="flex-container">
-        <div class="total">Total sales amount: Rs. {{total_amount | number:'1.2-2'}}</div>
-        <button type="button"
-                class="btn btn-primary add-sales-btn"
-                (click)=addSales()>
-          Add Sales
+    <app-data-grid
+        [columns]="columns"
+        [data]="sales"
+        [showSearch]="true"
+        [showActions]="authService.isAdmin()"
+        [headerActions]="true"
+        [actionsTemplate]="actionsTemplate"
+        [trackByFn]="trackBySaleId"
+        searchPlaceholder="Search sales...">
+        <div headerCenter>
+          <div class="summary-inline" *ngIf="total_amount">
+            <span class="summary-inline-label">Total:</span>
+            <span class="summary-inline-value">Rs. {{total_amount | number:'1.2-2'}}</span>
+          </div>
+        </div>
+        <div headerActions>
+          <button type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)=addSales()>
+            <i class="fa fa-plus"></i> Add Sales
+          </button>
+        </div>
+    </app-data-grid>
+
+    <!-- Actions Template -->
+    <ng-template #actionsTemplate let-sale>
+      <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
+        <button id="button-split" type="button" dropdownToggle class="btn"
+                aria-controls="dropdown-split">
+                <i class="fa fa-ellipsis-v"></i>
         </button>
+        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+            role="menu" aria-labelledby="button-split">
+          <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeSale(sale)"><i class="fa fa-trash"></i> Remove</a></li>
+        </ul>
       </div>
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-            <th scope="col">Date</th>
-            <th scope="col">Invoice Id</th>
-            <th scope="col">Item Name</th>
-            <th scope="col">Grade</th>
-            <th scope="col">Size</th>
-            <th scope="col">Party Name</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Rate</th>
-            <th scope="col">Amount</th>
-            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sale of sales">
-              <td>{{sale.timestamp | date: 'dd/MM/yyyy hh:mm a'}}</td>
-              <td>{{sale.invoice_id}}</td> 
-              <td>{{sale.item.name}}</td>
-              <td>{{sale.item.grade}}</td>
-              <td>{{sale.item.size}}</td>
-              <td>{{sale.customer.name}}</td>
-              <td>{{sale.quantity.value | number:'1.2-2'}} {{quantityUnitToLabelMapping[sale.quantity.unit]}}</td>
-              <td>{{sale.selling_price | number:'1.2-2'}}</td>
-              <td>Rs. {{sale.amount | number:'1.2-2'}}</td>
-              <td class="actions" *ngIf="authService.isAdmin()">
-                <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
-                  <button id="button-split" type="button" dropdownToggle class="btn"
-                          aria-controls="dropdown-split">
-                          <i class="fa fa-ellipsis-v"></i>
-                  </button>
-                  <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                      role="menu" aria-labelledby="button-split">
-                    <li role="menuitem"><a class="dropdown-item text-danger" (click)="removeSale(sale)"><i class="fa fa-trash"></i> Remove</a></li>
-                  </ul>
-                </div>
-              </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    </ng-template>
   </div>

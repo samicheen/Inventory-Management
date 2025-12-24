@@ -1,42 +1,34 @@
-
 <div class="container-fluid">
-    <div class="flex-container">
-        <button type="button"
-        class="btn btn-primary add-item-btn"
-                    (click)=addItem() *ngIf="authService.isAdmin()">
-            Add Item
-        </button>
-    </div>
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-            <th scope="col">Name</th>
-            <th scope="col">Grade</th>
-            <th scope="col">Size</th>
-            <th scope="col">Type</th>
-            <th scope="col" *ngIf="authService.isAdmin()">Actions</th>
-        </thead>
-        <tbody>
-            <tr *ngFor="let item of items">
-                <td>{{item.name}}</td>
-                <td>{{item.grade}}</td>
-                <td>{{item.size}}</td>
-                <td>{{item.is_sub_item ? 'Sub Item' : 'Main Item'}}</td>
-                <td class="actions" *ngIf="authService.isAdmin()">
-                    <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
-                        <button id="button-split" type="button" dropdownToggle class="btn"
-                                aria-controls="dropdown-split">
-                                <i class="fa fa-ellipsis-v"></i>
-                        </button>
-                        <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                            role="menu" aria-labelledby="button-split">
-                            <li role="menuitem"><a class="dropdown-item" (click)="editItem(item)"><i class="fa fa-edit"></i> Edit</a></li>
-                            <li role="menuitem"><a class="dropdown-item" (click)="removeItem(item.item_id)"><i class="fa fa-trash"></i> Remove</a></li>
-                        </ul>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-      </table>
-    </div>
+    <app-data-grid
+        [columns]="columns"
+        [data]="items"
+        [showSearch]="true"
+        [showActions]="authService.isAdmin()"
+        [headerActions]="authService.isAdmin()"
+        [actionsTemplate]="actionsTemplate"
+        [trackByFn]="trackByItemId"
+        searchPlaceholder="Search items...">
+        <div headerActions>
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)=addItem()>
+                <i class="fa fa-plus"></i> Add Item
+            </button>
+        </div>
+    </app-data-grid>
+
+    <!-- Actions Template -->
+    <ng-template #actionsTemplate let-item>
+        <div class="btn-group" dropdown [container]="'body'" [autoClose]="true">
+            <button id="button-split" type="button" dropdownToggle class="btn"
+                    aria-controls="dropdown-split">
+                    <i class="fa fa-ellipsis-v"></i>
+            </button>
+            <ul id="dropdown-split" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                role="menu" aria-labelledby="button-split">
+                <li role="menuitem"><a class="dropdown-item" (click)="editItem(item)"><i class="fa fa-edit"></i> Edit</a></li>
+                <li role="menuitem"><a class="dropdown-item" (click)="removeItem(item.item_id)"><i class="fa fa-trash"></i> Remove</a></li>
+            </ul>
+        </div>
+    </ng-template>
 </div>

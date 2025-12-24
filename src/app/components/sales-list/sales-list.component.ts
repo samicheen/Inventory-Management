@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RefreshService } from '../../services/refresh/refresh.service';
 import { Sale } from 'src/app/models/sale.model';
@@ -10,16 +10,20 @@ import { SellItemComponent } from '../sell-item/sell-item.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { NotificationService } from '../../services/notification/notification.service';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-sales-list',
   templateUrl: './sales-list.component.html',
   styleUrls: ['./sales-list.component.scss']
 })
-export class SalesListComponent implements OnInit, OnDestroy {
-  sales : Sale[];
+export class SalesListComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
+
+  sales: Sale[];
   total_amount: string;
-  quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping
+  quantityUnitToLabelMapping: Record<QuantityUnit, string> = QuantityUnitToLabelMapping;
+  columns: GridColumn[] = [];
   private refreshSubscription: Subscription;
 
   constructor(
@@ -39,6 +43,59 @@ export class SalesListComponent implements OnInit, OnDestroy {
         this.getSales();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeColumns();
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { 
+        key: 'timestamp', 
+        label: 'Date', 
+        sortable: true, 
+        searchable: true,
+        valueFormatter: (value: string) => {
+          if (!value) return '-';
+          const date = new Date(value);
+          return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + 
+                 date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+      },
+      { key: 'invoice_id', label: 'Invoice Id', sortable: true, searchable: true },
+      { key: 'item.name', label: 'Item Name', sortable: true, searchable: true },
+      { key: 'item.grade', label: 'Grade', sortable: true, searchable: true },
+      { key: 'item.size', label: 'Size', sortable: true, searchable: true },
+      { key: 'customer.name', label: 'Party Name', sortable: true, searchable: true },
+      { 
+        key: 'quantity', 
+        label: 'Quantity', 
+        sortable: true,
+        valueFormatter: (value: any) => {
+          if (!value || !value.value) return '-';
+          return `${parseFloat(value.value).toFixed(2)} ${this.quantityUnitToLabelMapping[value.unit] || value.unit}`;
+        }
+      },
+      { 
+        key: 'selling_price', 
+        label: 'Rate', 
+        sortable: true,
+        valueFormatter: (value: number) => value ? parseFloat(String(value)).toFixed(2) : '-'
+      },
+      { 
+        key: 'amount', 
+        label: 'Amount', 
+        sortable: true,
+        valueFormatter: (value: string) => value ? `Rs. ${parseFloat(value).toFixed(2)}` : '-'
+      }
+    ];
+  }
+
+  trackBySaleId(index: number, sale: Sale): string {
+    const invoiceId = sale.invoice_id ? String(sale.invoice_id) : '';
+    const itemId = sale.item?.item_id ? String(sale.item.item_id) : index.toString();
+    return invoiceId + '_' + itemId;
   }
 
   ngOnDestroy(): void {

@@ -49,6 +49,7 @@ import { ProcessingTypeListComponent } from './components/processing-type-list/p
 import { AddProcessingTypeComponent } from './components/add-processing-type/add-processing-type.component';
 import { ProcessFurtherPackagesComponent } from './components/process-further-packages/process-further-packages.component';
 import { ScanSalesPackagesComponent } from './components/scan-sales-packages/scan-sales-packages.component';
+import { DataGridComponent } from './components/data-grid/data-grid.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -88,7 +89,8 @@ const ENVIRONMENT = "environment";
         ProcessingTypeListComponent,
         AddProcessingTypeComponent,
         ProcessFurtherPackagesComponent,
-        ScanSalesPackagesComponent
+        ScanSalesPackagesComponent,
+        DataGridComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
 import { ProcessingType, ProcessingTypeService } from '../../services/processing-type/processing-type.service';
 import { BehaviorSubject } from 'rxjs';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -6,15 +6,18 @@ import { AddProcessingTypeComponent } from '../add-processing-type/add-processin
 import { NotificationService } from '../../services/notification/notification.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { AuthService } from '../../services/auth/auth.service';
+import { GridColumn } from '../data-grid/data-grid.component';
 
 @Component({
   selector: 'app-processing-type-list',
   templateUrl: './processing-type-list.component.html',
   styleUrls: ['./processing-type-list.component.scss']
 })
-export class ProcessingTypeListComponent implements OnInit {
+export class ProcessingTypeListComponent implements OnInit, AfterViewInit {
+  @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   processingTypes: ProcessingType[] = [];
+  columns: GridColumn[] = [];
   private readonly refreshItems = new BehaviorSubject(undefined);
   
   constructor(
@@ -29,6 +32,33 @@ export class ProcessingTypeListComponent implements OnInit {
     this.refreshItems.subscribe(() => {
       this.getProcessingTypes();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeColumns();
+  }
+
+  initializeColumns(): void {
+    this.columns = [
+      { key: 'name', label: 'Name', sortable: true, searchable: true },
+      { 
+        key: 'processing_charge', 
+        label: 'Processing Charge (Rs./Kg)', 
+        sortable: true,
+        valueFormatter: (value: number) => value ? parseFloat(String(value)).toFixed(2) : '-'
+      },
+      { 
+        key: 'description', 
+        label: 'Description', 
+        sortable: false, 
+        searchable: true,
+        valueFormatter: (value: string) => value || '-'
+      }
+    ];
+  }
+
+  trackByProcessingTypeId(index: number, pt: ProcessingType): number {
+    return pt.processing_type_id;
   }
 
   getProcessingTypes() {
