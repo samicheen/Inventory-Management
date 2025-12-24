@@ -127,7 +127,8 @@
 
   .table-responsive {
     border-radius: 4px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
   }
 
   .table {
