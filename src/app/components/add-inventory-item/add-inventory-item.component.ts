@@ -12,6 +12,8 @@ import { ProcessingTypeService } from 'src/app/services/processing-type/processi
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { Manufacture } from 'src/app/models/manufacture.model';
 import { ManufactureService } from 'src/app/services/manufacture/manufacture.service';
+import { QuickAddService } from 'src/app/services/quick-add/quick-add.service';
+import { TypeaheadValidationService } from 'src/app/services/typeahead-validation/typeahead-validation.service';
 
 @Component({
   selector: 'app-add-inventory-item',
@@ -44,7 +46,9 @@ export class AddInventoryItemComponent implements OnInit {
     private processingTypeService: ProcessingTypeService,
     private notificationService: NotificationService,
     private manufactureService: ManufactureService,
-    public modalRef: BsModalRef
+    public modalRef: BsModalRef,
+    private quickAddService: QuickAddService,
+    private typeaheadValidation: TypeaheadValidationService
   ) { }
 
   get timestamp(): FormControl {
@@ -349,42 +353,88 @@ export class AddInventoryItemComponent implements OnInit {
   onSelectItem(event: TypeaheadMatch, index: number): void {
     const item = event.item;
     const packageGroup = this.packages.at(index);
+    const selectedItemControl = packageGroup.get('selected_item') as FormControl;
+    
+    // Store the selected item object first
+    packageGroup.patchValue({ _selectedItemObj: item }, { emitEvent: false });
+    
+    // Update form values
     packageGroup.patchValue({
       selected_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size,
       selected_item_id: item.item_id
     });
     
-    // Store the selected item object in the form control for validation
-    packageGroup.patchValue({ _selectedItemObj: item }, { emitEvent: false });
+    // Immediately validate the selection (should always pass for autofill, but validate anyway)
+    this.validateItemField(index, false);
+  }
+
+  /**
+   * Validates the item field when user types manually (on blur)
+   */
+  validateItemField(index: number, markAsTouched: boolean = true): void {
+    const packageGroup = this.packages.at(index);
+    const selectedItemControl = packageGroup.get('selected_item') as FormControl;
+    const itemFormValue = selectedItemControl?.value;
+    const selectedItemId = packageGroup.get('selected_item_id')?.value;
+    const storedItemObj = packageGroup.get('_selectedItemObj')?.value;
     
-    // For initial stock, if item has a rate, pre-fill it (but keep it editable)
-    if (this.isInitialStockMode && item.rate) {
-      packageGroup.patchValue({ rate: item.rate }, { emitEvent: false });
+    if (!selectedItemControl) return;
+    
+    if (markAsTouched) {
+      selectedItemControl.markAsTouched();
     }
     
-    // Clear any previous errors
-    const selectedItemControl = packageGroup.get('selected_item');
-    if (selectedItemControl?.errors) {
-      selectedItemControl.setErrors(null);
-    }
+    // Validate the item (error clearing is handled in the utility service)
+    this.typeaheadValidation.validateAndGetItem(
+      itemFormValue,
+      storedItemObj,
+      selectedItemId,
+      this.items,
+      selectedItemControl
+    );
   }
 
   onSelectOutputItem(event: TypeaheadMatch, index: number): void {
     const item = event.item;
     const packageGroup = this.packages.at(index);
+    
+    // Store the selected output item object first
+    packageGroup.patchValue({ _outputItemObj: item }, { emitEvent: false });
+    
+    // Update form values
     packageGroup.patchValue({
       output_item_id: item.item_id,
       output_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size
     });
     
-    // Store the selected output item object in the form control for validation
-    packageGroup.patchValue({ _outputItemObj: item }, { emitEvent: false });
+    // Immediately validate the selection (should always pass for autofill, but validate anyway)
+    this.validateOutputItemField(index, false);
+  }
+
+  /**
+   * Validates the output item field when user types manually (on blur)
+   */
+  validateOutputItemField(index: number, markAsTouched: boolean = true): void {
+    const packageGroup = this.packages.at(index);
+    const outputItemControl = packageGroup.get('output_item') as FormControl;
+    const itemFormValue = outputItemControl?.value;
+    const outputItemId = packageGroup.get('output_item_id')?.value;
+    const storedOutputItemObj = packageGroup.get('_outputItemObj')?.value;
     
-    // Clear any previous errors
-    const outputItemControl = packageGroup.get('output_item');
-    if (outputItemControl?.errors) {
-      outputItemControl.setErrors(null);
+    if (!outputItemControl) return;
+    
+    if (markAsTouched) {
+      outputItemControl.markAsTouched();
     }
+    
+    // Validate the item (error clearing is handled in the utility service)
+    this.typeaheadValidation.validateAndGetItem(
+      itemFormValue,
+      storedOutputItemObj,
+      outputItemId,
+      this.items,
+      outputItemControl
+    );
   }
 
   updatePackageRate(index: number): void {
@@ -504,7 +554,23 @@ export class AddInventoryItemComponent implements OnInit {
     });
   }
 
+
   doneAndPrintLabels() {
+    // Always validate typeahead fields to show errors (this will also mark all controls as touched)
+    const typeaheadValidation = this.typeaheadValidation.validatePackagesTypeaheadFields(
+      this.packages,
+      this.isMixedMode,
+      this.items,
+      this.addInventoryItemForm
+    );
+    
+    if (!typeaheadValidation.isValid) {
+      if (typeaheadValidation.errorMessage) {
+        this.notificationService.showError(typeaheadValidation.errorMessage);
+      }
+      return;
+    }
+    
     if(this.addInventoryItemForm.valid) {
       // Validate mixed packages
       for (let i = 0; i < this.packages.length; i++) {
@@ -566,83 +632,7 @@ export class AddInventoryItemComponent implements OnInit {
         }
       }
       
-      // Validate items are selected from autofill
-      for (let i = 0; i < this.packages.length; i++) {
-        const packageGroup = this.packages.at(i);
-        const isMixed = this.isMixedMode[i];
-        
-        if (isMixed) {
-          // For mixed mode, validate output_item
-          const outputItemFormValue = packageGroup.get('output_item')?.value;
-          const outputItemId = packageGroup.get('output_item_id')?.value;
-          const storedOutputItemObj = packageGroup.get('_outputItemObj')?.value;
-          
-          let selectedOutputItem: Item | undefined;
-          // Prioritize stored output item object if it matches form value
-          if (storedOutputItemObj) {
-            const expectedFormat = `${storedOutputItemObj.name} Grade: ${storedOutputItemObj.grade} Size: ${storedOutputItemObj.size}`;
-            if (outputItemFormValue === expectedFormat) {
-              selectedOutputItem = storedOutputItemObj;
-            }
-          }
-          
-          // If not found, try to find by parsing the form value
-          if (!selectedOutputItem && this.items && outputItemFormValue) {
-            selectedOutputItem = this.items.find(i => {
-              const expectedFormat = `${i.name} Grade: ${i.grade} Size: ${i.size}`;
-              return expectedFormat === outputItemFormValue;
-            });
-          }
-          
-          // If still not found, try by stored item_id
-          if (!selectedOutputItem && outputItemId && this.items) {
-            selectedOutputItem = this.items.find(i => i.item_id === outputItemId);
-          }
-          
-          if (!selectedOutputItem) {
-            const outputItemControl = packageGroup.get('output_item');
-            outputItemControl?.setErrors({ itemNotSelected: true });
-            outputItemControl?.markAsTouched();
-            this.notificationService.showError(`Package #${i + 1}: Please select an output item from the dropdown suggestions.`);
-            return;
-          }
-        } else {
-          // For single source mode, validate selected_item
-          const itemFormValue = packageGroup.get('selected_item')?.value;
-          const selectedItemId = packageGroup.get('selected_item_id')?.value;
-          const storedItemObj = packageGroup.get('_selectedItemObj')?.value;
-          
-          let selectedItem: Item | undefined;
-          // Prioritize stored item object if it matches form value
-          if (storedItemObj) {
-            const expectedFormat = `${storedItemObj.name} Grade: ${storedItemObj.grade} Size: ${storedItemObj.size}`;
-            if (itemFormValue === expectedFormat) {
-              selectedItem = storedItemObj;
-            }
-          }
-          
-          // If not found, try to find by parsing the form value
-          if (!selectedItem && this.items && itemFormValue) {
-            selectedItem = this.items.find(i => {
-              const expectedFormat = `${i.name} Grade: ${i.grade} Size: ${i.size}`;
-              return expectedFormat === itemFormValue;
-            });
-          }
-          
-          // If still not found, try by stored item_id
-          if (!selectedItem && selectedItemId && this.items) {
-            selectedItem = this.items.find(i => i.item_id === selectedItemId);
-          }
-          
-          if (!selectedItem) {
-            const selectedItemControl = packageGroup.get('selected_item');
-            selectedItemControl?.setErrors({ itemNotSelected: true });
-            selectedItemControl?.markAsTouched();
-            this.notificationService.showError(`Package #${i + 1}: Please select an item from the dropdown suggestions.`);
-            return;
-          }
-        }
-      }
+      // Typeahead validation is already done above, so we can proceed
       
       const formValue = this.addInventoryItemForm.getRawValue();
       const packagesData = this.packages.value.map((pkg: any, index: number) => {
@@ -695,6 +685,65 @@ export class AddInventoryItemComponent implements OnInit {
       this.modalRef.hide();
     } else {
       this.addInventoryItemForm.markAllAsTouched();
+    }
+  }
+
+  /**
+   * Open quick-add modal for item
+   * @param packageIndex Index of the package to update (defaults to 0 for first package)
+   */
+  openAddItemModal(packageIndex: number = 0): void {
+    const itemObservable = this.isInitialStockMode 
+      ? this.quickAddService.openAddItemModal()
+      : this.quickAddService.openAddItemModalWithFilter(true);
+    
+    itemObservable.subscribe(
+      (newItem: Item) => {
+        // Refresh items list
+        if (this.isInitialStockMode) {
+          // For initial stock, load all items
+          this.itemService.getItems().subscribe((response) => {
+            this.items = response.items;
+            // Auto-select the newly added item in the specified package
+            this.selectNewItem(newItem, packageIndex);
+          });
+        } else {
+          // For processing, load sub-items only
+          this.itemService.getItems(true).subscribe((response) => {
+            this.items = response.items;
+            // Auto-select the newly added item in the specified package
+            this.selectNewItem(newItem, packageIndex);
+          });
+        }
+      }
+    );
+  }
+
+  /**
+   * Helper method to select a newly added item in a specific package
+   */
+  private selectNewItem(item: Item, packageIndex: number): void {
+    const newItem = this.items.find(i => 
+      i.name === item.name && 
+      i.grade === item.grade && 
+      i.size === item.size
+    );
+    
+    if (newItem && packageIndex < this.packages.length) {
+      const packageGroup = this.packages.at(packageIndex);
+      packageGroup.patchValue({
+        selected_item: newItem.name + ' Grade: ' + newItem.grade + ' Size: ' + newItem.size,
+        selected_item_id: newItem.item_id
+      });
+      
+      // Store the selected item object
+      packageGroup.patchValue({ _selectedItemObj: newItem }, { emitEvent: false });
+      
+      // Clear any errors
+      const selectedItemControl = packageGroup.get('selected_item');
+      if (selectedItemControl?.errors) {
+        selectedItemControl.setErrors(null);
+      }
     }
   }
 

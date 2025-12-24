@@ -11,6 +11,8 @@ import { ItemService } from '../../services/item/item.service';
 import { PartyService } from '../../services/party/party.service';
 import { Party } from '../../models/party.model';
 import { PurchaseService } from '../../services/purchase/purchase.service';
+import { QuickAddService } from '../../services/quick-add/quick-add.service';
+import { TypeaheadValidationService } from '../../services/typeahead-validation/typeahead-validation.service';
 
 @Component({
   selector: 'app-add-purchase',
@@ -39,7 +41,9 @@ export class AddPurchaseComponent implements OnInit {
               public modalRef: BsModalRef,
               private partyService: PartyService,
               private itemService: ItemService,
-              private purchaseService: PurchaseService) { }
+              private purchaseService: PurchaseService,
+              private quickAddService: QuickAddService,
+              private typeaheadValidation: TypeaheadValidationService) { }
 
   get selectedVendor(): FormControl {
     return this.addPurchaseForm.get('selected_vendor') as FormControl;
@@ -150,19 +154,43 @@ export class AddPurchaseComponent implements OnInit {
     this.addPurchaseForm.patchValue({
       selected_item: item.name + ' Grade: ' + item.grade + ' Size: ' + item.size
     });
-    // Clear any previous errors
-    if (this.selectedItem.errors) {
-      this.selectedItem.setErrors(null);
-    }
+    // Immediately validate the selection
+    this.validateItemField();
+  }
+
+  /**
+   * Validates the item field when user types manually (on blur) or when selecting from autofill
+   */
+  validateItemField(): void {
+    const itemFormValue = this.addPurchaseForm.value.selected_item;
+    this.typeaheadValidation.validateAndGetItem(
+      itemFormValue,
+      this.selectedItemObj,
+      this.selectedItemId,
+      this.items,
+      this.selectedItem
+    );
   }
 
   onSelectVendor(event: TypeaheadMatch): void {
     this.selectedVendorId = event.item.party_id;
     this.selectedVendorObj = event.item; // Store the selected vendor object
-    // Clear any previous errors
-    if (this.selectedVendor.errors) {
-      this.selectedVendor.setErrors(null);
-    }
+    // Immediately validate the selection
+    this.validateVendorField();
+  }
+
+  /**
+   * Validates the vendor field when user types manually (on blur) or when selecting from autofill
+   */
+  validateVendorField(): void {
+    const vendorName = this.addPurchaseForm.value.selected_vendor;
+    this.typeaheadValidation.validateAndGetParty(
+      vendorName,
+      this.selectedVendorObj,
+      this.parties,
+      this.selectedVendor,
+      'vendorNotSelected'
+    );
   }
 
   nextItem() {
@@ -174,6 +202,9 @@ export class AddPurchaseComponent implements OnInit {
   }
 
   doneAndPrintLabels() {
+    // Mark all form controls as touched to show validation errors
+    this.addPurchaseForm.markAllAsTouched();
+    
     // Validate quantity before submit (if editing)
     if (this.purchase?.purchase_id && this.minQuantity > 0) {
       const enteredQuantity = parseFloat(this.value.value) || 0;
@@ -186,47 +217,29 @@ export class AddPurchaseComponent implements OnInit {
     
     // Validate vendor - must be selected from autofill
     const vendorName = this.addPurchaseForm.value.selected_vendor;
-    let selectedVendor: Party;
-    if (this.selectedVendorObj && this.selectedVendorObj.name === vendorName) {
-      selectedVendor = this.selectedVendorObj;
-    } else {
-      selectedVendor = this.parties?.find(p => p.name === vendorName);
-    }
+    const selectedVendor = this.typeaheadValidation.validateAndGetParty(
+      vendorName,
+      this.selectedVendorObj,
+      this.parties,
+      this.selectedVendor,
+      'vendorNotSelected'
+    );
     
     if (!selectedVendor) {
-      this.selectedVendor.setErrors({ vendorNotSelected: true });
-      this.selectedVendor.markAsTouched();
       return;
     }
     
     // Validate item - must be selected from autofill
     const itemFormValue = this.addPurchaseForm.value.selected_item;
-    let selectedItem: Item;
-    if (this.selectedItemObj) {
-      const expectedFormat = `${this.selectedItemObj.name} Grade: ${this.selectedItemObj.grade} Size: ${this.selectedItemObj.size}`;
-      if (itemFormValue === expectedFormat) {
-        selectedItem = this.selectedItemObj;
-      }
-    }
-    
-    // If not found, try to find by parsing the form value
-    if (!selectedItem && this.items) {
-      if (itemFormValue) {
-        selectedItem = this.items.find(i => {
-          const expectedFormat = `${i.name} Grade: ${i.grade} Size: ${i.size}`;
-          return expectedFormat === itemFormValue;
-        });
-      }
-    }
-    
-    // If still not found, try by stored item_id
-    if (!selectedItem && this.selectedItemId && this.items) {
-      selectedItem = this.items.find(i => i.item_id === this.selectedItemId);
-    }
+    const selectedItem = this.typeaheadValidation.validateAndGetItem(
+      itemFormValue,
+      this.selectedItemObj,
+      this.selectedItemId,
+      this.items,
+      this.selectedItem
+    );
     
     if (!selectedItem) {
-      this.selectedItem.setErrors({ itemNotSelected: true });
-      this.selectedItem.markAsTouched();
       return;
     }
     
@@ -245,8 +258,6 @@ export class AddPurchaseComponent implements OnInit {
        }
        this.saveAndPrintPurchases.next(purchase);
        this.modalRef.hide();
-    } else {
-      this.addPurchaseForm.markAllAsTouched();
     }
   }
 
@@ -287,5 +298,53 @@ export class AddPurchaseComponent implements OnInit {
       delete errors.minQuantity;
       this.value.setErrors(Object.keys(errors).length > 0 ? errors : null);
     }
+  }
+
+  /**
+   * Open quick-add modal for vendor
+   */
+  openAddVendorModal(): void {
+    this.quickAddService.openAddPartyModal('vendor').subscribe(
+      (newVendor: Party) => {
+        // Refresh parties list
+        this.partyService.getParties('vendor').subscribe((response) => {
+          this.parties = response.items;
+          // Auto-select the newly added vendor
+          this.selectedVendorId = newVendor.party_id;
+          this.selectedVendorObj = newVendor;
+          this.addPurchaseForm.patchValue({
+            selected_vendor: newVendor.name
+          });
+          // Clear any errors
+          if (this.selectedVendor.errors) {
+            this.selectedVendor.setErrors(null);
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Open quick-add modal for item
+   */
+  openAddItemModal(): void {
+    this.quickAddService.openAddItemModal().subscribe(
+      (newItem: Item) => {
+        // Refresh items list
+        this.itemService.getItems().subscribe((response) => {
+          this.items = response.items;
+          // Auto-select the newly added item
+          this.selectedItemId = newItem.item_id;
+          this.selectedItemObj = newItem;
+          this.addPurchaseForm.patchValue({
+            selected_item: newItem.name + ' Grade: ' + newItem.grade + ' Size: ' + newItem.size
+          });
+          // Clear any errors
+          if (this.selectedItem.errors) {
+            this.selectedItem.setErrors(null);
+          }
+        });
+      }
+    );
   }
 }

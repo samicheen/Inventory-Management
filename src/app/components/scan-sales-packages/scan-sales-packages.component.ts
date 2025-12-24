@@ -9,6 +9,7 @@ import { QuantityUnit, QuantityUnitToLabelMapping } from '../../models/quantity.
 import { Party } from '../../models/party.model';
 import { Capacitor } from '@capacitor/core';
 import { BarcodeScannerService } from '../../services/barcode/barcode-scanner.service';
+import { QuickAddService } from '../../services/quick-add/quick-add.service';
 
 interface ScannedPackage {
   barcode: string;
@@ -58,7 +59,8 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
     private partyService: PartyService,
     private notificationService: NotificationService,
     private barcodeScannerService: BarcodeScannerService,
-    public modalRef: BsModalRef
+    public modalRef: BsModalRef,
+    private quickAddService: QuickAddService
   ) { }
 
   get selectedCustomer(): FormControl {
@@ -382,6 +384,28 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
 
     this.sell.next(salesData);
     this.modalRef.hide();
+  }
+
+  /**
+   * Open quick-add modal for customer
+   */
+  openAddCustomerModal(): void {
+    this.quickAddService.openAddPartyModal('customer').subscribe(
+      (newCustomer: Party) => {
+        // Refresh parties list
+        this.partyService.getParties('customer').subscribe((response) => {
+          this.parties = response.items || [];
+          // Auto-select the newly added customer
+          this.scanSalesForm.patchValue({
+            selected_customer: newCustomer.party_id
+          });
+          // Clear any errors
+          if (this.selectedCustomer.errors) {
+            this.selectedCustomer.setErrors(null);
+          }
+        });
+      }
+    );
   }
 }
 

@@ -62,7 +62,15 @@
 
         <!-- Customer Selection -->
         <div class="form-group">
-            <label for="selected_customer"><i class="fa fa-user"></i> Customer</label>
+            <label for="selected_customer">
+                <i class="fa fa-user"></i> Customer
+                <button type="button" 
+                        class="btn btn-sm btn-link p-0 ml-2" 
+                        (click)="openAddCustomerModal()"
+                        title="Add new customer">
+                    <i class="fa fa-plus-circle text-primary"></i>
+                </button>
+            </label>
             <select class="form-control" formControlName="selected_customer">
                 <option value="">Select customer...</option>
                 <option *ngFor="let party of parties" [value]="party.party_id">

@@ -20,7 +20,15 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="vendor"><i class="fa fa-building"></i> Vendor</label>
+            <label for="vendor">
+                <i class="fa fa-building"></i> Vendor
+                <button type="button" 
+                        class="btn btn-sm btn-link p-0 ml-2" 
+                        (click)="openAddVendorModal()"
+                        title="Add new vendor">
+                    <i class="fa fa-plus-circle text-primary"></i>
+                </button>
+            </label>
             <input type="text"
                    class="form-control"
                    id="vendor"
@@ -28,6 +36,7 @@
                    [typeahead]="parties"
                    typeaheadOptionField="name"
                    (typeaheadOnSelect)="onSelectVendor($event)"
+                   (blur)="validateVendorField()"
                    [typeaheadScrollable]="true"
                    formControlName="selected_vendor">
             <div *ngIf="selectedVendor.touched && selectedVendor.errors?.required" class="alert alert-danger">
@@ -38,7 +47,15 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="item"><i class="fa fa-box"></i> Item</label>
+            <label for="item">
+                <i class="fa fa-box"></i> Item
+                <button type="button" 
+                        class="btn btn-sm btn-link p-0 ml-2" 
+                        (click)="openAddItemModal()"
+                        title="Add new item">
+                    <i class="fa fa-plus-circle text-primary"></i>
+                </button>
+            </label>
             <input type="text"
                 class="form-control"
                 id="item"
@@ -48,6 +65,7 @@
                 [typeaheadItemTemplate]="customItemTemplate"
                 typeaheadOptionField="name"
                 (typeaheadOnSelect)="onSelectItem($event)"
+                (blur)="validateItemField()"
                 [typeaheadScrollable]="true"
                 formControlName="selected_item">
                 <ng-template #customItemTemplate let-item="item">

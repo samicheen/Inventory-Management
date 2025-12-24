@@ -54,7 +54,16 @@
                     <div *ngIf="!isMixedMode[i]">
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label>Item</label>
+                                <label>
+                                    Item
+                                    <button type="button" 
+                                            *ngIf="isInitialStockMode"
+                                            class="btn btn-sm btn-link p-0 ml-2" 
+                                            (click)="openAddItemModal(i)"
+                                            title="Add new item">
+                                        <i class="fa fa-plus-circle text-primary"></i>
+                                    </button>
+                                </label>
                                 <input type="text"
                                     class="form-control"
                                     [id]="'item_' + i"
@@ -66,6 +75,7 @@
                                     [typeaheadScrollable]="true"
                                     [typeaheadMinLength]="0"
                                     (typeaheadOnSelect)="onSelectItem($event, i)"
+                                    (blur)="validateItemField(i)"
                                     formControlName="selected_item">
                                 <ng-template #customItemTemplate let-item="item">
                                    {{item.name}} Grade: {{item.grade}} Size: {{item.size}}
@@ -176,7 +186,7 @@
                         <!-- Output Item Selection (for mixed packages) -->
                         <div class="form-group">
                             <label><i class="fa fa-arrow-right"></i> Output Item</label>
-                            <input type="text"
+                                <input type="text"
                                 class="form-control"
                                 [id]="'output_item_' + i"
                                 [name]="'output_item_' + i"
@@ -187,6 +197,7 @@
                                 [typeaheadScrollable]="true"
                                 [typeaheadMinLength]="0"
                                 (typeaheadOnSelect)="onSelectOutputItem($event, i)"
+                                (blur)="validateOutputItemField(i)"
                                 formControlName="output_item">
                             <ng-template #customItemTemplateMixed let-item="item">
                                {{item.name}} Grade: {{item.grade}} Size: {{item.size}}

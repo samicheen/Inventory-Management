@@ -26,13 +26,22 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="customer_name"><i class="fa fa-users"></i> Customer Name</label>
+            <label for="customer_name">
+                <i class="fa fa-users"></i> Customer Name
+                <button type="button" 
+                        class="btn btn-sm btn-link p-0 ml-2" 
+                        (click)="openAddCustomerModal()"
+                        title="Add new customer">
+                    <i class="fa fa-plus-circle text-primary"></i>
+                </button>
+            </label>
             <input type="text"
                    class="form-control"
                    id="customer"
                    [typeahead]="parties"
                    typeaheadOptionField="name"
                    (typeaheadOnSelect)="onSelectCustomer($event)"
+                   (blur)="validateCustomerField()"
                    [typeaheadScrollable]="true"
                    formControlName="selected_customer">
             <div *ngIf="selectedCustomer.touched && selectedCustomer.errors?.required" class="alert alert-danger">
@@ -43,7 +52,16 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="item"><i class="fa fa-box"></i> Item</label>
+            <label for="item">
+                <i class="fa fa-box"></i> Item
+                <button type="button" 
+                        *ngIf="!item"
+                        class="btn btn-sm btn-link p-0 ml-2" 
+                        (click)="openAddItemModal()"
+                        title="Add new item">
+                    <i class="fa fa-plus-circle text-primary"></i>
+                </button>
+            </label>
             <input type="text"
                 class="form-control"
                 id="item"
@@ -53,6 +71,7 @@
                 [typeaheadItemTemplate]="customItemTemplate"
                 typeaheadOptionField="name"
                 (typeaheadOnSelect)="onSelectItem($event)"
+                (blur)="validateItemField()"
                 [typeaheadScrollable]="true"
                 formControlName="selected_item">
                 <ng-template #customItemTemplate let-item="item">
