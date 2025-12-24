@@ -68,6 +68,7 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
         label: 'Barcode', 
         sortable: true, 
         searchable: true,
+        width: '150px',
         cellTemplate: this.barcodeTemplate
       },
       { key: 'invoice_id', label: 'Invoice Id', sortable: true, searchable: true },
