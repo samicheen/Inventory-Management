@@ -1,28 +1,10 @@
 <div class="container-fluid">
-    <div class="table-responsive">
-        <table class="table">
-        <thead>
-            <th scope="col">Item Name</th>
-            <th scope="col">Purchase</th>
-            <th scope="col">Opening Stock</th>
-            <th scope="col">Closing Stock</th>
-            <th scope="col">In Mfg</th>
-            <th scope="col">Sub Item Stock</th>
-            <th scope="col">Sales</th>
-            <th scope="col">Total Sub Item Sales</th>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of summary">
-              <td>{{item.item_name}}</td>
-              <td>{{item.purchase_qty | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-              <td>{{item.opening_stock | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-              <td>{{item.closing_stock | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-              <td>{{item.man_qty | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-              <td>{{item.sub_item_qty | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-              <td>{{item.sales_qty | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-              <td>{{item.sub_sales_qty | number:'1.2-2'}} {{quantityUnitToLabelMapping[item.unit]}}</td>
-          </tr>
-        </tbody>
-        </table>
-    </div>
+    <app-data-grid
+        [columns]="columns"
+        [data]="summary"
+        [showSearch]="true"
+        [showActions]="false"
+        [trackByFn]="trackByItemName"
+        searchPlaceholder="Search summary...">
+    </app-data-grid>
 </div>
