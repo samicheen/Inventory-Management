@@ -44,7 +44,8 @@
         <tr 
           *ngFor="let row of filteredData; trackBy: trackByIndex"
           (click)="onRowClick(row)"
-          [class.clickable]="rowClick.observers.length > 0">
+          [class.clickable]="rowClick.observers.length > 0"
+          [ngClass]="rowClassFn ? rowClassFn(row) : ''">
           <td *ngFor="let column of columns" [style.width]="column.width" [style.min-width]="column.width">
             <ng-container *ngIf="column.cellTemplate; else defaultCell">
               <ng-container *ngTemplateOutlet="column.cellTemplate; context: { $implicit: row, column: column, value: getCellValue(row, column) }"></ng-container>

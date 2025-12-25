@@ -61,7 +61,6 @@ export class UserListComponent implements OnInit, AfterViewInit {
     this.userService.getUsers().subscribe(
       (response) => {
         if (response.success) {
-          console.log('Users response:', response.users); // Debug log
           this.users = response.users;
         } else {
           this.notificationService.showError('Unable to load users');

@@ -28,6 +28,7 @@ export class DataGridComponent implements OnInit, OnChanges {
   @Input() showActions: boolean = false;
   @Input() actionsTemplate: TemplateRef<any>;
   @Input() emptyMessage: string = 'No data available';
+  @Input() rowClassFn?: (row: any) => string | string[]; // Function to get CSS classes for a row
   @Input() trackByFn: (index: number, item: any) => any;
   @Input() headerActions: boolean = false; // Flag to show header actions slot
   

@@ -73,7 +73,6 @@ export class BarcodeScannerService {
       
       return this.extractBarcodeFromScanResult(result);
     } catch (error: any) {
-      console.error('Error scanning barcode:', error);
       // Don't show error for user cancellation
       if (error.message && !error.message.includes('cancel') && !error.message.includes('Cancel')) {
         this.notificationService.showError('Error scanning barcode: ' + (error.message || 'Unknown error'));
@@ -105,7 +104,6 @@ export class BarcodeScannerService {
           // Processed item (final product) → Open sales form
           this.openSalesForm(response);
         } else {
-          console.error('Unknown action:', response.action, response); // Debug
           this.notificationService.showError('Unknown barcode type: ' + (response.action || 'no action'));
         }
       },

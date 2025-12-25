@@ -55,7 +55,6 @@ export class LoginComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Login error:', error);
           // Show more detailed error messages
           if (error.status === 0) {
             this.errorMessage = 'Cannot connect to server. Please check if the server is running and accessible.';

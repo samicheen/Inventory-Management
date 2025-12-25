@@ -118,7 +118,6 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
             this.refreshItems.next(undefined);
           },
           error: (error) => {
-            console.error('Error updating purchase:', error);
             // Show backend validation error to user
             const errorMessage = error.error?.message || error.message || 'Unable to update purchase.';
             this.notificationService.showError(errorMessage);
@@ -135,7 +134,6 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
   saveAndPrintPurchases(purchase: any) {
     this.purchaseService.addPurchase(purchase).subscribe({
       next: (response: any) => {
-        console.log('Purchase response:', response); // Debug
         this.refreshItems.next(undefined);
         
         // Open receive purchase modal to enter spool details
@@ -170,7 +168,6 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
         }
       },
       error: (error) => {
-        console.error('Error adding purchase:', error);
         // Still refresh to show current state
         this.refreshItems.next(undefined);
       }
@@ -213,7 +210,6 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
                 errorMessage = error;
               }
               
-              console.error('Purchase deletion error:', error); // Debug log
               this.notificationService.showError(errorMessage);
             }
           });
@@ -225,13 +221,7 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
   getPurchases(){
     this.purchaseService.getPurchases()
     .subscribe((response: Response<Purchase>) => {
-      console.log('Purchases response:', response); // Debug
       this.purchases = response.items || [];
-      console.log('Purchases array:', this.purchases); // Debug - check if barcode is present
-      if (this.purchases && this.purchases.length > 0) {
-        console.log('First purchase barcode:', this.purchases[0].barcode); // Debug
-        console.log('First purchase full object:', JSON.stringify(this.purchases[0])); // Debug - full object
-      }
       this.total_amount = response.total_amount;
     });
   }
@@ -263,8 +253,6 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
       isReceived: false // Will be checked in component
     };
     
-    console.log('Opening ReceivePurchaseComponent with initialState:', initialState); // Debug
-    
     try {
       const modalRef = this.modalService.show(ReceivePurchaseComponent, { 
         initialState, 
@@ -275,10 +263,8 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
       
       if (!modalRef) {
         this.notificationService.showError('Failed to open receive purchase modal. Please try again.');
-        console.error('Modal service returned null/undefined');
       }
     } catch (error) {
-      console.error('Error opening receive purchase modal:', error);
       this.notificationService.showError('Error opening receive purchase form: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
@@ -339,7 +325,6 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
         }
       },
       error: (error) => {
-        console.error('Error fetching packages:', error);
         const errorMessage = error.error?.message || error.message || 'Unable to fetch packages.';
         if (errorMessage.includes('not been received')) {
           this.notificationService.showError('Purchase has not been received yet. Please receive the purchase first.');

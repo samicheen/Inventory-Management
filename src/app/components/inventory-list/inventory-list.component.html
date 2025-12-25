@@ -13,6 +13,7 @@
       [headerActions]="true"
       [actionsTemplate]="actionsTemplate"
       [trackByFn]="trackByInventoryId"
+      [rowClassFn]="getRowClass"
       searchPlaceholder="Search inventory...">
       <div headerCenter>
         <div class="summary-inline" *ngIf="total">

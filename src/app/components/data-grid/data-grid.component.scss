@@ -188,6 +188,19 @@
           background-color: #f8f9fa;
         }
         
+        &.low-stock-row {
+          background-color: #fff3cd !important; // Light yellow/warning background
+          border-left: 3px solid #ffc107 !important; // Yellow border on left
+          
+          &:hover {
+            background-color: #ffe69c !important; // Darker yellow on hover
+          }
+          
+          td {
+            background-color: transparent !important; // Ensure cells don't override row background
+          }
+        }
+        
         td {
           vertical-align: middle;
           

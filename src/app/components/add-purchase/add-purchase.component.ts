@@ -275,7 +275,6 @@ export class AddPurchaseComponent implements OnInit {
         this.minQuantity = response.total_processed || 0;
       },
       (error) => {
-        console.error('Error loading processed quantities:', error);
         // Don't block editing if we can't fetch this info - backend will validate
       }
     );

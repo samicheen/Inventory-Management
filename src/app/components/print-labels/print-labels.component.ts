@@ -39,18 +39,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
     if (this.allPackages && this.allPackages.length > 0) {
       this.labelCount = this.allPackages.length;
     }
-    
-    // Debug: Log to verify values are being passed
-    console.log('PrintLabelsComponent initialized with:', {
-      barcode: this.barcode,
-      itemName: this.itemName,
-      quantity: this.quantity,
-      netQuantity: this.netQuantity,
-      unit: this.unit,
-      labelCount: this.labelCount,
-      allPackagesLength: this.allPackages?.length || 0,
-      allPackages: this.allPackages
-    });
   }
 
   ngAfterViewInit(): void {
@@ -58,7 +46,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
     // This is critical because ngx-bootstrap may assign initialState after ngOnInit
     if (this.allPackages && this.allPackages.length > 0) {
       if (this.labelCount !== this.allPackages.length) {
-        console.log(`Updating labelCount from ${this.labelCount} to ${this.allPackages.length} based on allPackages.length`);
         this.labelCount = this.allPackages.length;
       }
     }
@@ -81,14 +68,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       const modalElement = document.querySelector('.modal.show') || document.body;
       const canvasElements = modalElement.querySelectorAll('.qrcode-canvas');
       
-      // Debug: Log what we found
-      console.log('QR Code Generation:', {
-        labelCount: this.labelCount,
-        allPackagesLength: this.allPackages?.length || 0,
-        canvasElementsFound: canvasElements.length,
-        allPackages: this.allPackages
-      });
-      
       // Ensure we have the expected number of canvas elements
       if (canvasElements.length === this.labelCount) {
         // Canvas elements found, generate QR codes
@@ -98,19 +77,16 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
               this.generateQRCodeOnCanvas(canvas, index);
             }
           } catch (error) {
-            console.error('Error generating QR code for index', index, ':', error);
           }
         });
       } else if (canvasElements.length > 0 && canvasElements.length < this.labelCount) {
         // Some canvas elements found but not all - generate for what we have
-        console.warn(`Only ${canvasElements.length} of ${this.labelCount} canvas elements found. Generating QR codes for available ones.`);
         canvasElements.forEach((canvas: any, index: number) => {
           try {
             if (canvas instanceof HTMLCanvasElement) {
               this.generateQRCodeOnCanvas(canvas, index);
             }
           } catch (error) {
-            console.error('Error generating QR code for index', index, ':', error);
           }
         });
         // Retry to get remaining ones
@@ -122,8 +98,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
         // Canvas elements not found yet, retry after a short delay
         retryCount++;
         setTimeout(tryGenerate, 100);
-      } else {
-        console.warn('QR code canvas elements not found after multiple retries. Label count:', this.labelCount, 'Found:', canvasElements.length);
       }
     };
     
@@ -153,20 +127,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
       if (pkg.item_name && pkg.item_grade !== undefined && pkg.item_size !== undefined) {
         qrData.itemName = `${pkg.item_name} Grade: ${pkg.item_grade} Size: ${pkg.item_size}`;
       }
-      
-      // Debug log for each package
-      console.log(`Generating QR code for package ${index}:`, {
-        barcode: qrData.barcode,
-        quantity: qrData.quantity,
-        itemName: qrData.itemName,
-        package: pkg
-      });
-    } else {
-      console.warn(`No package data found for index ${index}. Using default values.`, {
-        allPackagesLength: this.allPackages?.length,
-        index: index,
-        allPackages: this.allPackages
-      });
     }
     
     // Create QR code data string (JSON format) - same structure as print output
@@ -181,7 +141,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
         light: '#FFFFFF'
       }
     }).catch((error: any) => {
-      console.error('QR Code generation error:', error);
     });
   }
 
@@ -470,7 +429,6 @@ export class PrintLabelsComponent implements OnInit, AfterViewInit {
         });
         qrCodeImages.push(qrCodeDataUrl);
       } catch (error) {
-        console.error('Error generating QR code image:', error);
         // Push empty string as fallback
         qrCodeImages.push('');
       }

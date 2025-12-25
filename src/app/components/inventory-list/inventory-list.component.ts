@@ -39,6 +39,8 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
   private readonly refreshItems = new BehaviorSubject(undefined);
   currentTab: string = 'Main Items'; // Track current tab
   private refreshSubscription: Subscription;
+  lowStockItemIds: Set<number> = new Set(); // Track item IDs that are low stock
+  lowStockThreshold: number = 100; // Default threshold
   
   constructor(
     private inventoryService: InventoryService,
@@ -61,16 +63,50 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
       this.inventoryParameters.set('retrieve_sub_items', this.currentTab === 'Sub Items' ? 1 : 0);
     }
     this.getInventory();
+    this.loadLowStockItems();
     this.refreshItems.subscribe(() => {
       this.getInventory();
+      this.loadLowStockItems(); // Refresh low stock items too
     });
     
     // Subscribe to refresh service for auto-refresh after barcode scans
     this.refreshSubscription = this.refreshService.refresh$.subscribe((page: string) => {
       if (page === 'inventory' || page === 'all') {
         this.getInventory();
+        this.loadLowStockItems();
       }
     });
+  }
+
+  loadLowStockItems(): void {
+    this.inventoryService.getLowStockItems(this.lowStockThreshold).subscribe({
+      next: (response) => {
+        if (response && response.items) {
+          // Map item_id from low stock items (response has item_id at root level)
+          this.lowStockItemIds = new Set(response.items.map((item: any) => {
+            const id = item.item_id || item.item?.item_id;
+            return parseInt(String(id));
+          }));
+        } else {
+          this.lowStockItemIds = new Set();
+        }
+      },
+      error: (error) => {
+        this.lowStockItemIds = new Set();
+      }
+    });
+  }
+
+  isLowStock(item: InventoryItem): boolean {
+    if (!item || !item.item || !item.item.item_id) return false;
+    const itemId = parseInt(String(item.item.item_id));
+    const isLow = this.lowStockItemIds.has(itemId);
+    return isLow;
+  }
+
+  getRowClass = (row: InventoryItem): string => {
+    const isLow = this.isLowStock(row);
+    return isLow ? 'low-stock-row' : '';
   }
 
   ngAfterViewInit(): void {
@@ -196,14 +232,10 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
         
         // Handle multiple packages and print labels
         if (response && response.packages && response.packages.length > 0) {
-          console.log('Received packages from backend:', response.packages);
           this.printLabelsForPackages(response.packages);
-        } else {
-          console.warn('No packages in response:', response);
         }
       }, (error) => {
         // Handle actual errors
-        console.error('Error adding inventory:', error);
         this.notificationService.showError('Error adding inventory: ' + (error.error?.message || error.message || 'Unknown error'));
       });
     });
@@ -319,8 +351,6 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
       return;
     }
     
-    console.log('printLabelsForPackages called with packages:', packages);
-    
     // When adding new packages (from "Done and Print Labels"), show ALL packages in a single modal
     // regardless of item or quantity differences - each package gets its own label
     // Format all packages for print labels component
@@ -344,12 +374,6 @@ export class InventoryListComponent implements OnInit, OnDestroy, AfterViewInit 
 
     // Use first package for basic info display
     const firstPkg = formattedPackages[0];
-
-    console.log('Opening print labels modal with all packages:', {
-      packageCount: packages.length,
-      labelCount: packages.length,
-      formattedPackages: formattedPackages
-    });
     
     const initialState = {
       barcode: firstPkg.package_barcode,

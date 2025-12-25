@@ -144,6 +144,17 @@
   }
 }
 
+// Ensure button text is visible in low stock alerts table
+.table {
+  .btn-sm {
+    white-space: nowrap;
+    
+    i {
+      margin-right: 0.25rem;
+    }
+  }
+}
+
 .spinner-border {
   width: 2.5rem;
   height: 2.5rem;

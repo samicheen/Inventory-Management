@@ -102,7 +102,6 @@ export class ScanSalesPackagesComponent implements OnInit, OnDestroy {
         this.parties = response.items || [];
       },
       (error) => {
-        console.error('Error loading parties:', error);
         this.notificationService.showError('Error loading customers.');
       }
     );

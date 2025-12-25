@@ -23,7 +23,6 @@ export class EmailComponent implements OnInit {
 
   ngOnInit(): void {
     // Email functionality disabled - GAPI removed
-    console.log('Email component: Marketing email functionality is disabled');
     this.showSignIn = false;
   }
 
@@ -52,14 +51,11 @@ export class EmailComponent implements OnInit {
    */
   async handleAuthClick() {
     if (!this.gapiSession || typeof gapi === 'undefined') {
-      console.error('GAPI not available. Email functionality requires Google API.');
       return;
     }
     try {
-      const res = await this.gapiSession.signIn();
-      console.log(typeof res);
+      await this.gapiSession.signIn();
     } catch (error) {
-      console.error('Failed to sign in to Google:', error);
     }
   }
 
@@ -67,7 +63,6 @@ export class EmailComponent implements OnInit {
    * 
    */
   async sendEmails() {
-    console.warn('Email functionality is disabled. GAPI has been removed.');
     alert('Email functionality is currently disabled. This feature required Google API which has been removed.');
   }
 }

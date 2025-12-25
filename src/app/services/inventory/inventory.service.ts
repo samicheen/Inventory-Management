@@ -131,4 +131,13 @@ export class InventoryService {
        responseType: 'json'
      });
    }
+
+   /**
+    * Get low stock items (items with closing_stock <= threshold)
+    * @param threshold Optional threshold (default: 100)
+    */
+   getLowStockItems(threshold?: number): Observable<any> {
+     const params = threshold ? `?threshold=${threshold}` : '';
+     return this.http.get(`${this.apiUrl}/api/inventory/getLowStockItems.php${params}`);
+   }
 }

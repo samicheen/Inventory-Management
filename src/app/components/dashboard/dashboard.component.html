@@ -81,6 +81,67 @@
         </div>
       </div>
 
+      <!-- Low Stock Alerts -->
+      <div class="row mb-4" *ngIf="lowStockItems.length > 0">
+        <div class="col-12">
+          <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+              <h5 class="mb-0">
+                <i class="fa fa-exclamation-triangle"></i> Low Stock Alerts ({{ lowStockItems.length }})
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th>Item Name</th>
+                      <th>Type</th>
+                      <th>Grade</th>
+                      <th>Size</th>
+                      <th>Current Stock</th>
+                      <th>Stock Value</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of lowStockItems">
+                      <td>{{ item.item?.name || '-' }}</td>
+                      <td>
+                        <span class="badge" [ngClass]="item.item?.is_sub_item ? 'bg-info' : 'bg-secondary'">
+                          {{ item.item?.is_sub_item ? 'Sub Item' : 'Main Item' }}
+                        </span>
+                      </td>
+                      <td>{{ item.item?.grade || '-' }}</td>
+                      <td>{{ item.item?.size || '-' }}</td>
+                      <td>
+                        <span class="badge bg-danger" *ngIf="item.closing_stock">
+                          {{ formatQuantity(item.closing_stock) }}
+                        </span>
+                        <span class="badge bg-danger" *ngIf="!item.closing_stock">0.00 KG</span>
+                      </td>
+                      <td>
+                        <span *ngIf="item.closing_amount">{{ formatCurrency(+item.closing_amount) }}</span>
+                        <span *ngIf="!item.closing_amount">{{ formatCurrency(0) }}</span>
+                      </td>
+                      <td>
+                        <button *ngIf="!item.item?.is_sub_item" 
+                                (click)="quickPurchase(item)" 
+                                class="btn btn-sm btn-success"
+                                title="Quick Purchase - Add purchase for this item">
+                          <i class="fa fa-shopping-cart"></i> Quick Purchase
+                        </button>
+                        <span *ngIf="item.item?.is_sub_item" class="text-muted">-</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Recent Activity -->
       <div class="row">
         <div class="col-md-6 mb-4">

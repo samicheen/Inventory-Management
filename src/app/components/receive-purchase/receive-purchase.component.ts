@@ -66,7 +66,6 @@ export class ReceivePurchaseComponent implements OnInit {
   ngOnInit(): void {
     // Ensure required properties are set (from initialState)
     if (!this.purchase_id || !this.purchase_barcode) {
-      console.error('ReceivePurchaseComponent: Missing required properties (purchase_id or purchase_barcode)');
       this.notificationService.showError('Error: Missing purchase information. Please try again.');
       return;
     }

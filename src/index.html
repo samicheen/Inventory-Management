@@ -6,17 +6,6 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!-- Google API script - only load on web, not mobile -->
-  <script>
-    // Only load Google API on web browsers, not in mobile WebView
-    if (!window.Capacitor) {
-      var script = document.createElement('script');
-      script.src = 'https://apis.google.com/js/platform.js';
-      script.async = true;
-      script.onerror = function() { console.log('Google API script failed to load (OK on mobile)'); };
-      document.head.appendChild(script);
-    }
-  </script>
 </head>
 <body>
   <app-root></app-root>

@@ -3,6 +3,9 @@ import { InventoryService } from '../../services/inventory/inventory.service';
 import { PurchaseService } from '../../services/purchase/purchase.service';
 import { SalesService } from '../../services/sales/sales.service';
 import { SummaryService } from '../../services/summary/summary.service';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
+import { Purchase } from '../../models/purchase.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,12 +26,14 @@ export class DashboardComponent implements OnInit {
   isLoading = true;
   recentPurchases: any[] = [];
   recentSales: any[] = [];
+  lowStockItems: any[] = [];
 
   constructor(
     private inventoryService: InventoryService,
     private purchaseService: PurchaseService,
     private salesService: SalesService,
-    private summaryService: SummaryService
+    private summaryService: SummaryService,
+    private modalService: BsModalService
   ) { }
 
   ngOnInit(): void {
@@ -53,7 +58,6 @@ export class DashboardComponent implements OnInit {
         this.checkLoadingComplete();
       },
       error: (error) => {
-        console.error('Error loading inventory:', error);
         this.checkLoadingComplete();
       }
     });
@@ -69,7 +73,6 @@ export class DashboardComponent implements OnInit {
         this.checkLoadingComplete();
       },
       error: (error) => {
-        console.error('Error loading purchases:', error);
         this.checkLoadingComplete();
       }
     });
@@ -85,7 +88,25 @@ export class DashboardComponent implements OnInit {
         this.checkLoadingComplete();
       },
       error: (error) => {
-        console.error('Error loading sales:', error);
+        this.checkLoadingComplete();
+      }
+    });
+
+    // Load low stock items
+    this.inventoryService.getLowStockItems().subscribe({
+      next: (response) => {
+        if (response && response.items) {
+          this.lowStockItems = response.items;
+          this.stats.lowStockItems = response.count || 0;
+        } else {
+          this.lowStockItems = [];
+          this.stats.lowStockItems = 0;
+        }
+        this.checkLoadingComplete();
+      },
+      error: (error) => {
+        this.lowStockItems = [];
+        this.stats.lowStockItems = 0;
         this.checkLoadingComplete();
       }
     });
@@ -114,5 +135,58 @@ export class DashboardComponent implements OnInit {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  formatQuantity(quantity: any): string {
+    if (!quantity) return '0.00 KG';
+    // Handle both object format {value, unit} and direct number
+    if (typeof quantity === 'object' && quantity.value !== undefined) {
+      const value = parseFloat(quantity.value) || 0;
+      const unit = quantity.unit || 'KG';
+      return `${value.toFixed(2)} ${unit}`;
+    } else if (typeof quantity === 'number') {
+      return `${quantity.toFixed(2)} KG`;
+    }
+    return '0.00 KG';
+  }
+
+  /**
+   * Open purchase modal with item pre-filled for quick reordering
+   * This allows users to quickly add a purchase for low stock items
+   */
+  quickPurchase(item: any): void {
+    if (!item || !item.item) return;
+    
+    // Create purchase object with item pre-filled
+    // Vendor and quantity will be filled by user in the modal
+    const purchase: Purchase = {
+      item: {
+        item_id: item.item.item_id,
+        name: item.item.name,
+        grade: item.item.grade || '',
+        size: item.item.size || '',
+        is_sub_item: item.item.is_sub_item || false
+      }
+    } as Purchase;
+
+    const initialState = { purchase };
+    const addPurchaseModalRef = this.modalService.show(AddPurchaseComponent, { 
+      initialState, 
+      backdrop: 'static', 
+      keyboard: false 
+    });
+
+    if (addPurchaseModalRef.content) {
+      addPurchaseModalRef.content.saveAndPrintPurchases.subscribe((purchase: Purchase) => {
+        this.purchaseService.addPurchase(purchase).subscribe({
+          next: () => {
+            // Refresh dashboard data to update low stock items
+            this.loadDashboardData();
+          },
+          error: (error) => {
+          }
+        });
+      });
+    }
   }
 }

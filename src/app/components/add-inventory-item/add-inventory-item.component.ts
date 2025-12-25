@@ -88,7 +88,6 @@ export class AddInventoryItemComponent implements OnInit {
         }));
       },
       (error) => {
-        console.error('Error loading processing types:', error);
         this.notificationService.showError('Error loading processing types. Please refresh the page.');
         this.processingTypes = [];
       }
@@ -100,7 +99,6 @@ export class AddInventoryItemComponent implements OnInit {
       this.itemService.getItems().subscribe((response) => {
         this.items = response.items;
       }, (error) => {
-        console.error('Error loading items:', error);
         this.items = [];
       });
     } else {
@@ -108,7 +106,6 @@ export class AddInventoryItemComponent implements OnInit {
       this.itemService.getItems(true).subscribe((response) => {
         this.items = response.items;
       }, (error) => {
-        console.error('Error loading items:', error);
         this.items = [];
       });
       
@@ -126,7 +123,6 @@ export class AddInventoryItemComponent implements OnInit {
           );
         },
         (error) => {
-          console.error('Error loading inventory items for mixed mode:', error);
           this.availableInventoryItems = [];
         }
       );
@@ -137,7 +133,6 @@ export class AddInventoryItemComponent implements OnInit {
           this.manufacturingEntries = response.items || [];
         },
         (error) => {
-          console.error('Error loading manufacturing entries:', error);
           this.manufacturingEntries = [];
         }
       );
@@ -162,7 +157,6 @@ export class AddInventoryItemComponent implements OnInit {
             }
           },
           (error) => {
-            console.error('Error fetching source rate by item_id:', error);
             this.sourceRate = 0;
           }
         );

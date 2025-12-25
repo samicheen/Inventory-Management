@@ -32,12 +32,9 @@ export class AuthService {
     const loginData: LoginRequest = { username, password };
     const loginUrl = `${this.apiUrl}/api/auth/login.php`;
     
-    console.log('Attempting login to:', loginUrl); // Debug log
-    
     return this.http.post<LoginResponse>(loginUrl, loginData)
       .pipe(
         tap(response => {
-          console.log('Login response:', response); // Debug log
           if (response.success && response.token && response.user) {
             this.setToken(response.token);
             this.setUser(response.user);

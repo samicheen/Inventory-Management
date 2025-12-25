@@ -125,14 +125,10 @@ export class ManufacturingListComponent implements OnInit, OnDestroy, AfterViewI
         
         // Handle multiple packages and print labels
         if (response && response.packages && response.packages.length > 0) {
-          console.log('Received packages from backend:', response.packages);
           this.printLabelsForPackages(response.packages);
-        } else {
-          console.warn('No packages in response:', response);
         }
       }, (error) => {
         // Handle actual errors
-        console.error('Error adding inventory:', error);
         this.notificationService.showError(error.error?.message || 'Error adding inventory item');
       });
     });
@@ -184,10 +180,6 @@ export class ManufacturingListComponent implements OnInit, OnDestroy, AfterViewI
       keyboard: false,
       class: 'modal-lg'
     });
-    
-    if (packages.length > 1) {
-      console.log(`Created ${packages.length} packages. Print labels for each package.`);
-    }
   }
 
   removeManufacture(manufacture: Manufacture): void {
