@@ -90,6 +90,13 @@
       <i class="fa fa-list-alt"></i>
       <span>Summary</span>
     </a>
+    <a class="sidebar-item" 
+       routerLink="reports" 
+       [routerLinkActive]="['active']"
+       (click)="closeSidebarOnNavigation()">
+      <i class="fa fa-file-text"></i>
+      <span>Reports</span>
+    </a>
   </nav>
 </aside>
 

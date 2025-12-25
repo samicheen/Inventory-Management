@@ -1,0 +1,66 @@
+<div class="container-fluid">
+  <div class="report-header">
+    <div class="header-content">
+      <h2><i class="fa fa-truck"></i> Vendor-wise Purchase Report</h2>
+      <p class="text-muted">Purchase summary grouped by vendor</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-primary" (click)="exportToExcel()" [disabled]="vendors.length === 0">
+        <i class="fa fa-download"></i> Export to Excel
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-section">
+    <div class="row">
+      <div class="col-md-3">
+        <label>Start Date</label>
+        <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onDateFilterChange()">
+      </div>
+      <div class="col-md-3">
+        <label>End Date</label>
+        <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onDateFilterChange()">
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-cards" *ngIf="summary">
+    <div class="summary-card">
+      <div class="summary-label">Total Vendors</div>
+      <div class="summary-value">{{summary.total_vendors || 0}}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Total Quantity</div>
+      <div class="summary-value">{{(summary.total_quantity || 0).toFixed(2)}} KG</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Total Amount</div>
+      <div class="summary-value">{{formatCurrency(summary.total_amount || 0)}}</div>
+    </div>
+  </div>
+
+  <div class="loading-spinner" *ngIf="isLoading">
+    <i class="fa fa-spinner fa-spin"></i> Loading report...
+  </div>
+
+  <app-data-grid
+    *ngIf="!isLoading"
+    [columns]="columns"
+    [data]="vendors"
+    [showSearch]="true"
+    [showActions]="false"
+    [trackByFn]="trackByVendorId"
+    searchPlaceholder="Search vendors...">
+    <div headerCenter>
+      <div class="summary-inline" *ngIf="summary">
+        <span class="summary-inline-label">Total:</span>
+        <span class="summary-inline-value">{{formatCurrency(summary.total_amount || 0)}}</span>
+      </div>
+    </div>
+  </app-data-grid>
+
+  <div *ngIf="!isLoading && vendors.length === 0" class="empty-state">
+    <i class="fa fa-inbox"></i>
+    <p>No purchase data found for the selected date range</p>
+  </div>
+</div>

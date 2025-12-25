@@ -50,6 +50,12 @@ import { AddProcessingTypeComponent } from './components/add-processing-type/add
 import { ProcessFurtherPackagesComponent } from './components/process-further-packages/process-further-packages.component';
 import { ScanSalesPackagesComponent } from './components/scan-sales-packages/scan-sales-packages.component';
 import { DataGridComponent } from './components/data-grid/data-grid.component';
+import { ReportsListComponent } from './components/report/reports-list/reports-list.component';
+import { CustomerSalesReportComponent } from './components/report/customer-sales-report/customer-sales-report.component';
+import { VendorPurchaseReportComponent } from './components/report/vendor-purchase-report/vendor-purchase-report.component';
+import { ItemSalesReportComponent } from './components/report/item-sales-report/item-sales-report.component';
+import { ItemPurchaseReportComponent } from './components/report/item-purchase-report/item-purchase-report.component';
+import { ProfitAnalysisReportComponent } from './components/report/profit-analysis-report/profit-analysis-report.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -90,7 +96,13 @@ const ENVIRONMENT = "environment";
         AddProcessingTypeComponent,
         ProcessFurtherPackagesComponent,
         ScanSalesPackagesComponent,
-        DataGridComponent
+        DataGridComponent,
+        ReportsListComponent,
+        CustomerSalesReportComponent,
+        VendorPurchaseReportComponent,
+        ItemSalesReportComponent,
+        ItemPurchaseReportComponent,
+        ProfitAnalysisReportComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,

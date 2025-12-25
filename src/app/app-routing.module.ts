@@ -13,6 +13,12 @@ import { ProcessingTypeListComponent } from './components/processing-type-list/p
 import { UserListComponent } from './components/user-list/user-list.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoginComponent } from './components/login/login.component';
+import { ReportsListComponent } from './components/report/reports-list/reports-list.component';
+import { CustomerSalesReportComponent } from './components/report/customer-sales-report/customer-sales-report.component';
+import { VendorPurchaseReportComponent } from './components/report/vendor-purchase-report/vendor-purchase-report.component';
+import { ItemSalesReportComponent } from './components/report/item-sales-report/item-sales-report.component';
+import { ItemPurchaseReportComponent } from './components/report/item-purchase-report/item-purchase-report.component';
+import { ProfitAnalysisReportComponent } from './components/report/profit-analysis-report/profit-analysis-report.component';
 
 
 const routes: Routes = [
@@ -30,6 +36,12 @@ const routes: Routes = [
   { path: 'sales', component: SalesListComponent, canActivate: [AuthGuard] },
   { path: 'summary', component: SummaryComponent, canActivate: [AuthGuard] },
   { path: 'email', component: EmailComponent, canActivate: [AuthGuard] },
+  { path: 'reports', component: ReportsListComponent, canActivate: [AuthGuard] },
+  { path: 'reports/profit-analysis', component: ProfitAnalysisReportComponent, canActivate: [AuthGuard] },
+  { path: 'reports/item-sales', component: ItemSalesReportComponent, canActivate: [AuthGuard] },
+  { path: 'reports/item-purchase', component: ItemPurchaseReportComponent, canActivate: [AuthGuard] },
+  { path: 'reports/customer-sales', component: CustomerSalesReportComponent, canActivate: [AuthGuard] },
+  { path: 'reports/vendor-purchase', component: VendorPurchaseReportComponent, canActivate: [AuthGuard] },
   { path: '',
     redirectTo: '/dashboard',
     pathMatch: 'full'
