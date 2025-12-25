@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, TemplateRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { AddPurchaseComponent } from '../add-purchase/add-purchase.component';
@@ -36,7 +36,8 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
     private purchaseService: PurchaseService,
     private modalService: BsModalService,
     private itemService: ItemService,
-    public authService: AuthService
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -48,6 +49,7 @@ export class PurchaseListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initializeColumns();
+    this.cdr.detectChanges();
   }
 
   initializeColumns(): void {

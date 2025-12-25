@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from './services/auth/auth.service';
 import { filter } from 'rxjs/operators';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +19,17 @@ export class AppComponent implements OnInit {
     private router: Router
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Configure StatusBar for mobile
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await StatusBar.setOverlaysWebView({ overlay: true });
+        await StatusBar.setStyle({ style: Style.Dark });
+      } catch (error) {
+        // StatusBar might not be available, ignore error
+      }
+    }
+
     // Check if user is authenticated on app load
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);

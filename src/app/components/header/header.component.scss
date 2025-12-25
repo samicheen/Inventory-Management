@@ -129,6 +129,9 @@
 // Top Header Bar
 .top-header {
   padding: 0.75rem 1rem;
+  // Add safe area inset for status bar (iOS and Android with notches)
+  padding-top: calc(0.75rem + constant(safe-area-inset-top, 0px)); // iOS Safari fallback
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px)); // Modern browsers
   min-height: 60px;
   display: flex;
   align-items: center;
@@ -272,19 +275,90 @@
 // Mobile adjustments
 @media (max-width: 991px) {
   .top-header {
-    padding: 0.75rem 1rem;
-    min-height: 56px;
+    padding: 0.5rem 0.5rem;
+    // Add safe area inset for status bar (iOS and Android with notches)
+    padding-top: calc(0.5rem + constant(safe-area-inset-top, 0px)); // iOS Safari fallback
+    padding-top: calc(0.5rem + env(safe-area-inset-top, 0px)); // Modern browsers
+    min-height: auto;
+    flex-wrap: nowrap;
+    align-items: center;
     
-    .navbar-brand {
-      font-size: 1.1rem;
+    .sidebar-toggle-btn {
+      margin-right: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      min-width: 36px;
+    }
+    
+    .navbar-brand-container {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      
+      .navbar-brand {
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 1;
+        max-width: 120px;
+      }
+      
+      .current-page-indicator {
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+        flex-shrink: 1;
+        
+        &::before {
+          margin-right: 0.2rem;
+        }
+      }
+    }
+    
+    .header-actions {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: 0.4rem;
+      
+      .btn {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.6rem;
+        white-space: nowrap;
+        line-height: 1.2;
+        
+        i {
+          margin-right: 0.25rem;
+        }
+      }
+      
+      .user-dropdown {
+        .user-link {
+          font-size: 0.85rem;
+          padding: 0.35rem 0.5rem;
+          
+          span {
+            display: none; // Hide username on mobile
+          }
+        }
+      }
     }
     
     .barcode-input-group {
-      width: 160px;
+      display: none; // Hide on mobile, use camera button instead
     }
   }
   
   .sidebar {
     width: 260px;
+    padding-top: env(safe-area-inset-top, 0px);
   }
 }

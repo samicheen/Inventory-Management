@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ReportsService } from '../../../services/reports/reports.service';
 import { NotificationService } from '../../../services/notification/notification.service';
 import { GridColumn } from '../../data-grid/data-grid.component';
@@ -9,7 +9,7 @@ import * as XLSX from 'xlsx';
   templateUrl: './vendor-purchase-report.component.html',
   styleUrls: ['./vendor-purchase-report.component.scss']
 })
-export class VendorPurchaseReportComponent implements OnInit, AfterViewInit {
+export class VendorPurchaseReportComponent implements OnInit {
   @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   vendors: any[] = [];
@@ -25,11 +25,8 @@ export class VendorPurchaseReportComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadReport();
-  }
-
-  ngAfterViewInit(): void {
     this.initializeColumns();
+    this.loadReport();
   }
 
   initializeColumns(): void {

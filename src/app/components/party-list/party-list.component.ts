@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
@@ -16,7 +16,7 @@ import { GridColumn } from '../data-grid/data-grid.component';
   templateUrl: './party-list.component.html',
   styleUrls: ['./party-list.component.scss']
 })
-export class PartyListComponent implements OnInit, AfterViewInit {
+export class PartyListComponent implements OnInit {
   @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   party_type: string;
@@ -34,16 +34,13 @@ export class PartyListComponent implements OnInit, AfterViewInit {
     ) { }
 
   ngOnInit(): void {
+    this.initializeColumns();
     this.party_type = this.router.url.split('/').pop();
     this.button_value = this.party_type === 'customer' ? 'Add Customer' : 'Add Vendor';
     this.getParties();
     this.refreshItems.subscribe(() => {
       this.getParties();
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.initializeColumns();
   }
 
   initializeColumns(): void {

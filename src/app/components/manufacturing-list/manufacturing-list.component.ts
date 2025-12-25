@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { InventoryService } from 'src/app/services/inventory/inventory.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from 'src/app/models/quantity.model';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -21,7 +21,7 @@ import { GridColumn } from '../data-grid/data-grid.component';
   templateUrl: './manufacturing-list.component.html',
   styleUrls: ['./manufacturing-list.component.scss']
 })
-export class ManufacturingListComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ManufacturingListComponent implements OnInit, OnDestroy {
   @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   manufactures: Manufacture[];
@@ -41,6 +41,7 @@ export class ManufacturingListComponent implements OnInit, OnDestroy, AfterViewI
   ) { }
 
   ngOnInit(): void {
+    this.initializeColumns();
     this.getManufacturingItems();
     this.refreshItems.subscribe(() => {
       this.getManufacturingItems();
@@ -52,10 +53,6 @@ export class ManufacturingListComponent implements OnInit, OnDestroy, AfterViewI
         this.getManufacturingItems();
       }
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.initializeColumns();
   }
 
   initializeColumns(): void {

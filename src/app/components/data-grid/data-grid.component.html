@@ -1,6 +1,12 @@
 <div class="data-grid-container">
   <!-- Header with Search and Actions -->
   <div class="grid-header" *ngIf="showSearch || headerActions">
+    <div class="header-actions" *ngIf="headerActions">
+      <ng-content select="[headerActions]"></ng-content>
+    </div>
+    <div>
+      <ng-content select="[headerCenter]"></ng-content>
+    </div>
     <div class="search-container" *ngIf="showSearch">
       <div class="search-input-wrapper">
         <i class="fa fa-search search-icon"></i>
@@ -11,12 +17,6 @@
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearch($event)">
       </div>
-    </div>
-    <div class="header-center">
-      <ng-content select="[headerCenter]"></ng-content>
-    </div>
-    <div class="header-actions">
-      <ng-content select="[headerActions]"></ng-content>
     </div>
   </div>
 

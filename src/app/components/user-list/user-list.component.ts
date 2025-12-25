@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BehaviorSubject } from 'rxjs';
 import { User } from '../../models/user.model';
@@ -26,7 +26,8 @@ export class UserListComponent implements OnInit, AfterViewInit {
     private userService: UserService,
     private modalService: BsModalService,
     private notificationService: NotificationService,
-    public authService: AuthService
+    public authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -38,6 +39,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initializeColumns();
+    this.cdr.detectChanges();
   }
 
   initializeColumns(): void {

@@ -26,6 +26,16 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    
+    .summary-inline-label {
+      font-size: 0.75rem;
+    }
+    
+    .summary-inline-value {
+      font-size: 0.95rem;
+    }
   }
 }
 

@@ -10,9 +10,10 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "cap:add": "npx cap add",
-    "cap:sync": "npx cap sync",
+    "cap:sync": "npx cap sync && node scripts/update-android-config.js",
     "cap:open": "npx cap open",
-    "cap:run": "npx cap run"
+    "cap:run": "npx cap run",
+    "postinstall": "node scripts/update-android-config.js"
   },
   "private": true,
   "dependencies": {

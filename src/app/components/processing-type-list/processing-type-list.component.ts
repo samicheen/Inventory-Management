@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ProcessingType, ProcessingTypeService } from '../../services/processing-type/processing-type.service';
 import { BehaviorSubject } from 'rxjs';
 import { BsModalService } from 'ngx-bootstrap/modal';
@@ -13,7 +13,7 @@ import { GridColumn } from '../data-grid/data-grid.component';
   templateUrl: './processing-type-list.component.html',
   styleUrls: ['./processing-type-list.component.scss']
 })
-export class ProcessingTypeListComponent implements OnInit, AfterViewInit {
+export class ProcessingTypeListComponent implements OnInit {
   @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   processingTypes: ProcessingType[] = [];
@@ -28,14 +28,11 @@ export class ProcessingTypeListComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
+    this.initializeColumns();
     this.getProcessingTypes();
     this.refreshItems.subscribe(() => {
       this.getProcessingTypes();
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.initializeColumns();
   }
 
   initializeColumns(): void {

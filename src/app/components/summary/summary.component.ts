@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SummaryService } from '../../services/summary/summary.service';
 import { QuantityUnit, QuantityUnitToLabelMapping } from '../../models/quantity.model';
 import { SummaryItem } from '../../models/summary.model';
@@ -10,7 +10,7 @@ import { GridColumn } from '../data-grid/data-grid.component';
   templateUrl: './summary.component.html',
   styleUrls: ['./summary.component.scss']
 })
-export class SummaryComponent implements OnInit, AfterViewInit {
+export class SummaryComponent implements OnInit {
   summary: SummaryItem[];
   total: any;
   parent_item_id: string;
@@ -22,11 +22,8 @@ export class SummaryComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.getSummary();
-  }
-
-  ngAfterViewInit(): void {
     this.initializeColumns();
+    this.getSummary();
   }
 
   initializeColumns(): void {

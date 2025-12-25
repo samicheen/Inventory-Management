@@ -1,5 +1,8 @@
 {
   "appId": "com.vinayakainventory.app",
   "appName": "Vinayaka Inventory",
-  "webDir": "dist/inventory-management"
+  "webDir": "dist/inventory-management",
+  "android": {
+    "minSdkVersion": 26
+  }
 }

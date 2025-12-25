@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ReportsService } from '../../../services/reports/reports.service';
 import { NotificationService } from '../../../services/notification/notification.service';
 import { GridColumn } from '../../data-grid/data-grid.component';
@@ -9,7 +9,7 @@ import * as XLSX from 'xlsx';
   templateUrl: './item-sales-report.component.html',
   styleUrls: ['./item-sales-report.component.scss']
 })
-export class ItemSalesReportComponent implements OnInit, AfterViewInit {
+export class ItemSalesReportComponent implements OnInit {
   @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   items: any[] = [];
@@ -25,11 +25,8 @@ export class ItemSalesReportComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadReport();
-  }
-
-  ngAfterViewInit(): void {
     this.initializeColumns();
+    this.loadReport();
   }
 
   initializeColumns(): void {

@@ -93,8 +93,12 @@
 }
 
 .tabs-wrapper {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding-bottom: 0;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 0.75rem;
+  }
   
   ::ng-deep {
     .tabset {
@@ -146,6 +150,21 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    
+    .summary-inline-label {
+      font-size: 0.75rem;
+    }
+    
+    .summary-inline-value {
+      font-size: 0.95rem;
+    }
+    
+    .summary-inline-separator {
+      margin: 0 0.3rem;
+      font-size: 0.85rem;
+    }
   }
 }
 

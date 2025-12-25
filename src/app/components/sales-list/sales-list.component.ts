@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RefreshService } from '../../services/refresh/refresh.service';
 import { Sale } from 'src/app/models/sale.model';
@@ -17,7 +17,7 @@ import { GridColumn } from '../data-grid/data-grid.component';
   templateUrl: './sales-list.component.html',
   styleUrls: ['./sales-list.component.scss']
 })
-export class SalesListComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SalesListComponent implements OnInit, OnDestroy {
   @ViewChild('actionsTemplate') actionsTemplate: TemplateRef<any>;
 
   sales: Sale[];
@@ -35,6 +35,7 @@ export class SalesListComponent implements OnInit, OnDestroy, AfterViewInit {
     ) { }
 
   ngOnInit(): void {
+    this.initializeColumns();
     this.getSales();
     
     // Subscribe to refresh service for auto-refresh after barcode scans
@@ -43,10 +44,6 @@ export class SalesListComponent implements OnInit, OnDestroy, AfterViewInit {
         this.getSales();
       }
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.initializeColumns();
   }
 
   initializeColumns(): void {
